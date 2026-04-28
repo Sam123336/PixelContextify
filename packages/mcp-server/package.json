@@ -1,0 +1,19 @@
+{
+  "name": "@contextify/mcp-server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Contextify MCP server (Phase 2 placeholder)",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "echo \"no tests\" && exit 0",
+    "lint": "echo \"no lint\" && exit 0"
+  },
+  "dependencies": {
+    "@contextify/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4"
+  }
+}
