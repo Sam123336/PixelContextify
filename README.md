@@ -87,3 +87,4 @@ extension, Claude Code plugin, framework awareness, security, monetization).
 
 MIT
 # PixelContextify
+# PixelContextify
