@@ -5,8 +5,7 @@
     "outDir": "dist",
     "baseUrl": "./",
     "incremental": true,
-    "strictPropertyInitialization": false,
-    "ignoreDeprecations": "6.0"
+    "strictPropertyInitialization": false
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "**/*.spec.ts"]
