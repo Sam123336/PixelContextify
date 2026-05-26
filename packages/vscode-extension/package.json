@@ -1,15 +1,51 @@
 {
   "name": "@contextify/vscode-extension",
+  "displayName": "Contextify",
   "version": "0.1.0",
   "private": true,
-  "description": "Contextify VS Code extension (Phase 3 placeholder)",
+  "description": "Drop or paste UI screenshots into VS Code — Contextify turns them into structured developer markdown.",
+  "publisher": "contextify",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
   "main": "dist/extension.js",
+  "categories": ["Other"],
+  "activationEvents": ["onStartupFinished"],
+  "contributes": {
+    "commands": [
+      {
+        "command": "contextify.analyzeFile",
+        "title": "Contextify: Analyze Image File…"
+      }
+    ],
+    "configuration": {
+      "title": "Contextify",
+      "properties": {
+        "contextify.backendUrl": {
+          "type": "string",
+          "default": "http://localhost:3000",
+          "description": "Base URL of the Contextify backend (e.g. http://localhost:3000)."
+        },
+        "contextify.timeoutMs": {
+          "type": "number",
+          "default": 120000,
+          "minimum": 1000,
+          "description": "Maximum time (ms) to wait for a screenshot analysis to complete."
+        }
+      }
+    }
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "echo \"no tests\" && exit 0",
     "lint": "echo \"no lint\" && exit 0"
   },
+  "dependencies": {
+    "@contextify/shared": "workspace:*"
+  },
   "devDependencies": {
-    "typescript": "^5.5.4"
+    "@types/node": "^20.14.10",
+    "@types/vscode": "^1.90.0",
+    "typescript": "^6.0.3"
   }
 }
