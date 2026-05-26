@@ -7,12 +7,12 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/sequelize';
-import { Worker, type Job } from 'bullmq';
+import { UnrecoverableError, Worker, type Job } from 'bullmq';
 import IORedis from 'ioredis';
 import { promises as fs } from 'fs';
 import type { ScreenshotJobPayload } from '@contextify/shared';
 import { Screenshot } from '../database/models/screenshot.model';
-import { GeminiService } from '../gemini/gemini.service';
+import { GeminiNotConfiguredError, GeminiService } from '../gemini/gemini.service';
 import { MarkdownService } from '../markdown/markdown.service';
 import { TokenSavingsService } from '../analytics/token-savings.service';
 import { SCREENSHOT_QUEUE_NAME } from './queue.constants';
@@ -98,6 +98,9 @@ export class ScreenshotProcessor implements OnModuleInit, OnModuleDestroy {
         `Failed to process screenshot ${screenshotId}: ${message}`,
       );
       await row.update({ status: 'failed', errorMessage: message });
+      if (err instanceof GeminiNotConfiguredError) {
+        throw new UnrecoverableError(message);
+      }
       throw err;
     }
   }
