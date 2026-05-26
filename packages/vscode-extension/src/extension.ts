@@ -1,15 +1,56 @@
-/**
- * Contextify VS Code extension — Phase 3 placeholder.
- *
- * In Phase 3 this module will register clipboard listeners, drag-and-drop
- * targets, and a context-preview webview. For Phase 1 we simply export a
- * stub `activate()` so the package compiles in the workspace.
- */
+import * as vscode from 'vscode';
+import { BackendClient, SUPPORTED_MIME_TYPES } from './backend-client';
+import {
+  CONTEXTIFY_DROP_KIND,
+  ContextifyDropEditProvider,
+} from './providers/drop-edit-provider';
+import {
+  CONTEXTIFY_PASTE_KIND,
+  ContextifyPasteEditProvider,
+} from './providers/paste-edit-provider';
+import { registerAnalyzeFileCommand } from './commands/analyze-file';
 
-export function activate(): void {
-  // intentionally empty until Phase 3
+const DEFAULT_BACKEND_URL = 'http://localhost:3000';
+const DEFAULT_TIMEOUT_MS = 120_000;
+
+export function activate(context: vscode.ExtensionContext): void {
+  const getClient = (): BackendClient => {
+    const baseUrl = vscode.workspace
+      .getConfiguration('contextify')
+      .get<string>('backendUrl', DEFAULT_BACKEND_URL);
+    return new BackendClient({ baseUrl });
+  };
+
+  const getTimeoutMs = (): number =>
+    vscode.workspace
+      .getConfiguration('contextify')
+      .get<number>('timeoutMs', DEFAULT_TIMEOUT_MS);
+
+  const dropMimeTypes = [...SUPPORTED_MIME_TYPES, 'text/uri-list'];
+  const pasteMimeTypes = [...SUPPORTED_MIME_TYPES];
+  const selector: vscode.DocumentSelector = '*';
+
+  context.subscriptions.push(
+    vscode.languages.registerDocumentDropEditProvider(
+      selector,
+      new ContextifyDropEditProvider(getClient, getTimeoutMs),
+      {
+        dropMimeTypes,
+        providedDropEditKinds: [CONTEXTIFY_DROP_KIND],
+      },
+    ),
+    vscode.languages.registerDocumentPasteEditProvider(
+      selector,
+      new ContextifyPasteEditProvider(getClient, getTimeoutMs),
+      {
+        pasteMimeTypes,
+        providedPasteEditKinds: [CONTEXTIFY_PASTE_KIND],
+      },
+    ),
+    registerAnalyzeFileCommand(getClient, getTimeoutMs),
+  );
 }
 
 export function deactivate(): void {
-  // intentionally empty until Phase 3
+  // disposables are managed via context.subscriptions
 }
