@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "contextify": {
+      "command": "node",
+      "args": ["packages/mcp-server/dist/index.js"],
+      "env": {
+        "CONTEXTIFY_BACKEND_URL": "http://localhost:3000"
+      }
+    }
+  }
+}
