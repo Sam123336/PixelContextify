@@ -1,19 +1,23 @@
-/**
- * Contextify MCP server — Phase 2 placeholder.
- *
- * This package will host the Model Context Protocol server that exposes
- * Contextify's capabilities to Claude Code. For Phase 1 we only export the
- * intended tool name catalog so other packages can reference it.
- */
-import { MCP_TOOL_NAMES } from '@contextify/shared';
+#!/usr/bin/env node
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { BackendClient } from './backend-client';
+import { buildServer } from './server';
 
-export const PHASE = 'phase-2-pending' as const;
-export const TOOLS = MCP_TOOL_NAMES;
+async function main(): Promise<void> {
+  const baseUrl =
+    process.env.CONTEXTIFY_BACKEND_URL ??
+    process.env.BACKEND_URL ??
+    'http://localhost:3000';
 
-if (require.main === module) {
-  // eslint-disable-next-line no-console
-  console.log(
-    'Contextify MCP server is a placeholder. Tools planned:',
-    Object.values(TOOLS),
-  );
+  const backend = new BackendClient({ baseUrl });
+  const server = buildServer({ backend });
+  const transport = new StdioServerTransport();
+  await server.connect(transport);
 }
+
+main().catch((err) => {
+  // stdout is reserved for the MCP transport — log to stderr only.
+  // eslint-disable-next-line no-console
+  console.error('contextify-mcp failed:', err);
+  process.exit(1);
+});
