@@ -1,0 +1,25 @@
+{
+  "name": "contextify",
+  "owner": {
+    "name": "PixelContextify",
+    "url": "https://github.com/Sam123336/PixelContextify"
+  },
+  "description": "Contextify — screenshot-to-markdown context compression for Claude Code.",
+  "plugins": [
+    {
+      "name": "contextify",
+      "source": "./packages/mcp-server",
+      "displayName": "Contextify",
+      "description": "Turn UI screenshots into structured developer markdown via the Contextify MCP server.",
+      "version": "0.2.0",
+      "author": {
+        "name": "PixelContextify"
+      },
+      "homepage": "https://github.com/Sam123336/PixelContextify",
+      "repository": "https://github.com/Sam123336/PixelContextify",
+      "license": "MIT",
+      "keywords": ["mcp", "screenshot", "vision", "ui"],
+      "category": "productivity"
+    }
+  ]
+}

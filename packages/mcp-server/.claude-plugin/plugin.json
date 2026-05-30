@@ -1,0 +1,60 @@
+{
+  "name": "contextify",
+  "displayName": "Contextify",
+  "version": "0.2.0",
+  "description": "Turn UI screenshots into structured developer markdown — ~95% fewer vision tokens for Claude Code. Bring your own LLM key (Gemini / OpenAI / Anthropic / any OpenAI-compatible endpoint).",
+  "author": {
+    "name": "PixelContextify"
+  },
+  "homepage": "https://github.com/Sam123336/PixelContextify",
+  "repository": "https://github.com/Sam123336/PixelContextify",
+  "license": "MIT",
+  "keywords": ["mcp", "screenshot", "vision", "ui", "context-compression"],
+  "mcpServers": {
+    "contextify": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/bundle/index.cjs"],
+      "env": {
+        "CONTEXTIFY_BACKEND_URL": "${user_config.backend_url}",
+        "CONTEXTIFY_LLM_PROVIDER": "${user_config.llm_provider}",
+        "CONTEXTIFY_LLM_API_KEY": "${user_config.llm_api_key}",
+        "CONTEXTIFY_LLM_MODEL": "${user_config.llm_model}",
+        "CONTEXTIFY_LLM_BASE_URL": "${user_config.llm_base_url}"
+      }
+    }
+  },
+  "userConfig": {
+    "backend_url": {
+      "type": "string",
+      "title": "Backend URL",
+      "description": "Base URL of your running Contextify backend.",
+      "default": "http://localhost:3000",
+      "required": false
+    },
+    "llm_provider": {
+      "type": "string",
+      "title": "LLM provider (optional override)",
+      "description": "Leave blank to use the backend's default key. Otherwise: gemini | openai | anthropic | openai-compatible.",
+      "required": false
+    },
+    "llm_api_key": {
+      "type": "string",
+      "title": "Your LLM API key (optional)",
+      "description": "Your own key for the chosen provider. Sent to the backend per request; never stored server-side. Leave blank to use the backend default.",
+      "sensitive": true,
+      "required": false
+    },
+    "llm_model": {
+      "type": "string",
+      "title": "Model (optional)",
+      "description": "Model id, e.g. gpt-4o or claude-3-5-sonnet-latest. Required when provider is openai-compatible.",
+      "required": false
+    },
+    "llm_base_url": {
+      "type": "string",
+      "title": "OpenAI-compatible base URL (optional)",
+      "description": "Endpoint URL, e.g. https://openrouter.ai/api/v1. Required when provider is openai-compatible.",
+      "required": false
+    }
+  }
+}
