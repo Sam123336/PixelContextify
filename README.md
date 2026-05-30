@@ -140,6 +140,33 @@ curl -F "file=@./sample.png" \
 > The header carries the raw key over whatever transport the backend URL uses.
 > Fine for `localhost`; use HTTPS for any remote backend.
 
+### From Claude Code / the MCP server
+
+The MCP server forwards a per-user key as the same override headers when these
+env vars are set in your MCP config (e.g. `claude_desktop_config.json`). Leave
+them unset to use the backend's default.
+
+```json
+{
+  "mcpServers": {
+    "contextify": {
+      "command": "node",
+      "args": ["/abs/path/packages/mcp-server/dist/index.js"],
+      "env": {
+        "CONTEXTIFY_BACKEND_URL": "http://localhost:3000",
+        "CONTEXTIFY_LLM_PROVIDER": "anthropic",
+        "CONTEXTIFY_LLM_API_KEY": "sk-ant-...",
+        "CONTEXTIFY_LLM_MODEL": "",
+        "CONTEXTIFY_LLM_BASE_URL": ""
+      }
+    }
+  }
+}
+```
+
+`CONTEXTIFY_LLM_BASE_URL` is required when `CONTEXTIFY_LLM_PROVIDER` is
+`openai-compatible`.
+
 ## VS Code extension
 
 Drop or paste a screenshot into any editor, or run **“Contextify: Analyze
