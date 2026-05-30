@@ -1,0 +1,14 @@
+# Source & build inputs — the shipped code is the bundled dist/extension.js.
+src/**
+tsconfig.json
+.eslintrc*
+**/*.ts
+**/*.map
+
+# dist contains per-module tsc output too; ship only the esbuild bundle.
+dist/**
+!dist/extension.js
+
+# Tooling
+.vscode/**
+node_modules/**

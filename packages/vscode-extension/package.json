@@ -1,10 +1,16 @@
 {
-  "name": "@contextify/vscode-extension",
+  "name": "contextify",
   "displayName": "Contextify",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "Drop or paste UI screenshots into VS Code — Contextify turns them into structured developer markdown.",
   "publisher": "contextify",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Sam123336/PixelContextify.git",
+    "directory": "packages/vscode-extension"
+  },
   "engines": {
     "vscode": "^1.90.0"
   },
@@ -69,6 +75,8 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "bundle": "esbuild src/extension.ts --bundle --platform=node --target=node18 --format=cjs --external:vscode --outfile=dist/extension.js",
+    "package": "pnpm run bundle && vsce package --no-dependencies",
     "test": "echo \"no tests\" && exit 0",
     "lint": "echo \"no lint\" && exit 0"
   },
@@ -78,6 +86,8 @@
   "devDependencies": {
     "@types/node": "^20.14.10",
     "@types/vscode": "^1.90.0",
+    "@vscode/vsce": "^3.2.1",
+    "esbuild": "^0.24.0",
     "typescript": "^6.0.3"
   }
 }
