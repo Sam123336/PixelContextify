@@ -1,7 +1,43 @@
 #!/usr/bin/env node
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import {
+  LLM_PROVIDERS,
+  type LlmOverride,
+  type LlmProvider,
+} from '@contextify/shared';
 import { BackendClient } from './backend-client';
 import { buildServer } from './server';
+
+/**
+ * Build an optional "bring your own key" override from the MCP server's env.
+ * Set these in your Claude Code / desktop MCP config to use your own LLM key
+ * instead of the backend's default. Returns null when no key is supplied.
+ */
+function llmFromEnv(): LlmOverride | null {
+  const apiKey = process.env.CONTEXTIFY_LLM_API_KEY?.trim();
+  if (!apiKey) {
+    return null;
+  }
+  const provider = process.env.CONTEXTIFY_LLM_PROVIDER?.trim();
+  if (!provider || !LLM_PROVIDERS.includes(provider as LlmProvider)) {
+    throw new Error(
+      `CONTEXTIFY_LLM_PROVIDER must be one of: ${LLM_PROVIDERS.join(', ')}.`,
+    );
+  }
+  const model = process.env.CONTEXTIFY_LLM_MODEL?.trim();
+  const baseUrl = process.env.CONTEXTIFY_LLM_BASE_URL?.trim();
+  if (provider === 'openai-compatible' && !baseUrl) {
+    throw new Error(
+      'CONTEXTIFY_LLM_BASE_URL is required when CONTEXTIFY_LLM_PROVIDER is "openai-compatible".',
+    );
+  }
+  return {
+    provider: provider as LlmProvider,
+    apiKey,
+    ...(model ? { model } : {}),
+    ...(baseUrl ? { baseUrl } : {}),
+  };
+}
 
 async function main(): Promise<void> {
   const baseUrl =
@@ -9,7 +45,7 @@ async function main(): Promise<void> {
     process.env.BACKEND_URL ??
     'http://localhost:3000';
 
-  const backend = new BackendClient({ baseUrl });
+  const backend = new BackendClient({ baseUrl, llm: llmFromEnv() });
   const server = buildServer({ backend });
   const transport = new StdioServerTransport();
   await server.connect(transport);
