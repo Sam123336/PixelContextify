@@ -41,8 +41,8 @@ function llmFromEnv(): LlmOverride | null {
 
 async function main(): Promise<void> {
   const baseUrl =
-    process.env.CONTEXTIFY_BACKEND_URL ??
-    process.env.BACKEND_URL ??
+    process.env.CONTEXTIFY_BACKEND_URL?.trim() ||
+    process.env.BACKEND_URL?.trim() ||
     'http://localhost:3000';
 
   const backend = new BackendClient({ baseUrl, llm: llmFromEnv() });
