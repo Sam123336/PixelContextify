@@ -20,21 +20,24 @@ export interface ResolvedLlmConfig {
   provider: LlmProvider;
   apiKey: string;
   model: string;
+  /** Base URL for OpenAI-compatible endpoints; unused by other providers. */
+  baseUrl?: string;
 }
 
 /**
  * A provider implementation knows how to turn an image into markdown using a
- * specific vendor SDK. Implementations are stateless — credentials are passed
- * in per call so the same instance serves both the server default and
+ * specific vendor SDK. Implementations are stateless — the resolved config is
+ * passed in per call so the same instance serves both the server default and
  * caller-supplied keys.
  */
 export interface LlmProviderImpl {
   readonly provider: LlmProvider;
   /** Model used when neither the request nor server config specifies one. */
   readonly defaultModel: string;
+  /** Whether this provider requires a baseUrl to be supplied. */
+  readonly requiresBaseUrl?: boolean;
   analyzeUi(
-    apiKey: string,
-    model: string,
+    config: ResolvedLlmConfig,
     imageBuffer: Buffer,
     mimeType: string,
   ): Promise<string>;

@@ -11,9 +11,11 @@ export interface AppConfig {
   redisUrl: string;
   /** Server-default LLM. Callers may override per-request with their own key. */
   llm: {
-    provider: 'gemini' | 'openai' | 'anthropic';
+    provider: 'gemini' | 'openai' | 'anthropic' | 'openai-compatible';
     apiKey: string;
     model: string;
+    /** Base URL for an OpenAI-compatible default provider. */
+    baseUrl: string;
   };
   upload: {
     dir: string;
@@ -42,6 +44,7 @@ export default (): AppConfig => {
         process.env.LLM_MODEL ??
         process.env.GEMINI_MODEL ??
         'gemini-2.0-flash',
+      baseUrl: process.env.LLM_BASE_URL ?? '',
     },
     upload: {
       dir: process.env.UPLOAD_DIR ?? './uploads',

@@ -59,9 +59,16 @@ function parseLlmOverride(
     );
   }
   const model = headers[LLM_OVERRIDE_HEADERS.MODEL]?.trim();
+  const baseUrl = headers[LLM_OVERRIDE_HEADERS.BASE_URL]?.trim();
+  if (provider === 'openai-compatible' && !baseUrl) {
+    throw new BadRequestException(
+      `Provider "openai-compatible" requires header "${LLM_OVERRIDE_HEADERS.BASE_URL}".`,
+    );
+  }
   return {
     provider: provider as LlmProvider,
     apiKey,
     ...(model ? { model } : {}),
+    ...(baseUrl ? { baseUrl } : {}),
   };
 }

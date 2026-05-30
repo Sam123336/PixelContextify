@@ -30,12 +30,17 @@ export interface ScreenshotRecord {
  * Supported LLM providers for UI analysis. The backend ships a default
  * (Gemini) but callers may override it per-request with their own key.
  */
-export type LlmProvider = 'gemini' | 'openai' | 'anthropic';
+export type LlmProvider =
+  | 'gemini'
+  | 'openai'
+  | 'anthropic'
+  | 'openai-compatible';
 
 export const LLM_PROVIDERS: readonly LlmProvider[] = [
   'gemini',
   'openai',
   'anthropic',
+  'openai-compatible',
 ];
 
 /**
@@ -48,6 +53,11 @@ export interface LlmOverride {
   apiKey: string;
   /** Optional model id; falls back to a provider-specific default. */
   model?: string;
+  /**
+   * Base URL of an OpenAI-compatible endpoint. Required for the
+   * 'openai-compatible' provider; ignored by the others.
+   */
+  baseUrl?: string;
 }
 
 /** HTTP headers used to carry an {@link LlmOverride} on the upload request. */
@@ -55,6 +65,7 @@ export const LLM_OVERRIDE_HEADERS = {
   PROVIDER: 'x-llm-provider',
   API_KEY: 'x-llm-api-key',
   MODEL: 'x-llm-model',
+  BASE_URL: 'x-llm-base-url',
 } as const;
 
 /** Payload posted onto the BullMQ queue. */

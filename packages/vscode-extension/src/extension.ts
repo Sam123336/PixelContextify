@@ -10,6 +10,7 @@ import {
   ContextifyPasteEditProvider,
 } from './providers/paste-edit-provider';
 import { registerAnalyzeFileCommand } from './commands/analyze-file';
+import { registerProviderStatusBar } from './provider-status-bar';
 
 const DEFAULT_BACKEND_URL = 'http://localhost:3000';
 const DEFAULT_TIMEOUT_MS = 120_000;
@@ -23,10 +24,12 @@ export function activate(context: vscode.ExtensionContext): void {
       return null;
     }
     const model = cfg.get<string>('llm.model', '').trim();
+    const baseUrl = cfg.get<string>('llm.baseUrl', '').trim();
     return {
       provider: provider as LlmProvider,
       apiKey,
       ...(model ? { model } : {}),
+      ...(baseUrl ? { baseUrl } : {}),
     };
   };
 
@@ -64,6 +67,7 @@ export function activate(context: vscode.ExtensionContext): void {
       },
     ),
     registerAnalyzeFileCommand(getClient, getTimeoutMs),
+    ...registerProviderStatusBar(),
   );
 }
 

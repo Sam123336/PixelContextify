@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
-import type { LlmProviderImpl } from '../llm.types';
+import type { LlmProviderImpl, ResolvedLlmConfig } from '../llm.types';
 import { UI_ANALYSIS_PROMPT } from '../prompts/ui-analysis.prompt';
 
 type AnthropicMediaType = 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp';
@@ -10,15 +10,14 @@ export class AnthropicProvider implements LlmProviderImpl {
   readonly defaultModel = 'claude-3-5-sonnet-latest';
 
   async analyzeUi(
-    apiKey: string,
-    model: string,
+    config: ResolvedLlmConfig,
     imageBuffer: Buffer,
     mimeType: string,
   ): Promise<string> {
-    const client = new Anthropic({ apiKey });
+    const client = new Anthropic({ apiKey: config.apiKey });
 
     const message = await client.messages.create({
-      model,
+      model: config.model,
       max_tokens: 4096,
       temperature: 0.2,
       messages: [

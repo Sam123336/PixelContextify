@@ -16,6 +16,10 @@
       {
         "command": "contextify.analyzeFile",
         "title": "Contextify: Analyze Image File…"
+      },
+      {
+        "command": "contextify.selectProvider",
+        "title": "Contextify: Select LLM Provider…"
       }
     ],
     "configuration": {
@@ -34,15 +38,16 @@
         },
         "contextify.llm.provider": {
           "type": "string",
-          "enum": ["default", "gemini", "openai", "anthropic"],
+          "enum": ["default", "gemini", "openai", "anthropic", "openai-compatible"],
           "enumDescriptions": [
             "Use the backend's configured LLM (no key sent).",
             "Google Gemini (e.g. gemini-2.0-flash).",
             "OpenAI (e.g. gpt-4o).",
-            "Anthropic Claude (e.g. claude-3-5-sonnet-latest)."
+            "Anthropic Claude (e.g. claude-3-5-sonnet-latest).",
+            "Any OpenAI-compatible endpoint (OpenRouter, Together, Groq, vLLM, LM Studio, …). Requires a base URL and model."
           ],
           "default": "default",
-          "markdownDescription": "Advanced: which LLM provider to use for analysis. Choose `default` to use the backend's own key, or pick a provider and supply your own key in `#contextify.llm.apiKey#`."
+          "markdownDescription": "Advanced: which LLM provider to use for analysis. Choose `default` to use the backend's own key, or pick a provider and supply your own key in `#contextify.llm.apiKey#`. The model must support image input."
         },
         "contextify.llm.apiKey": {
           "type": "string",
@@ -52,7 +57,12 @@
         "contextify.llm.model": {
           "type": "string",
           "default": "",
-          "markdownDescription": "Advanced: model id for the selected provider (e.g. `gemini-2.0-flash`, `gpt-4o`, `claude-3-5-sonnet-latest`). Leave blank for the provider's default."
+          "markdownDescription": "Advanced: model id for the selected provider (e.g. `gemini-2.0-flash`, `gpt-4o`, `claude-3-5-sonnet-latest`). Required for `openai-compatible`; leave blank elsewhere for the provider's default. Must be a vision-capable model."
+        },
+        "contextify.llm.baseUrl": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Advanced: base URL of an OpenAI-compatible endpoint (e.g. `https://openrouter.ai/api/v1`). Only used when `#contextify.llm.provider#` is `openai-compatible`."
         }
       }
     }

@@ -106,6 +106,9 @@ export class BackendClient {
     if (llm.model) {
       headers[LLM_OVERRIDE_HEADERS.MODEL] = llm.model;
     }
+    if (llm.baseUrl) {
+      headers[LLM_OVERRIDE_HEADERS.BASE_URL] = llm.baseUrl;
+    }
     return headers;
   }
 
