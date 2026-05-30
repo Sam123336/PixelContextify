@@ -1,0 +1,109 @@
+name: Deploy backend to Azure (manual)
+
+# Manual-only pipeline. Trigger it from the GitHub UI:
+#   Actions → "Deploy backend to Azure (manual)" → Run workflow
+# The "Use workflow from" branch dropdown picks which branch is deployed.
+#
+# One-time setup (repo Settings):
+#   Secrets:
+#     AZURE_CREDENTIALS  → output of:
+#        az ad sp create-for-rbac --name contextify-deployer \
+#          --role contributor \
+#          --scopes /subscriptions/<sub-id>/resourceGroups/contextify-rg \
+#          --sdk-auth
+#   Variables (Settings → Secrets and variables → Actions → Variables):
+#     AZURE_RESOURCE_GROUP   e.g. contextify-rg
+#     ACR_NAME               e.g. contextifyacr1234
+#     CONTAINERAPP_NAME      e.g. contextify-backend
+#
+# Assumes the infra already exists (run ./deploy/azure.sh once first). This
+# pipeline only builds a new image from the chosen branch and rolls the app
+# to it — it does not change secrets/env vars.
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Image tag (default: short commit SHA)"
+        required: false
+        default: ""
+      resource_group:
+        description: "Override AZURE_RESOURCE_GROUP variable"
+        required: false
+        default: ""
+      acr_name:
+        description: "Override ACR_NAME variable"
+        required: false
+        default: ""
+      app_name:
+        description: "Override CONTAINERAPP_NAME variable"
+        required: false
+        default: ""
+
+concurrency:
+  group: deploy-azure-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout selected branch
+        uses: actions/checkout@v4
+
+      - name: Resolve deployment parameters
+        id: vars
+        run: |
+          set -euo pipefail
+          RG="${{ github.event.inputs.resource_group || vars.AZURE_RESOURCE_GROUP }}"
+          ACR="${{ github.event.inputs.acr_name || vars.ACR_NAME }}"
+          APP="${{ github.event.inputs.app_name || vars.CONTAINERAPP_NAME }}"
+          TAG="${{ github.event.inputs.image_tag }}"
+          [ -z "$TAG" ] && TAG="$(git rev-parse --short HEAD)"
+          for v in RG ACR APP; do
+            if [ -z "${!v}" ]; then
+              echo "::error::Missing $v — set the repo variable or pass an input."
+              exit 1
+            fi
+          done
+          echo "rg=$RG"   >> "$GITHUB_OUTPUT"
+          echo "acr=$ACR" >> "$GITHUB_OUTPUT"
+          echo "app=$APP" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Deploying branch '${{ github.ref_name }}' (sha $TAG) → app '$APP'."
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Build image in ACR from this branch
+        run: |
+          set -euo pipefail
+          az acr build \
+            -r "${{ steps.vars.outputs.acr }}" \
+            -t "contextify-backend:${{ steps.vars.outputs.tag }}" \
+            -t "contextify-backend:latest" \
+            .
+
+      - name: Roll Container App to the new image
+        run: |
+          set -euo pipefail
+          ACR_SERVER="$(az acr show -n "${{ steps.vars.outputs.acr }}" --query loginServer -o tsv)"
+          az containerapp update \
+            -g "${{ steps.vars.outputs.rg }}" \
+            -n "${{ steps.vars.outputs.app }}" \
+            --image "$ACR_SERVER/contextify-backend:${{ steps.vars.outputs.tag }}"
+
+      - name: Report URL
+        run: |
+          set -euo pipefail
+          FQDN="$(az containerapp show \
+            -g "${{ steps.vars.outputs.rg }}" \
+            -n "${{ steps.vars.outputs.app }}" \
+            --query properties.configuration.ingress.fqdn -o tsv)"
+          echo "### Deployed :rocket:" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Branch: \`${{ github.ref_name }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Image tag: \`${{ steps.vars.outputs.tag }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- URL: https://$FQDN" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Health: https://$FQDN/health" >> "$GITHUB_STEP_SUMMARY"

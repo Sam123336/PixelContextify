@@ -273,6 +273,27 @@ Notes:
   `packages/mcp-server/.claude-plugin/plugin.json` (and the VS Code
   `contextify.backendUrl` default) to the printed URL.
 
+### Manual deploy pipeline (GitHub Actions)
+
+Once the infra exists (one run of `./deploy/azure.sh`), redeploys are a button
+press. The [`Deploy backend to Azure (manual)`](.github/workflows/deploy-azure.yml)
+workflow is **manual-only** (`workflow_dispatch`): go to **Actions → Deploy
+backend to Azure (manual) → Run workflow**, and the branch dropdown picks which
+branch to ship. It builds a fresh image from that branch in ACR and rolls the
+Container App to it.
+
+One-time repo setup (Settings → Secrets and variables → Actions):
+
+| Kind     | Name                   | Value                                                        |
+| -------- | ---------------------- | ------------------------------------------------------------ |
+| Secret   | `AZURE_CREDENTIALS`    | `az ad sp create-for-rbac --role contributor --scopes /subscriptions/<id>/resourceGroups/contextify-rg --sdk-auth` |
+| Variable | `AZURE_RESOURCE_GROUP` | e.g. `contextify-rg`                                          |
+| Variable | `ACR_NAME`             | e.g. `contextifyacr1234`                                      |
+| Variable | `CONTAINERAPP_NAME`    | e.g. `contextify-backend`                                     |
+
+The image tag defaults to the commit SHA; each field can be overridden via the
+Run-workflow inputs. The run summary prints the deployed URL.
+
 ## Roadmap
 
 See [`/home/sambit/.claude/plans/effervescent-purring-leaf.md`](/home/sambit/.claude/plans/effervescent-purring-leaf.md)
