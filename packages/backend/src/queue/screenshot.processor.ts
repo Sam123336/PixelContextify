@@ -12,7 +12,8 @@ import IORedis from 'ioredis';
 import { promises as fs } from 'fs';
 import type { ScreenshotJobPayload } from '@contextify/shared';
 import { Screenshot } from '../database/models/screenshot.model';
-import { GeminiNotConfiguredError, GeminiService } from '../gemini/gemini.service';
+import { LlmService } from '../llm/llm.service';
+import { LlmNotConfiguredError } from '../llm/llm.types';
 import { MarkdownService } from '../markdown/markdown.service';
 import { TokenSavingsService } from '../analytics/token-savings.service';
 import { SCREENSHOT_QUEUE_NAME } from './queue.constants';
@@ -28,7 +29,7 @@ export class ScreenshotProcessor implements OnModuleInit, OnModuleDestroy {
     @Inject(REDIS_CONNECTION) private readonly redis: IORedis,
     @InjectModel(Screenshot)
     private readonly screenshotModel: typeof Screenshot,
-    private readonly gemini: GeminiService,
+    private readonly llm: LlmService,
     private readonly markdown: MarkdownService,
     private readonly tokens: TokenSavingsService,
   ) {}
@@ -65,7 +66,7 @@ export class ScreenshotProcessor implements OnModuleInit, OnModuleDestroy {
   }
 
   private async handle(job: Job<ScreenshotJobPayload>): Promise<void> {
-    const { screenshotId } = job.data;
+    const { screenshotId, llm } = job.data;
     const row = await this.screenshotModel.findByPk(screenshotId);
     if (!row) {
       throw new Error(`Screenshot ${screenshotId} not found`);
@@ -75,7 +76,7 @@ export class ScreenshotProcessor implements OnModuleInit, OnModuleDestroy {
 
     try {
       const buffer = await fs.readFile(row.storagePath);
-      const rawMarkdown = await this.gemini.analyzeUi(buffer, row.mimeType);
+      const rawMarkdown = await this.llm.analyzeUi(buffer, row.mimeType, llm);
       const { markdown, missingSections } = this.markdown.normalize(rawMarkdown);
       if (missingSections.length > 0) {
         this.logger.warn(
@@ -98,7 +99,7 @@ export class ScreenshotProcessor implements OnModuleInit, OnModuleDestroy {
         `Failed to process screenshot ${screenshotId}: ${message}`,
       );
       await row.update({ status: 'failed', errorMessage: message });
-      if (err instanceof GeminiNotConfiguredError) {
+      if (err instanceof LlmNotConfiguredError) {
         throw new UnrecoverableError(message);
       }
       throw err;

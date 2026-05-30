@@ -4,7 +4,7 @@ import configuration from './config/configuration';
 import { DatabaseModule } from './database/database.module';
 import { ScreenshotsModule } from './screenshots/screenshots.module';
 import { QueueModule } from './queue/queue.module';
-import { GeminiModule } from './gemini/gemini.module';
+import { LlmModule } from './llm/llm.module';
 import { MarkdownModule } from './markdown/markdown.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { HealthController } from './health.controller';
@@ -17,7 +17,7 @@ import { HealthController } from './health.controller';
       envFilePath: ['.env', '.env.local'],
     }),
     DatabaseModule,
-    GeminiModule,
+    LlmModule,
     MarkdownModule,
     AnalyticsModule,
     QueueModule,

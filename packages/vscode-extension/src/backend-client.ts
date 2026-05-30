@@ -1,6 +1,11 @@
 import { readFile } from 'node:fs/promises';
 import * as path from 'node:path';
-import type { ScreenshotRecord, ScreenshotStatus } from '@contextify/shared';
+import {
+  LLM_OVERRIDE_HEADERS,
+  type LlmOverride,
+  type ScreenshotRecord,
+  type ScreenshotStatus,
+} from '@contextify/shared';
 
 const TERMINAL_STATUSES: ReadonlySet<ScreenshotStatus> = new Set(['done', 'failed']);
 
@@ -19,6 +24,8 @@ export const SUPPORTED_MIME_TYPES: ReadonlySet<string> = new Set([
 
 export interface BackendClientOptions {
   baseUrl: string;
+  /** Optional "bring your own key" override sent with each upload. */
+  llm?: LlmOverride | null;
 }
 
 export interface UploadInput {
@@ -74,6 +81,7 @@ export class BackendClient {
     const res = await fetch(`${this.options.baseUrl}/screenshots`, {
       method: 'POST',
       body: form,
+      headers: this.llmHeaders(),
       signal,
     });
     if (!res.ok) {
@@ -83,6 +91,22 @@ export class BackendClient {
       );
     }
     return (await res.json()) as ScreenshotRecord;
+  }
+
+  /** Headers carrying the optional per-user LLM override. */
+  private llmHeaders(): Record<string, string> {
+    const llm = this.options.llm;
+    if (!llm?.apiKey) {
+      return {};
+    }
+    const headers: Record<string, string> = {
+      [LLM_OVERRIDE_HEADERS.PROVIDER]: llm.provider,
+      [LLM_OVERRIDE_HEADERS.API_KEY]: llm.apiKey,
+    };
+    if (llm.model) {
+      headers[LLM_OVERRIDE_HEADERS.MODEL] = llm.model;
+    }
+    return headers;
   }
 
   async getScreenshot(id: string, signal?: AbortSignal): Promise<ScreenshotRecord> {

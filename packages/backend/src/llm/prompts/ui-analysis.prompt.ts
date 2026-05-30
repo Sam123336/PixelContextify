@@ -2,6 +2,9 @@
  * Prompt template for converting a UI screenshot into structured developer
  * markdown. The output is intentionally short, opinionated, and easy for
  * downstream tools (Claude Code) to consume.
+ *
+ * Shared across every provider so output stays consistent regardless of which
+ * LLM the caller chooses.
  */
 export const UI_ANALYSIS_PROMPT = `You are a senior UI/UX engineer.
 

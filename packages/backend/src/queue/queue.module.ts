@@ -3,7 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Queue } from 'bullmq';
 import IORedis from 'ioredis';
 import { DatabaseModule } from '../database/database.module';
-import { GeminiModule } from '../gemini/gemini.module';
+import { LlmModule } from '../llm/llm.module';
 import { MarkdownModule } from '../markdown/markdown.module';
 import { AnalyticsModule } from '../analytics/analytics.module';
 import { ScreenshotProcessor } from './screenshot.processor';
@@ -14,7 +14,7 @@ import { REDIS_CONNECTION, SCREENSHOT_QUEUE } from './queue.tokens';
   imports: [
     ConfigModule,
     DatabaseModule,
-    GeminiModule,
+    LlmModule,
     MarkdownModule,
     AnalyticsModule,
   ],

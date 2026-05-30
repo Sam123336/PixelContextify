@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import type { LlmOverride, LlmProvider } from '@contextify/shared';
 import { BackendClient, SUPPORTED_MIME_TYPES } from './backend-client';
 import {
   CONTEXTIFY_DROP_KIND,
@@ -14,11 +15,26 @@ const DEFAULT_BACKEND_URL = 'http://localhost:3000';
 const DEFAULT_TIMEOUT_MS = 120_000;
 
 export function activate(context: vscode.ExtensionContext): void {
+  const getLlmOverride = (): LlmOverride | null => {
+    const cfg = vscode.workspace.getConfiguration('contextify');
+    const provider = cfg.get<string>('llm.provider', 'default');
+    const apiKey = cfg.get<string>('llm.apiKey', '').trim();
+    if (provider === 'default' || !apiKey) {
+      return null;
+    }
+    const model = cfg.get<string>('llm.model', '').trim();
+    return {
+      provider: provider as LlmProvider,
+      apiKey,
+      ...(model ? { model } : {}),
+    };
+  };
+
   const getClient = (): BackendClient => {
     const baseUrl = vscode.workspace
       .getConfiguration('contextify')
       .get<string>('backendUrl', DEFAULT_BACKEND_URL);
-    return new BackendClient({ baseUrl });
+    return new BackendClient({ baseUrl, llm: getLlmOverride() });
   };
 
   const getTimeoutMs = (): number =>

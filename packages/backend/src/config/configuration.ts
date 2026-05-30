@@ -9,7 +9,9 @@ export interface AppConfig {
   port: number;
   databaseUrl: string;
   redisUrl: string;
-  gemini: {
+  /** Server-default LLM. Callers may override per-request with their own key. */
+  llm: {
+    provider: 'gemini' | 'openai' | 'anthropic';
     apiKey: string;
     model: string;
   };
@@ -31,9 +33,15 @@ export default (): AppConfig => {
       process.env.DATABASE_URL ??
       'postgres://contextify:contextify@localhost:5432/contextify',
     redisUrl: process.env.REDIS_URL ?? 'redis://localhost:6379',
-    gemini: {
-      apiKey: process.env.GEMINI_API_KEY ?? '',
-      model: process.env.GEMINI_MODEL ?? 'gemini-2.0-flash',
+    llm: {
+      // LLM_* takes precedence; GEMINI_* kept for backwards compatibility.
+      provider:
+        (process.env.LLM_PROVIDER as AppConfig['llm']['provider']) ?? 'gemini',
+      apiKey: process.env.LLM_API_KEY ?? process.env.GEMINI_API_KEY ?? '',
+      model:
+        process.env.LLM_MODEL ??
+        process.env.GEMINI_MODEL ??
+        'gemini-2.0-flash',
     },
     upload: {
       dir: process.env.UPLOAD_DIR ?? './uploads',

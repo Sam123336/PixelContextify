@@ -12,6 +12,7 @@ import * as path from 'path';
 import { v4 as uuid } from 'uuid';
 import { Queue } from 'bullmq';
 import type {
+  LlmOverride,
   ScreenshotJobPayload,
   ScreenshotRecord,
 } from '@contextify/shared';
@@ -44,7 +45,10 @@ export class ScreenshotsService {
     @Inject(SCREENSHOT_QUEUE) private readonly queue: Queue<ScreenshotJobPayload>,
   ) {}
 
-  async upload(file: Express.Multer.File): Promise<ScreenshotRecord> {
+  async upload(
+    file: Express.Multer.File,
+    llm?: LlmOverride | null,
+  ): Promise<ScreenshotRecord> {
     if (!file) {
       throw new BadRequestException('Missing file field "file".');
     }
@@ -79,12 +83,14 @@ export class ScreenshotsService {
 
     await this.queue.add(
       SCREENSHOT_JOB_NAME,
-      { screenshotId: id },
+      { screenshotId: id, llm: llm ?? null },
       {
         attempts: 3,
         backoff: { type: 'exponential', delay: 2000 },
-        removeOnComplete: 1000,
-        removeOnFail: 1000,
+        // When a caller supplies their own API key, don't retain the finished
+        // job (and its key) in Redis — drop it as soon as it settles.
+        removeOnComplete: llm ? true : 1000,
+        removeOnFail: llm ? true : 1000,
       },
     );
 
