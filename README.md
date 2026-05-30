@@ -167,6 +167,45 @@ them unset to use the backend's default.
 `CONTEXTIFY_LLM_BASE_URL` is required when `CONTEXTIFY_LLM_PROVIDER` is
 `openai-compatible`.
 
+The easiest way to get the above wired up is the Claude Code plugin below — it
+sets these env vars for you from a config prompt.
+
+## Claude Code plugin
+
+Contextify ships as a Claude Code plugin that registers the MCP server (the
+`analyze_screenshot` / `get_screenshot` tools) — no manual config editing.
+
+The marketplace lives in this repo (`.claude-plugin/marketplace.json`) and the
+plugin bundles a single self-contained server file
+(`packages/mcp-server/bundle/index.cjs`), so users don't run any install step.
+
+```bash
+# In Claude Code:
+/plugin marketplace add Sam123336/PixelContextify
+/plugin install contextify@contextify
+```
+
+On install you're prompted for the plugin's config (all optional):
+
+| Option       | Maps to env               | Notes                                                  |
+| ------------ | ------------------------- | ------------------------------------------------------ |
+| Backend URL  | `CONTEXTIFY_BACKEND_URL`  | Defaults to `http://localhost:3000`.                   |
+| LLM provider | `CONTEXTIFY_LLM_PROVIDER` | Blank → backend default. Else gemini/openai/anthropic/openai-compatible. |
+| LLM API key  | `CONTEXTIFY_LLM_API_KEY`  | Your own key (stored in the OS keychain). Optional.    |
+| Model        | `CONTEXTIFY_LLM_MODEL`    | Required for `openai-compatible`.                      |
+| Base URL     | `CONTEXTIFY_LLM_BASE_URL` | Required for `openai-compatible`.                      |
+
+Leave the LLM fields blank to use whatever key the backend is configured with;
+fill them in to bring your own key per the
+[provider options](#choosing-an-llm-provider) above. You still need a running
+Contextify backend (see [Quickstart](#quickstart)).
+
+To rebuild the bundled server after changing MCP-server code:
+
+```bash
+cd packages/mcp-server && pnpm run bundle:plugin   # → bundle/index.cjs
+```
+
 ## VS Code extension
 
 Drop or paste a screenshot into any editor, or run **“Contextify: Analyze
