@@ -15,6 +15,15 @@ import { Screenshot } from './models/screenshot.model';
         autoLoadModels: true,
         synchronize: true,
         logging: false,
+        // Managed Postgres (Azure, etc.) requires TLS. rejectUnauthorized is
+        // false because the connection terminates at the provider's own CA.
+        ...(config.get<boolean>('databaseSsl')
+          ? {
+              dialectOptions: {
+                ssl: { require: true, rejectUnauthorized: false },
+              },
+            }
+          : {}),
       }),
     }),
     SequelizeModule.forFeature([Screenshot]),

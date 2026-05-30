@@ -236,6 +236,43 @@ pnpm run package        # bundles with esbuild → contextify-<version>.vsix
 code --install-extension contextify-0.2.0.vsix
 ```
 
+## Deploy to Azure
+
+To make Contextify usable by others without each person running the stack
+locally, host the backend and bake its URL into the plugin's default
+`backend_url`.
+
+The API and BullMQ worker run in a **single process**, so it's one container.
+Recommended Azure shape:
+
+| Piece            | Azure service                              |
+| ---------------- | ------------------------------------------ |
+| Backend container| Azure Container Apps                        |
+| Postgres         | Azure Database for PostgreSQL Flexible Server |
+| Redis            | Azure Cache for Redis                       |
+| Image registry   | Azure Container Registry                    |
+
+```bash
+az login
+PG_PASSWORD='<strong-pw>' LLM_API_KEY='<your-key>' ./deploy/azure.sh
+```
+
+The script ([deploy/azure.sh](deploy/azure.sh)) provisions everything, builds
+the image from the repo [`Dockerfile`](Dockerfile), wires `DATABASE_URL` /
+`REDIS_URL` / `LLM_API_KEY` as Container App secrets, and prints the public
+HTTPS URL. Set `DATABASE_SSL=true` (the script does this) for Azure's managed
+Postgres.
+
+Notes:
+- **Schema** is created automatically on boot (Sequelize `synchronize`).
+- **Single replica** by default. Uploads are written to the container's local
+  disk and read back by the in-process worker, which is safe at one replica.
+  To scale out (`MAX_REPLICAS>1`), mount Azure Files at `UPLOAD_DIR` so the
+  upload is visible to whichever replica processes the job.
+- After deploy, update `backend_url` in
+  `packages/mcp-server/.claude-plugin/plugin.json` (and the VS Code
+  `contextify.backendUrl` default) to the printed URL.
+
 ## Roadmap
 
 See [`/home/sambit/.claude/plans/effervescent-purring-leaf.md`](/home/sambit/.claude/plans/effervescent-purring-leaf.md)

@@ -1,0 +1,17 @@
+# Build context hygiene — install & build happen inside the image.
+**/node_modules
+**/dist
+**/build
+**/bundle
+**/*.vsix
+**/*.tsbuildinfo
+.git
+.github
+**/.env
+**/.env.*
+uploads
+generated
+coverage
+*.log
+.DS_Store
+deploy

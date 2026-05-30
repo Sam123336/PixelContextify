@@ -8,6 +8,8 @@ export interface AppConfig {
   env: string;
   port: number;
   databaseUrl: string;
+  /** Enable TLS for Postgres (required by managed providers e.g. Azure). */
+  databaseSsl: boolean;
   redisUrl: string;
   /** Server-default LLM. Callers may override per-request with their own key. */
   llm: {
@@ -34,6 +36,9 @@ export default (): AppConfig => {
     databaseUrl:
       process.env.DATABASE_URL ??
       'postgres://contextify:contextify@localhost:5432/contextify',
+    databaseSsl:
+      process.env.DATABASE_SSL === 'true' ||
+      (process.env.DATABASE_URL?.includes('sslmode=require') ?? false),
     redisUrl: process.env.REDIS_URL ?? 'redis://localhost:6379',
     llm: {
       // LLM_* takes precedence; GEMINI_* kept for backwards compatibility.
