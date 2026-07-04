@@ -1,323 +1,155 @@
 # Contextify
 
-> AI Context Compression Infrastructure for Claude Code.
-
-Upload a UI screenshot. A cheap vision model converts it into structured
-developer markdown. Claude Code consumes the markdown instead of the raw image
-— typically **~95% fewer vision tokens** with equal or better coding output.
+Turn UI screenshots into structured developer markdown for Claude Code — typically **~90% fewer vision tokens** with equal or better coding output.
 
 ```
 Screenshot ──► Vision LLM ──► Structured Markdown ──► Claude Code
 ```
 
-**Try it now** — a hosted backend is live, so the plugin works with zero setup:
+## Quick start
+
+Install the plugin (a hosted backend is included — no setup, no API keys):
 
 ```bash
-# In Claude Code:
-/plugin marketplace add Sam123336/PixelContextify
-/plugin install contextify@contextify
+claude plugin marketplace add Sam123336/PixelContextify
+claude plugin install contextify@contextify
 ```
 
-Then ask Claude to analyze any screenshot by file path. See
-[Claude Code plugin](#claude-code-plugin) for configuration.
+> Using the Claude Code CLI? You can also run these as `/plugin marketplace add …` and `/plugin install …` inside a session. Don't have the `claude` CLI: `npm install -g @anthropic-ai/claude-code`.
 
-The vision model is fully pluggable: **Gemini, OpenAI, Anthropic, or any
-OpenAI-compatible endpoint** (the hosted backend runs Llama 4 Scout via Groq),
-and you can optionally **bring your own API key** per request. See
-[Choosing an LLM provider](#choosing-an-llm-provider) below.
+Then start a new Claude Code session and ask:
 
-## Repo Layout
+> analyze this screenshot with contextify: /path/to/screenshot.png
 
-This is a `pnpm` workspace monorepo.
+Approve the tool prompt. The first call after a quiet period can take up to a minute while the free-tier server wakes; subsequent calls are fast. Supported formats: PNG, JPEG, WebP.
 
-| Package                       | Status   | Purpose                                       |
-| ----------------------------- | -------- | --------------------------------------------- |
-| `packages/shared`             | Phase 1  | Shared TypeScript types                        |
-| `packages/backend`            | Phase 1  | NestJS API + BullMQ worker + multi-provider LLM pipeline |
-| `packages/mcp-server`         | Phase 2  | MCP server exposing tools to Claude Code      |
-| `packages/vscode-extension`   | Phase 3  | VS Code clipboard / drag-drop integration     |
+## What you get
 
-## Quickstart
+For each screenshot, Claude receives compact markdown instead of the raw image:
 
-### Prerequisites
+- **Screen type** — what kind of UI it is
+- **Components** — headers, sections, cards, CTAs
+- **Layout** — grid structure, hierarchy, spacing
+- **Design style** — colors, typography, elevation
+- **Problems & suggestions** — contrast, density, hierarchy issues
 
-- Node.js 20+
-- pnpm 9+
-- Docker (for Postgres + Redis)
-- An LLM API key for your chosen provider (optional — the worker will mark
-  jobs `failed` without one, but the rest of the stack still runs). Gemini is
-  the default; see [Choosing an LLM provider](#choosing-an-llm-provider).
+## Configuration
 
-### 1. Install
+The plugin works with zero configuration. To customize, set these environment variables where Claude Code runs (all optional):
+
+| Env var                   | Description                                                        |
+| ------------------------- | ------------------------------------------------------------------ |
+| `CONTEXTIFY_BACKEND_URL`  | Use your own backend (default: the hosted instance)                |
+| `CONTEXTIFY_LLM_PROVIDER` | Bring your own LLM: `gemini`, `openai`, `anthropic`, `openai-compatible` |
+| `CONTEXTIFY_LLM_API_KEY`  | Your key for that provider — sent per request, never stored server-side |
+| `CONTEXTIFY_LLM_MODEL`    | Model id (required for `openai-compatible`)                        |
+| `CONTEXTIFY_LLM_BASE_URL` | Endpoint URL (required for `openai-compatible`)                    |
+
+### Supported LLM providers
+
+| Provider          | `provider` value    | Default model              | Needs base URL? |
+| ----------------- | ------------------- | -------------------------- | --------------- |
+| Google Gemini     | `gemini`            | `gemini-2.5-flash-lite`    | no              |
+| OpenAI            | `openai`            | `gpt-4o`                   | no              |
+| Anthropic Claude  | `anthropic`         | `claude-3-5-sonnet-latest` | no              |
+| OpenAI-compatible | `openai-compatible` | _(must specify)_           | **yes**         |
+
+`openai-compatible` works with any endpoint that speaks the OpenAI Chat Completions API and exposes a vision-capable model — Groq, OpenRouter, Together, Fireworks, vLLM, Ollama, etc.
+
+## API
+
+The backend is a plain HTTP API you can use without the plugin:
+
+| Method | Path               | Description                                     |
+| ------ | ------------------ | ----------------------------------------------- |
+| POST   | `/screenshots`     | Multipart upload (`file`); enqueues analysis    |
+| GET    | `/screenshots/:id` | Status + markdown + token savings               |
+| GET    | `/health`          | Liveness check                                  |
+
+Per-request LLM override headers on `POST /screenshots` (the key lives only on the in-flight job and is dropped when it settles):
+
+| Header           | Description                                            |
+| ---------------- | ------------------------------------------------------ |
+| `x-llm-provider` | One of the provider values above                       |
+| `x-llm-api-key`  | Your API key (required to trigger the override)        |
+| `x-llm-model`    | Model id (optional; required for `openai-compatible`)  |
+| `x-llm-base-url` | Endpoint base URL (required for `openai-compatible`)   |
+
+```bash
+curl -X POST https://<backend-url>/screenshots \
+  -H "x-llm-provider: openai" \
+  -H "x-llm-api-key: sk-..." \
+  -F "file=@./screenshot.png"
+```
+
+## Self-hosting
+
+### Run locally
+
+Prerequisites: Node.js 20+, pnpm 9+, Docker.
 
 ```bash
 pnpm install
-```
-
-### 2. Bring up Postgres + Redis
-
-```bash
 docker compose up -d postgres redis
+cp .env.example packages/backend/.env   # set LLM_API_KEY
+pnpm dev                                # API on http://localhost:3000
 ```
 
-### 3. Configure env
+Point the plugin at it with `CONTEXTIFY_BACKEND_URL=http://localhost:3000`.
+
+Server-default LLM config (`packages/backend/.env`):
 
 ```bash
-cp .env.example packages/backend/.env
-# edit packages/backend/.env and set LLM_API_KEY (Gemini by default)
+LLM_PROVIDER=gemini   # gemini | openai | anthropic | openai-compatible
+LLM_API_KEY=          # key for the chosen provider
+LLM_MODEL=            # blank → provider default; required for openai-compatible
+LLM_BASE_URL=         # only for openai-compatible
 ```
 
-### 4. Run the backend
+### Deploy on Render (free tier)
 
-```bash
-pnpm dev
-```
+[`render.yaml`](render.yaml) is a ready-made blueprint. Create a free Postgres database ([Neon](https://neon.tech)) and Redis ([Upstash](https://upstash.com)), then on [Render](https://render.com): **New → Blueprint** → pick your fork → fill in `DATABASE_URL`, `REDIS_URL`, and `LLM_API_KEY`. Free-plan note: the service sleeps after ~15 idle minutes and takes ~30–60s to wake.
 
-The API listens on `http://localhost:3000`.
+### Deploy on Azure
 
-### 5. Smoke test
-
-```bash
-curl -F "file=@./sample.png" http://localhost:3000/screenshots
-# → { "id": "...", "status": "queued" }
-
-curl http://localhost:3000/screenshots/<id>
-# poll until status == "done"
-```
-
-## API (Phase 1)
-
-| Method | Path                  | Description                                  |
-| ------ | --------------------- | -------------------------------------------- |
-| POST   | `/screenshots`        | Multipart upload (`file`); enqueues analysis. Accepts optional [LLM override headers](#per-request-bring-your-own-key). |
-| GET    | `/screenshots/:id`    | Fetch status + markdown + token savings      |
-| GET    | `/health`             | Liveness check                               |
-
-## Choosing an LLM provider
-
-Contextify is provider-agnostic. By default it uses the server's configured
-key, but callers can override the provider, key, and model **per request** so
-each user brings their own credentials.
-
-### Supported providers
-
-| Provider            | `provider` value    | Default model                 | Needs base URL? |
-| ------------------- | ------------------- | ----------------------------- | --------------- |
-| Google Gemini       | `gemini`            | `gemini-2.5-flash-lite`       | no              |
-| OpenAI              | `openai`            | `gpt-4o`                      | no              |
-| Anthropic Claude    | `anthropic`         | `claude-3-5-sonnet-latest`    | no              |
-| OpenAI-compatible   | `openai-compatible` | _(none — must specify)_       | **yes**         |
-
-`openai-compatible` works with any endpoint that speaks the OpenAI Chat
-Completions API and exposes a **vision-capable** model — OpenRouter, Together,
-Groq, Fireworks, vLLM, LM Studio, Ollama (`http://localhost:11434/v1`), etc.
-
-### Server default (env)
-
-Set the fallback used when a request brings no key of its own
-(`packages/backend/.env`):
-
-```bash
-LLM_PROVIDER=gemini          # gemini | openai | anthropic | openai-compatible
-LLM_API_KEY=                 # key for the chosen provider
-LLM_MODEL=                   # blank → provider default; required for openai-compatible
-LLM_BASE_URL=                # only for openai-compatible, e.g. https://openrouter.ai/api/v1
-```
-
-> The legacy `GEMINI_API_KEY` / `GEMINI_MODEL` vars are still honoured as
-> fallbacks when the `LLM_*` vars are unset.
-
-### Per-request (bring your own key)
-
-Send these headers on `POST /screenshots` to override the server default for
-that upload. The key is **never persisted** — it lives only on the in-flight
-queue job and is dropped as soon as the job settles.
-
-| Header             | Description                                          |
-| ------------------ | ---------------------------------------------------- |
-| `x-llm-provider`   | One of the `provider` values above                   |
-| `x-llm-api-key`    | Your API key (required to trigger the override)      |
-| `x-llm-model`      | Model id (optional; required for `openai-compatible`)|
-| `x-llm-base-url`   | Endpoint base URL (required for `openai-compatible`) |
-
-```bash
-curl -F "file=@./sample.png" \
-  -H "x-llm-provider: openai" \
-  -H "x-llm-api-key: sk-..." \
-  -H "x-llm-model: gpt-4o" \
-  http://localhost:3000/screenshots
-```
-
-> The header carries the raw key over whatever transport the backend URL uses.
-> Fine for `localhost`; use HTTPS for any remote backend.
-
-### From Claude Code / the MCP server
-
-The MCP server forwards a per-user key as the same override headers when these
-env vars are set in the environment Claude Code runs in. Leave them unset to
-use the backend's default.
-
-```bash
-export CONTEXTIFY_BACKEND_URL="https://contextify-backend-mdrs.onrender.com"  # optional; this is the default
-export CONTEXTIFY_LLM_PROVIDER="anthropic"        # optional override
-export CONTEXTIFY_LLM_API_KEY="sk-ant-..."        # optional override
-export CONTEXTIFY_LLM_MODEL=""                    # required for openai-compatible
-export CONTEXTIFY_LLM_BASE_URL=""                 # required for openai-compatible
-```
-
-The easiest way to get the above wired up is the Claude Code plugin below — it
-reads these env vars automatically.
-
-## Claude Code plugin
-
-Contextify ships as a Claude Code plugin that registers the MCP server (the
-`analyze_screenshot` / `get_screenshot` tools) — no manual config editing.
-
-The marketplace lives in this repo (`.claude-plugin/marketplace.json`) and the
-plugin bundles a single self-contained server file
-(`packages/mcp-server/bundle/index.cjs`), so users don't run any install step.
-
-```bash
-# In Claude Code:
-/plugin marketplace add Sam123336/PixelContextify
-/plugin install contextify@contextify
-```
-
-It works out of the box: the plugin defaults to the hosted backend at
-`https://contextify-backend-mdrs.onrender.com` (Render free tier — the first
-request after ~15 idle minutes takes ~30-60s while the service wakes).
-
-To customize, set these env vars in the environment Claude Code runs in
-(all optional):
-
-| Env var                   | Notes                                                  |
-| ------------------------- | ------------------------------------------------------ |
-| `CONTEXTIFY_BACKEND_URL`  | Point at your own backend, e.g. `http://localhost:3000` for the [Quickstart](#quickstart) stack. |
-| `CONTEXTIFY_LLM_PROVIDER` | Unset → backend default. Else gemini/openai/anthropic/openai-compatible. |
-| `CONTEXTIFY_LLM_API_KEY`  | Bring your own key (sent per request, never stored server-side). |
-| `CONTEXTIFY_LLM_MODEL`    | Required for `openai-compatible`.                      |
-| `CONTEXTIFY_LLM_BASE_URL` | Required for `openai-compatible`.                      |
-
-Leave the LLM vars unset to use whatever key the backend is configured with;
-set them to bring your own key per the
-[provider options](#choosing-an-llm-provider) above.
-
-To rebuild the bundled server after changing MCP-server code:
-
-```bash
-cd packages/mcp-server && pnpm run bundle:plugin   # → bundle/index.cjs
-```
-
-## VS Code extension
-
-Drop or paste a screenshot into any editor, or run **“Contextify: Analyze
-Image File…”** from the Command Palette. The result markdown is inserted at the
-cursor.
-
-### Settings
-
-| Setting                    | Purpose                                                    |
-| -------------------------- | ---------------------------------------------------------- |
-| `contextify.backendUrl`    | Base URL of the Contextify backend                         |
-| `contextify.timeoutMs`     | Max time to wait for an analysis                           |
-| `contextify.llm.provider`  | `default` (use backend key) or a specific provider         |
-| `contextify.llm.apiKey`    | Your own key, sent per upload (never stored server-side)   |
-| `contextify.llm.model`     | Model id (required for `openai-compatible`)                |
-| `contextify.llm.baseUrl`   | Endpoint base URL for `openai-compatible`                  |
-
-A **status-bar item** (bottom-right, `Contextify: <provider>`) shows the active
-provider — click it to switch in one step, or run **“Contextify: Select LLM
-Provider…”**. When `provider` is `default` or the key is blank, no key is sent
-and the backend's own provider is used.
-
-### Packaging
-
-```bash
-cd packages/vscode-extension
-pnpm run package        # bundles with esbuild → contextify-<version>.vsix
-code --install-extension contextify-0.2.0.vsix
-```
-
-## Hosting
-
-The production backend runs on an all-free stack:
-
-| Piece    | Service                | Notes                                   |
-| -------- | ---------------------- | --------------------------------------- |
-| Backend  | Render (free plan)     | Built from the repo `Dockerfile` via [`render.yaml`](render.yaml) |
-| Postgres | Neon (free tier)       | `DATABASE_URL`, requires `DATABASE_SSL=true` |
-| Redis    | Upstash (free tier)    | `REDIS_URL` (`rediss://…`)              |
-| LLM      | Groq (free tier)       | `openai-compatible`, Llama 4 Scout      |
-
-To stand up your own copy: create a Neon database and an Upstash Redis, then
-on Render choose **New → Blueprint**, pick your fork, and fill in
-`DATABASE_URL`, `REDIS_URL`, and `LLM_API_KEY` when prompted — everything else
-is preconfigured in [`render.yaml`](render.yaml). Free-plan caveat: the
-service spins down after ~15 idle minutes and takes ~30-60s to wake.
-
-## Deploy to Azure
-
-To make Contextify usable by others without each person running the stack
-locally, host the backend and bake its URL into the plugin's default
-`backend_url`.
-
-The API and BullMQ worker run in a **single process**, so it's one container.
-Recommended Azure shape:
-
-| Piece            | Azure service                              |
-| ---------------- | ------------------------------------------ |
-| Backend container| Azure Container Apps                        |
-| Postgres         | Azure Database for PostgreSQL Flexible Server |
-| Redis            | Azure Cache for Redis                       |
-| Image registry   | Azure Container Registry                    |
+[`deploy/azure.sh`](deploy/azure.sh) provisions Container Apps + managed Postgres + Redis and prints the public URL:
 
 ```bash
 az login
 PG_PASSWORD='<strong-pw>' LLM_API_KEY='<your-key>' ./deploy/azure.sh
 ```
 
-The script ([deploy/azure.sh](deploy/azure.sh)) provisions everything, builds
-the image from the repo [`Dockerfile`](Dockerfile), wires `DATABASE_URL` /
-`REDIS_URL` / `LLM_API_KEY` as Container App secrets, and prints the public
-HTTPS URL. Set `DATABASE_SSL=true` (the script does this) for Azure's managed
-Postgres.
+Redeploys are a button press via the [manual GitHub Actions workflow](.github/workflows/deploy-azure.yml) once the repo secrets/variables documented in that file are set.
 
-Notes:
-- **Schema** is created automatically on boot (Sequelize `synchronize`).
-- **Single replica** by default. Uploads are written to the container's local
-  disk and read back by the in-process worker, which is safe at one replica.
-  To scale out (`MAX_REPLICAS>1`), mount Azure Files at `UPLOAD_DIR` so the
-  upload is visible to whichever replica processes the job.
-- After deploy, update `backend_url` in
-  `packages/mcp-server/.claude-plugin/plugin.json` (and the VS Code
-  `contextify.backendUrl` default) to the printed URL.
+Notes for any host:
+- Schema is created automatically on boot (Sequelize `synchronize`).
+- Single replica by default: uploads are written to local disk and read by the in-process worker. To scale out, mount shared storage at `UPLOAD_DIR`.
 
-### Manual deploy pipeline (GitHub Actions)
+## Repository layout
 
-Once the infra exists (one run of `./deploy/azure.sh`), redeploys are a button
-press. The [`Deploy backend to Azure (manual)`](.github/workflows/deploy-azure.yml)
-workflow is **manual-only** (`workflow_dispatch`): go to **Actions → Deploy
-backend to Azure (manual) → Run workflow**, and the branch dropdown picks which
-branch to ship. It builds a fresh image from that branch in ACR and rolls the
-Container App to it.
+`pnpm` workspace monorepo:
 
-One-time repo setup (Settings → Secrets and variables → Actions):
+| Package                     | Purpose                                                  |
+| --------------------------- | -------------------------------------------------------- |
+| `packages/backend`          | NestJS API + BullMQ worker + multi-provider LLM pipeline |
+| `packages/mcp-server`       | MCP server exposing tools to Claude Code                 |
+| `packages/shared`           | Shared TypeScript types                                  |
+| `packages/vscode-extension` | VS Code clipboard / drag-drop integration                |
 
-| Kind     | Name                   | Value                                                        |
-| -------- | ---------------------- | ------------------------------------------------------------ |
-| Secret   | `AZURE_CREDENTIALS`    | `az ad sp create-for-rbac --role contributor --scopes /subscriptions/<id>/resourceGroups/contextify-rg --sdk-auth` |
-| Variable | `AZURE_RESOURCE_GROUP` | e.g. `contextify-rg`                                          |
-| Variable | `ACR_NAME`             | e.g. `contextifyacr1234`                                      |
-| Variable | `CONTAINERAPP_NAME`    | e.g. `contextify-backend`                                     |
+To rebuild the plugin's bundled MCP server after changing `packages/mcp-server`:
 
-The image tag defaults to the commit SHA; each field can be overridden via the
-Run-workflow inputs. The run summary prints the deployed URL.
+```bash
+pnpm --filter @contextify/mcp-server run bundle:plugin   # → bundle/index.cjs
+```
 
-## Roadmap
+## VS Code extension
 
-See [`/home/sambit/.claude/plans/effervescent-purring-leaf.md`](/home/sambit/.claude/plans/effervescent-purring-leaf.md)
-for the Phase 1 plan, and the master plan for Phases 2–9 (MCP server, VS Code
-extension, Claude Code plugin, framework awareness, security, monetization).
+Drop or paste a screenshot into any editor, or run **"Contextify: Analyze Image File…"** from the Command Palette; the markdown is inserted at the cursor. Configure via the `contextify.*` settings (backend URL, provider, key). Package with:
+
+```bash
+cd packages/vscode-extension
+pnpm run package   # → contextify-<version>.vsix
+```
 
 ## License
 
