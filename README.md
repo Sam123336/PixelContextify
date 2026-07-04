@@ -10,9 +10,20 @@ developer markdown. Claude Code consumes the markdown instead of the raw image
 Screenshot ──► Vision LLM ──► Structured Markdown ──► Claude Code
 ```
 
-The vision model defaults to **Gemini 2.0 Flash**, but is fully pluggable:
-choose **Gemini, OpenAI, Anthropic, or any OpenAI-compatible endpoint**, and
-optionally **bring your own API key** per request. See
+**Try it now** — a hosted backend is live, so the plugin works with zero setup:
+
+```bash
+# In Claude Code:
+/plugin marketplace add Sam123336/PixelContextify
+/plugin install contextify@contextify
+```
+
+Then ask Claude to analyze any screenshot by file path. See
+[Claude Code plugin](#claude-code-plugin) for configuration.
+
+The vision model is fully pluggable: **Gemini, OpenAI, Anthropic, or any
+OpenAI-compatible endpoint** (the hosted backend runs Llama 4 Scout via Groq),
+and you can optionally **bring your own API key** per request. See
 [Choosing an LLM provider](#choosing-an-llm-provider) below.
 
 ## Repo Layout
@@ -92,7 +103,7 @@ each user brings their own credentials.
 
 | Provider            | `provider` value    | Default model                 | Needs base URL? |
 | ------------------- | ------------------- | ----------------------------- | --------------- |
-| Google Gemini       | `gemini`            | `gemini-2.0-flash`            | no              |
+| Google Gemini       | `gemini`            | `gemini-2.5-flash-lite`       | no              |
 | OpenAI              | `openai`            | `gpt-4o`                      | no              |
 | Anthropic Claude    | `anthropic`         | `claude-3-5-sonnet-latest`    | no              |
 | OpenAI-compatible   | `openai-compatible` | _(none — must specify)_       | **yes**         |
@@ -143,32 +154,19 @@ curl -F "file=@./sample.png" \
 ### From Claude Code / the MCP server
 
 The MCP server forwards a per-user key as the same override headers when these
-env vars are set in your MCP config (e.g. `claude_desktop_config.json`). Leave
-them unset to use the backend's default.
+env vars are set in the environment Claude Code runs in. Leave them unset to
+use the backend's default.
 
-```json
-{
-  "mcpServers": {
-    "contextify": {
-      "command": "node",
-      "args": ["/abs/path/packages/mcp-server/dist/index.js"],
-      "env": {
-        "CONTEXTIFY_BACKEND_URL": "http://localhost:3000",
-        "CONTEXTIFY_LLM_PROVIDER": "anthropic",
-        "CONTEXTIFY_LLM_API_KEY": "sk-ant-...",
-        "CONTEXTIFY_LLM_MODEL": "",
-        "CONTEXTIFY_LLM_BASE_URL": ""
-      }
-    }
-  }
-}
+```bash
+export CONTEXTIFY_BACKEND_URL="https://contextify-backend-mdrs.onrender.com"  # optional; this is the default
+export CONTEXTIFY_LLM_PROVIDER="anthropic"        # optional override
+export CONTEXTIFY_LLM_API_KEY="sk-ant-..."        # optional override
+export CONTEXTIFY_LLM_MODEL=""                    # required for openai-compatible
+export CONTEXTIFY_LLM_BASE_URL=""                 # required for openai-compatible
 ```
 
-`CONTEXTIFY_LLM_BASE_URL` is required when `CONTEXTIFY_LLM_PROVIDER` is
-`openai-compatible`.
-
 The easiest way to get the above wired up is the Claude Code plugin below — it
-sets these env vars for you from a config prompt.
+reads these env vars automatically.
 
 ## Claude Code plugin
 
@@ -185,20 +183,24 @@ plugin bundles a single self-contained server file
 /plugin install contextify@contextify
 ```
 
-On install you're prompted for the plugin's config (all optional):
+It works out of the box: the plugin defaults to the hosted backend at
+`https://contextify-backend-mdrs.onrender.com` (Render free tier — the first
+request after ~15 idle minutes takes ~30-60s while the service wakes).
 
-| Option       | Maps to env               | Notes                                                  |
-| ------------ | ------------------------- | ------------------------------------------------------ |
-| Backend URL  | `CONTEXTIFY_BACKEND_URL`  | Defaults to `http://localhost:3000`.                   |
-| LLM provider | `CONTEXTIFY_LLM_PROVIDER` | Blank → backend default. Else gemini/openai/anthropic/openai-compatible. |
-| LLM API key  | `CONTEXTIFY_LLM_API_KEY`  | Your own key (stored in the OS keychain). Optional.    |
-| Model        | `CONTEXTIFY_LLM_MODEL`    | Required for `openai-compatible`.                      |
-| Base URL     | `CONTEXTIFY_LLM_BASE_URL` | Required for `openai-compatible`.                      |
+To customize, set these env vars in the environment Claude Code runs in
+(all optional):
 
-Leave the LLM fields blank to use whatever key the backend is configured with;
-fill them in to bring your own key per the
-[provider options](#choosing-an-llm-provider) above. You still need a running
-Contextify backend (see [Quickstart](#quickstart)).
+| Env var                   | Notes                                                  |
+| ------------------------- | ------------------------------------------------------ |
+| `CONTEXTIFY_BACKEND_URL`  | Point at your own backend, e.g. `http://localhost:3000` for the [Quickstart](#quickstart) stack. |
+| `CONTEXTIFY_LLM_PROVIDER` | Unset → backend default. Else gemini/openai/anthropic/openai-compatible. |
+| `CONTEXTIFY_LLM_API_KEY`  | Bring your own key (sent per request, never stored server-side). |
+| `CONTEXTIFY_LLM_MODEL`    | Required for `openai-compatible`.                      |
+| `CONTEXTIFY_LLM_BASE_URL` | Required for `openai-compatible`.                      |
+
+Leave the LLM vars unset to use whatever key the backend is configured with;
+set them to bring your own key per the
+[provider options](#choosing-an-llm-provider) above.
 
 To rebuild the bundled server after changing MCP-server code:
 
@@ -235,6 +237,23 @@ cd packages/vscode-extension
 pnpm run package        # bundles with esbuild → contextify-<version>.vsix
 code --install-extension contextify-0.2.0.vsix
 ```
+
+## Hosting
+
+The production backend runs on an all-free stack:
+
+| Piece    | Service                | Notes                                   |
+| -------- | ---------------------- | --------------------------------------- |
+| Backend  | Render (free plan)     | Built from the repo `Dockerfile` via [`render.yaml`](render.yaml) |
+| Postgres | Neon (free tier)       | `DATABASE_URL`, requires `DATABASE_SSL=true` |
+| Redis    | Upstash (free tier)    | `REDIS_URL` (`rediss://…`)              |
+| LLM      | Groq (free tier)       | `openai-compatible`, Llama 4 Scout      |
+
+To stand up your own copy: create a Neon database and an Upstash Redis, then
+on Render choose **New → Blueprint**, pick your fork, and fill in
+`DATABASE_URL`, `REDIS_URL`, and `LLM_API_KEY` when prompted — everything else
+is preconfigured in [`render.yaml`](render.yaml). Free-plan caveat: the
+service spins down after ~15 idle minutes and takes ~30-60s to wake.
 
 ## Deploy to Azure
 
