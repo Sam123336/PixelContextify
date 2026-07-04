@@ -1,0 +1,36 @@
+# Render Blueprint — deploys the Contextify backend on Render's free plan.
+#
+# One-time setup (all free, no card):
+#   1. Create a Postgres DB at https://neon.tech  → copy its connection string
+#   2. Create a Redis DB at https://upstash.com   → copy its rediss:// URL
+#   3. On https://render.com: New → Blueprint → pick this repo, then fill in
+#      the three `sync: false` env vars (DATABASE_URL, REDIS_URL, LLM_API_KEY).
+#
+# Free-plan caveat: the service spins down after ~15 min idle; the first
+# request after that takes ~30-60s. analyze_screenshot's 120s timeout covers it.
+
+services:
+  - type: web
+    name: contextify-backend
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false # Neon connection string (postgres://...)
+      - key: DATABASE_SSL
+        value: "true"
+      - key: REDIS_URL
+        sync: false # Upstash URL (rediss://...)
+      - key: LLM_PROVIDER
+        value: openai-compatible
+      - key: LLM_BASE_URL
+        value: https://api.groq.com/openai/v1
+      - key: LLM_MODEL
+        value: meta-llama/llama-4-scout-17b-16e-instruct
+      - key: LLM_API_KEY
+        sync: false # Groq key (gsk_...) — server default; users can still BYOK
