@@ -18,6 +18,34 @@ H1 headings. Omit a section only if it truly has nothing to say.
 # Screen Type
 One short line. e.g. "Food delivery homepage (mobile)".
 
+# Screen Sketch
+An ASCII wireframe of the screen inside a \`\`\`text code fence, drawn to the
+screen's rough proportions (portrait for mobile, landscape for desktop).
+Use box-drawing/ASCII characters to outline every major region in its actual
+position, with short labels inside each box. Example style:
+
+\`\`\`text
++----------------------------------+
+| < Back        Sambit's food      |
+|        4.5 ★ · 20-25 mins        |
++----------------------------------+
+| [ Search products...           ] |
++----------------------------------+
+| (Main Course) (Beverages)        |
++----------------------------------+
+| +------------+  +------------+   |
+| | Butter     |  | Paneer     |   |
+| | Chicken    |  | Tikka      |   |
+| | ₹350 [-1+] |  | ₹310 [Add+]|   |
+| +------------+  +------------+   |
++----------------------------------+
+| 1 added to cart      [View Cart] |
++----------------------------------+
+\`\`\`
+
+Every component listed in # Components must appear in the sketch. Keep it
+under ~30 lines.
+
 # Components
 Bulleted list. Name each visible component (Header, SearchBar, CategoryPill,
 RestaurantCard, BottomNav, ...). Include short notes about state where useful.
@@ -38,9 +66,11 @@ spacing, accessibility, outdated patterns). Be specific.
 Bulleted list of focused, actionable improvements a developer can implement.
 
 Rules:
-- Total output should be under ~250 words.
-- No prose paragraphs. Bullets only inside sections.
-- Do NOT wrap the whole answer in a code fence.
+- Total output should be under ~250 words, excluding the Screen Sketch.
+- No prose paragraphs. Bullets only inside sections (the Screen Sketch fence
+  is the one exception).
+- Do NOT wrap the whole answer in a code fence (a fence around ONLY the
+  Screen Sketch is required).
 - Do NOT add commentary before/after the sections.
 - If you are uncertain, say so briefly inside the relevant section.
 `;

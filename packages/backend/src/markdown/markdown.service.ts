@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 const REQUIRED_SECTIONS = [
   'Screen Type',
+  'Screen Sketch',
   'Components',
   'Layout',
   'Design Style',

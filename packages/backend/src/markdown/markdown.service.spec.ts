@@ -24,6 +24,7 @@ Login
     const input = '# Screen Type\nLogin';
     const result = service.normalize(input);
     expect(result.missingSections).toEqual([
+      'Screen Sketch',
       'Components',
       'Layout',
       'Design Style',
@@ -34,6 +35,8 @@ Login
 
   it('reports no missing sections when all are present', () => {
     const input = `# Screen Type
+x
+# Screen Sketch
 x
 # Components
 x
