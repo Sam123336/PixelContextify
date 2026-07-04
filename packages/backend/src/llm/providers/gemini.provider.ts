@@ -5,7 +5,7 @@ import { UI_ANALYSIS_PROMPT } from '../prompts/ui-analysis.prompt';
 /** Google Gemini provider (the historical default). */
 export class GeminiProvider implements LlmProviderImpl {
   readonly provider = 'gemini' as const;
-  readonly defaultModel = 'gemini-2.0-flash';
+  readonly defaultModel = 'gemini-2.5-flash-lite';
 
   async analyzeUi(
     config: ResolvedLlmConfig,
