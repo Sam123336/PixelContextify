@@ -1,7 +1,7 @@
 {
   "name": "contextify",
   "displayName": "Contextify",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Turn UI screenshots into structured developer markdown — ~95% fewer vision tokens for Claude Code. Bring your own LLM key (Gemini / OpenAI / Anthropic / any OpenAI-compatible endpoint).",
   "author": {
     "name": "PixelContextify"
@@ -15,7 +15,7 @@
       "command": "node",
       "args": ["${CLAUDE_PLUGIN_ROOT}/bundle/index.cjs"],
       "env": {
-        "CONTEXTIFY_BACKEND_URL": "${CONTEXTIFY_BACKEND_URL:-http://localhost:3000}",
+        "CONTEXTIFY_BACKEND_URL": "${CONTEXTIFY_BACKEND_URL:-https://contextify-backend-mdrs.onrender.com}",
         "CONTEXTIFY_LLM_PROVIDER": "${CONTEXTIFY_LLM_PROVIDER:-}",
         "CONTEXTIFY_LLM_API_KEY": "${CONTEXTIFY_LLM_API_KEY:-}",
         "CONTEXTIFY_LLM_MODEL": "${CONTEXTIFY_LLM_MODEL:-}",
