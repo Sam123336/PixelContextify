@@ -4,21 +4,21 @@
     "name": "PixelContextify",
     "url": "https://github.com/Sam123336/PixelContextify"
   },
-  "description": "Contextify — screenshot-to-markdown context compression for Claude Code.",
+  "description": "Contextify — persistent context engine for AI coding assistants: screenshot compression + a live Software Knowledge Graph of your codebase.",
   "plugins": [
     {
       "name": "contextify",
       "source": "./packages/mcp-server",
       "displayName": "Contextify",
-      "description": "Persistent context engine: screenshot-to-markdown compression + a live local Software Knowledge Graph (routes, components, impact analysis) so Claude queries your project instead of re-discovering it.",
-      "version": "0.3.0",
+      "description": "Persistent context engine: Claude queries your project instead of re-discovering it. 13 tools — screenshot→markdown compression (~95% fewer vision tokens), live Software Knowledge Graph for React/Next.js + Flutter with incremental indexing, what-if change simulation, visual Mermaid explanations, impact analysis with regression risk, architecture score, feature graph, screenshot↔code matching, and a git-tagged architecture timeline. Interactive graph.html visualization + CLI included. 100% local — code never leaves your machine.",
+      "version": "0.4.0",
       "author": {
         "name": "PixelContextify"
       },
       "homepage": "https://github.com/Sam123336/PixelContextify",
       "repository": "https://github.com/Sam123336/PixelContextify",
       "license": "MIT",
-      "keywords": ["mcp", "screenshot", "vision", "ui", "knowledge-graph", "impact-analysis"],
+      "keywords": ["mcp", "screenshot", "vision", "ui", "knowledge-graph", "impact-analysis", "nextjs", "react", "flutter", "architecture", "what-if", "mermaid", "context-engine"],
       "category": "productivity"
     }
   ]
