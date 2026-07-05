@@ -259,6 +259,153 @@ function recommendations(index: GraphIndex, node: GraphNode): string | null {
   return `## 💡 Recommendations for this project\n\n${recs.map((r) => `- ${r}`).join('\n')}`;
 }
 
+// --- flow tracing (user journeys) -------------------------------------------
+
+const FLOW_KINDS = ['navigates_to', 'routes_to', 'renders', 'calls'] as const;
+const FLOW_DEPTH = 12;
+
+/**
+ * Trace a user journey through the graph: shortest path from `from` to `to`
+ * over navigation/render/API edges, decorated with the side-branches
+ * (API calls, alternative navigations) each step can take. Single-endpoint
+ * mode renders the forward journey tree from an entry point.
+ *
+ * This is the low-token replacement for "read 20 files to explain checkout":
+ * the whole dossier is a few hundred tokens of verified edges.
+ */
+export function traceFlow(index: GraphIndex, from: string, to?: string): string {
+  const start = index.resolve(from)[0];
+  if (!start) return `No graph node matches \`${from}\` — try search_graph first.`;
+
+  if (!to) return flowTree(index, start);
+
+  const goal = index.resolve(to)[0];
+  if (!goal) return `No graph node matches \`${to}\` — try search_graph first.`;
+
+  // BFS shortest path over flow edges.
+  const parent = new Map<string, { prev: string; kind: string }>();
+  const seen = new Set<string>([start.id]);
+  let frontier = [start.id];
+  let found = false;
+  for (let d = 0; d < FLOW_DEPTH && frontier.length > 0 && !found; d++) {
+    const next: string[] = [];
+    for (const id of frontier) {
+      for (const e of index.outEdges(id, [...FLOW_KINDS])) {
+        if (seen.has(e.to)) continue;
+        seen.add(e.to);
+        parent.set(e.to, { prev: id, kind: e.kind });
+        if (e.to === goal.id) {
+          found = true;
+          break;
+        }
+        next.push(e.to);
+      }
+      if (found) break;
+    }
+    frontier = next;
+  }
+  if (!found) {
+    return (
+      `No flow path found from \`${start.name}\` to \`${goal.name}\` through ` +
+      'navigation/render/API edges. Both exist — they may be connected only via ' +
+      'state, or through navigation the parser could not see (e.g. anonymous ' +
+      '`Navigator.push`). Try get_impact on each to view their neighborhoods.'
+    );
+  }
+
+  // Reconstruct path.
+  const pathIds: string[] = [goal.id];
+  while (pathIds[0] !== start.id) pathIds.unshift(parent.get(pathIds[0])!.prev);
+  const pathSet = new Set(pathIds);
+
+  const m = new MermaidBuilder('flowchart TD');
+  const steps: string[] = [];
+  for (let i = 0; i < pathIds.length; i++) {
+    const node = index.byId.get(pathIds[i])!;
+    if (i + 1 < pathIds.length) {
+      const nextNode = index.byId.get(pathIds[i + 1])!;
+      m.edge(node, nextNode, parent.get(nextNode.id)!.kind.replace('_to', ''));
+    }
+    // Side branches: APIs called and alternative navigations off the main path.
+    for (const e of index.outEdges(node.id, ['calls'])) {
+      const api = index.byId.get(e.to);
+      if (api && !pathSet.has(api.id) && m.size() < MAX_DIAGRAM_NODES) m.edge(node, api, 'calls', true);
+    }
+    for (const e of index.outEdges(node.id, ['navigates_to'])) {
+      const alt = index.byId.get(e.to);
+      if (alt && !pathSet.has(alt.id) && m.size() < MAX_DIAGRAM_NODES) m.edge(node, alt, 'alt', true);
+    }
+    steps.push(
+      `${i + 1}. **${node.name}** (${node.type})${node.file ? ` — \`${node.file}\`` : ''}`,
+    );
+  }
+
+  return [
+    `# Flow: ${start.name} → ${goal.name}`,
+    '',
+    m.render(),
+    '',
+    '## Steps',
+    ...steps,
+    '',
+    '_Solid arrows = the traced path; dashed = side effects and alternative branches at each step._',
+  ].join('\n');
+}
+
+/**
+ * Forward journey tree from an entry point, at route level: navigation is
+ * aggregated from each route's entire render subtree and labeled with the
+ * component that triggers it; API calls appear as dashed side-effects.
+ */
+function flowTree(index: GraphIndex, start: GraphNode): string {
+  const startRoutes =
+    start.type === 'route'
+      ? [start]
+      : index
+          .routes()
+          .filter((r) => r.file && index.routeSubtree(r.id).some((n) => n.id === start.id));
+  if (startRoutes.length === 0) {
+    return `\`${start.name}\` is not on any route — pass a route or screen, or use from+to for a point-to-point path.`;
+  }
+
+  const m = new MermaidBuilder('flowchart TD');
+  const seen = new Set(startRoutes.map((r) => r.id));
+  let frontier = startRoutes.map((r) => r.id);
+  for (let d = 0; d < 4 && frontier.length > 0 && m.size() < MAX_DIAGRAM_NODES; d++) {
+    const next: string[] = [];
+    for (const routeId of frontier) {
+      const route = index.byId.get(routeId);
+      if (!route) continue;
+      for (const member of index.routeSubtree(routeId)) {
+        for (const e of index.outEdges(member.id, ['navigates_to'])) {
+          const target = index.byId.get(e.to);
+          if (!target || e.to === routeId || m.size() >= MAX_DIAGRAM_NODES) continue;
+          m.edge(route, target, `via ${member.name}`);
+          if (!seen.has(e.to)) {
+            seen.add(e.to);
+            next.push(e.to);
+          }
+        }
+        for (const e of index.outEdges(member.id, ['calls'])) {
+          const api = index.byId.get(e.to);
+          if (api && m.size() < MAX_DIAGRAM_NODES) m.edge(route, api, member.name, true);
+        }
+      }
+    }
+    frontier = next;
+  }
+  if (m.empty()) {
+    return `\`${start.name}\` has no outgoing navigation — nothing to trace forward. Pass a \`to\` target for a point-to-point path.`;
+  }
+  return [
+    `# User journey from ${start.name}`,
+    '',
+    m.render(),
+    '',
+    '_Solid arrows = navigation (labeled with the component that triggers it); dashed = API calls made along the way._',
+  ].join('\n');
+}
+
 // --- mermaid builder ---------------------------------------------------------
 
 const TYPE_SHAPE: Record<string, [string, string]> = {
@@ -270,26 +417,40 @@ const TYPE_SHAPE: Record<string, [string, string]> = {
   file: ['[', ']'],
 };
 
+const TYPE_STYLE: Record<string, string> = {
+  route: 'fill:#f59e0b1a,stroke:#f59e0b,color:#f59e0b',
+  api: 'fill:#10b9811a,stroke:#10b981,color:#10b981',
+  component: 'fill:#6366f11a,stroke:#6366f1',
+  context: 'fill:#c084fc1a,stroke:#c084fc',
+  hook: 'fill:#c084fc1a,stroke:#c084fc',
+};
+
 class MermaidBuilder {
-  private readonly declared = new Set<string>();
+  private readonly declared = new Map<string, GraphNode>();
   private readonly edges = new Set<string>();
   private readonly lines: string[] = [];
 
   constructor(private readonly header: string) {}
 
-  edge(from: GraphNode, to: GraphNode, label?: string): void {
+  edge(from: GraphNode, to: GraphNode, label?: string, dashed = false): void {
     this.declare(from);
     this.declare(to);
     const key = `${from.id}|${to.id}|${label ?? ''}`;
     if (this.edges.has(key)) return;
     this.edges.add(key);
-    const arrow = label ? `-->|${label}|` : '-->';
+    const arrow = dashed
+      ? label
+        ? `-.->|${label}|`
+        : '-.->'
+      : label
+        ? `-->|${label}|`
+        : '-->';
     this.lines.push(`  ${mid(from.id)} ${arrow} ${mid(to.id)}`);
   }
 
   private declare(n: GraphNode): void {
     if (this.declared.has(n.id)) return;
-    this.declared.add(n.id);
+    this.declared.set(n.id, n);
     const [open, close] = TYPE_SHAPE[n.type] ?? ['[', ']'];
     this.lines.unshift(`  ${mid(n.id)}${open}"${n.name.replace(/"/g, "'")}"${close}`);
   }
@@ -301,7 +462,20 @@ class MermaidBuilder {
     return this.edges.size === 0;
   }
   render(): string {
-    return ['```mermaid', this.header, ...this.lines, '```'].join('\n');
+    // Color nodes by type so diagrams read like the graph.html legend.
+    const styleLines: string[] = [];
+    const byType = new Map<string, string[]>();
+    for (const n of this.declared.values()) {
+      if (!TYPE_STYLE[n.type]) continue;
+      const list = byType.get(n.type);
+      if (list) list.push(mid(n.id));
+      else byType.set(n.type, [mid(n.id)]);
+    }
+    for (const [type, ids] of byType) {
+      styleLines.push(`  classDef ${type} ${TYPE_STYLE[type]}`);
+      styleLines.push(`  class ${ids.join(',')} ${type}`);
+    }
+    return ['```mermaid', this.header, ...this.lines, ...styleLines, '```'].join('\n');
   }
 }
 
