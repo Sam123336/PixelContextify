@@ -280,6 +280,7 @@ Works with any endpoint that speaks the OpenAI Chat Completions API and has a vi
 | `analyze_project` | Architecture score 0–100: circular imports, dead code, unused API routes, oversized components, usage heatmap, state fan-out |
 | `get_feature` | Think in features, not files: "explain Authentication" → its routes, components, state, APIs, and entry points |
 | `match_screenshot` | "Orange Checkout Button" → the component that implements it + the screens it appears on |
+| `blueprint_screenshot` | 🔥 The full "eye" loop: screenshot analysis (with its ASCII Screen Sketch) → every sketched element mapped to its component/file/screen → the code-side render tree → a brief for 3 design-variant sketches, generated from the tiny ASCII instead of re-reading the image |
 | `search_graph` | Find any component/route/API by name with its full relationship neighborhood |
 | `graph_diff` | What changed architecturally between two snapshots |
 | `graph_timeline` | The whole architecture's evolution, dated and git-commit-tagged |

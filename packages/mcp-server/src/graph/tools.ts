@@ -28,7 +28,7 @@ import {
   staleFileCount,
 } from './store';
 import type { ProjectGraph } from './types';
-import { renderExplainVisually, traceFlow } from './visual';
+import { renderBlueprint, renderExplainVisually, traceFlow } from './visual';
 
 const projectDirParam = z
   .string()
@@ -230,6 +230,33 @@ export function registerGraphTools(server: McpServer): void {
           );
         }
         return text(lines.join('\n'));
+      } catch (err) {
+        return errorText(err);
+      }
+    },
+  );
+
+  server.tool(
+    'blueprint_screenshot',
+    'Screenshot Blueprint — the full "eye" loop at minimal token cost. Feed it ' +
+      'the complete markdown from analyze_screenshot (which includes the ASCII ' +
+      'Screen Sketch): it maps every sketched element to the code that implements ' +
+      'it (component, file, screens), renders how that screen is actually built ' +
+      '(Mermaid render tree), and returns a brief for generating 3 design-variant ' +
+      'sketches from the tiny ASCII instead of re-reading the image. Use after ' +
+      'analyze_screenshot whenever the user wants to connect a screenshot to code ' +
+      'or redesign a screen.',
+    {
+      projectDir: projectDirParam,
+      markdown: z
+        .string()
+        .min(1)
+        .describe('Full markdown output of analyze_screenshot (must include # Components; ideally # Screen Sketch).'),
+    },
+    async ({ projectDir, markdown }) => {
+      try {
+        const { index, staleNote } = loadIndex(projectDir);
+        return text(staleNote + renderBlueprint(index, markdown));
       } catch (err) {
         return errorText(err);
       }

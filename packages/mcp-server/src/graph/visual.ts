@@ -1,4 +1,4 @@
-import { GraphIndex } from './queries';
+import { extractUiCandidates, GraphIndex, matchUiElement } from './queries';
 import type { GraphNode } from './types';
 
 /**
@@ -257,6 +257,112 @@ function recommendations(index: GraphIndex, node: GraphNode): string | null {
   }
   if (recs.length === 0) return null;
   return `## 💡 Recommendations for this project\n\n${recs.map((r) => `- ${r}`).join('\n')}`;
+}
+
+// --- screenshot blueprint (sketch → code mapping) -----------------------------
+
+/**
+ * Screenshot Blueprint: take a Contextify screenshot analysis (which contains
+ * an ASCII Screen Sketch), locate every sketched element in the codebase via
+ * the graph, and render the code-side diagram next to it. Ends with an
+ * explicit brief for generating design-variant sketches, so the whole
+ * "analyze → map → redesign" loop runs on ~1k tokens instead of re-reading
+ * the image or the codebase.
+ */
+export function renderBlueprint(index: GraphIndex, markdown: string): string {
+  const sketch = markdown.match(/# Screen Sketch[\s\S]*?```(?:text)?\n([\s\S]*?)```/)?.[1];
+  const componentNames = extractComponentNames(markdown);
+  if (componentNames.length === 0) {
+    return (
+      'No components found in the provided markdown — pass the full output of ' +
+      'analyze_screenshot (it must include the # Components section).'
+    );
+  }
+
+  // Map every sketched element to code.
+  const rows: { label: string; hit?: { node: GraphNode; routes: string[] } }[] = [];
+  const routeVotes = new Map<string, number>();
+  for (const label of componentNames.slice(0, 15)) {
+    const matches = matchUiElement(index, label);
+    const best = matches[0];
+    rows.push({ label, hit: best ? { node: best.node, routes: best.routes } : undefined });
+    if (best) {
+      for (const r of best.routes) routeVotes.set(r, (routeVotes.get(r) ?? 0) + 1);
+    }
+  }
+  const matched = rows.filter((r) => r.hit);
+  const screenRoute = [...routeVotes.entries()].sort((a, b) => b[1] - a[1])[0]?.[0];
+
+  const lines: string[] = ['# Screenshot blueprint → code', ''];
+  if (sketch) {
+    lines.push('## What the screenshot shows', '', '```text', sketch.trimEnd(), '```', '');
+  }
+
+  lines.push(
+    `## Where each element lives in the code (${matched.length}/${rows.length} matched)`,
+    '',
+    '| Sketch element | Code | File | Screens |',
+    '|---|---|---|---|',
+  );
+  for (const r of rows) {
+    if (r.hit) {
+      lines.push(
+        `| ${r.label} | \`${r.hit.node.name}\` (${r.hit.node.type}) | ${r.hit.node.file ?? '—'} | ${
+          r.hit.routes.slice(0, 3).map((x) => `\`${x}\``).join(' ') || '—'
+        } |`,
+      );
+    } else {
+      lines.push(`| ${r.label} | _no match — likely a library/generic element_ | — | — |`);
+    }
+  }
+  lines.push('');
+
+  // Code-side drawing: the render tree of the screen the elements point at.
+  if (screenRoute) {
+    const routeNode = index.resolve(screenRoute)[0];
+    if (routeNode) {
+      const comp = composition(index, routeNode);
+      if (comp) {
+        lines.push(
+          `## How this screen is built in code (\`${screenRoute}\`)`,
+          '',
+          comp.replace(/^## .*\n\n/, ''),
+          '',
+        );
+      }
+    }
+  }
+
+  // Brief for the AI layer: generate the variant sketches from the tiny ASCII,
+  // never from the image.
+  lines.push(
+    '## Design-variant brief',
+    '',
+    'Using ONLY the Screen Sketch above (do not re-read the image), produce **3 variant',
+    'sketches** in the same ASCII style, each implementing one improvement from the',
+    "analysis' Problems/Suggestions sections (e.g. reposition a primary CTA, merge",
+    'duplicate sections, fix hierarchy). Under each variant, list which of the matched',
+    'code components from the table would need to change, so the redesign is',
+    'immediately actionable.',
+  );
+  return lines.join('\n');
+}
+
+/** Pull component names out of the "# Components" section of an analysis. */
+function extractComponentNames(markdown: string): string[] {
+  const section = markdown.match(/# Components\n([\s\S]*?)(?=\n# |$)/)?.[1] ?? '';
+  const names: string[] = [];
+  const seen = new Set<string>();
+  for (const m of section.matchAll(/^[-*]\s*\**([A-Za-z][A-Za-z0-9 /]{1,32}?)\**\s*(?:[—:–(-]|$)/gm)) {
+    const name = m[1].trim();
+    const key = name.toLowerCase();
+    if (!seen.has(key)) {
+      seen.add(key);
+      names.push(name);
+    }
+  }
+  if (names.length === 0) return extractUiCandidates(markdown);
+  return names;
 }
 
 // --- flow tracing (user journeys) -------------------------------------------
