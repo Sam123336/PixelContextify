@@ -4,9 +4,12 @@ import { saveGraphHtml } from './html';
 import { indexProject } from './indexer';
 import {
   analyzeProject,
+  extractUiCandidates,
   GraphIndex,
+  matchUiElement,
   renderGraphDiff,
   renderProjectMap,
+  renderTimeline,
   searchNodes,
 } from './queries';
 import {
@@ -27,7 +30,7 @@ const projectDirParam = z
 export function registerGraphTools(server: McpServer): void {
   server.tool(
     'index_project',
-    'Build (or rebuild) the local code knowledge graph for a TypeScript/React/Next.js ' +
+    'Build (or rebuild) the local Software Knowledge Graph for a TypeScript/React/Next.js ' +
       'or Flutter/Dart project (Dart support is beta). Parses components/widgets, ' +
       'routes, navigation, state, and API calls statically and ' +
       'stores the graph in <project>/.pixelcontextify/graph.json, along with an ' +
@@ -166,8 +169,88 @@ export function registerGraphTools(server: McpServer): void {
   );
 
   server.tool(
+    'match_screenshot',
+    'Semantic screenshot ↔ code matching: map UI elements from a Contextify ' +
+      'screenshot analysis to the components that implement them, including which ' +
+      'routes/screens each match appears on. Pass either a single element ' +
+      'description ("Orange Checkout Button") or the full markdown from ' +
+      'analyze_screenshot to match every detected element at once. For the reverse ' +
+      'direction ("where does GET /products appear visually?") use get_impact on the endpoint.',
+    {
+      projectDir: projectDirParam,
+      element: z
+        .string()
+        .optional()
+        .describe('One UI element description, e.g. "Orange Checkout Button".'),
+      markdown: z
+        .string()
+        .optional()
+        .describe('Full markdown output of analyze_screenshot — matches all detected elements.'),
+    },
+    async ({ projectDir, element, markdown }) => {
+      try {
+        if (!element && !markdown) {
+          throw new Error('Provide either `element` or `markdown`.');
+        }
+        const { index, staleNote } = loadIndex(projectDir);
+        const queries = element ? [element] : extractUiCandidates(markdown!);
+        const lines = [staleNote + '# Screenshot → code matches', ''];
+        let any = false;
+        for (const q of queries) {
+          const matches = matchUiElement(index, q);
+          if (matches.length === 0) continue;
+          any = true;
+          lines.push(`### "${q}"`);
+          for (const m of matches) {
+            const routes =
+              m.routes.length > 0
+                ? ` — appears on: ${m.routes.map((r) => `\`${r}\``).join(', ')}`
+                : '';
+            lines.push(`- **${m.node.name}** (${m.node.type}) \`${m.node.id}\`${routes}`);
+          }
+          lines.push('');
+        }
+        if (!any) {
+          lines.push(
+            '_No graph nodes matched. The UI may be built from generic/library ' +
+              'components — try search_graph with text from the element, or start ' +
+              'from the route the screen belongs to._',
+          );
+        }
+        return text(lines.join('\n'));
+      } catch (err) {
+        return errorText(err);
+      }
+    },
+  );
+
+  server.tool(
+    'graph_timeline',
+    'Architecture timeline: chronological evolution of the project across all ' +
+      'stored graph snapshots — which routes/components/APIs/state were added or ' +
+      'removed at each step, tagged with dates and git commits. Answers ' +
+      '"how did this architecture evolve over time?"',
+    { projectDir: projectDirParam },
+    async ({ projectDir }) => {
+      try {
+        const current = loadGraph(projectDir);
+        if (!current) {
+          throw new Error(`No graph found at ${graphDir(projectDir)}. Run index_project first.`);
+        }
+        const history = listSnapshots(projectDir)
+          .reverse() // oldest first
+          .map((name) => loadSnapshot(projectDir, name))
+          .filter((g): g is ProjectGraph => !!g);
+        return text(renderTimeline([...history, current]));
+      } catch (err) {
+        return errorText(err);
+      }
+    },
+  );
+
+  server.tool(
     'search_graph',
-    'Search the project knowledge graph by name — components, routes, files, or API ' +
+    'Search the Software Knowledge Graph by name — components, routes, files, or API ' +
       'endpoints — and see how each match connects to the rest of the codebase. ' +
       'Useful for mapping UI elements from a screenshot analysis to the code that ' +
       'renders them (e.g. search for the component or button name Contextify identified).',

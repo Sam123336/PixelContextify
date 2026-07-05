@@ -51,6 +51,18 @@ description with the file paths involved, and the affected-routes list as its te
 scope. Output as markdown the user can paste; do not call any external ticket system
 unless the user has one connected and asks.
 
+**"Why is X broken?" / root-cause analysis**
+Combine the graph with git history — neither alone is enough:
+1. `search_graph` / `get_impact` on the broken feature to find its dependency chain
+   (component → hooks/contexts → APIs). Note any edge you'd *expect* that is missing
+   — a missing `uses`/`calls` edge is often the symptom made visible.
+2. `graph_timeline` and `graph_diff` to see when the structure changed around it.
+3. `git log --follow -p -- <file>` and `git log -S '<symbol>'` on the suspect files
+   to find the commit that introduced the change, and read its message/diff for the why.
+4. Report as a causal chain, not a file list: *symptom → missing/changed dependency →
+   commit that changed it → why (from the commit/diff)*. If the cause can't be
+   pinned to a commit, say what was ruled out rather than guessing.
+
 **"Find performance bottlenecks / security issues"**
 The graph narrows the search; it does not detect these itself — say so. Use it to
 find the hot paths (components on many routes, APIs called from many places), then

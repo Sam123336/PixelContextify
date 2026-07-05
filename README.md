@@ -57,9 +57,9 @@ For each screenshot, Claude receives compact markdown instead of the raw image:
 - **Design style** — colors, typography, elevation
 - **Problems & suggestions** — contrast, density, hierarchy issues
 
-## Code knowledge graph (v0.3)
+## Software Knowledge Graph (v0.3)
 
-Contextify can also build a **local knowledge graph** of a TypeScript/React/Next.js or Flutter codebase — no LLM in the pipeline and no code ever leaves your machine. It parses the AST with the TypeScript compiler (via ts-morph), extracts typed nodes (files, components, routes, hooks, contexts, API endpoints) and typed edges (imports, renders, navigates, uses, calls), and stores the graph in `<project>/.pixelcontextify/graph.json` (auto-gitignored).
+Contextify can also build a **local Software Knowledge Graph** of a TypeScript/React/Next.js or Flutter codebase — no LLM in the pipeline and no code ever leaves your machine. It parses the AST with the TypeScript compiler (via ts-morph), extracts typed nodes (files, components, routes, hooks, contexts, API endpoints) and typed edges (imports, renders, navigates, uses, calls), and stores the graph in `<project>/.pixelcontextify/graph.json` (auto-gitignored).
 
 **Flutter support (beta):** `.dart` files are indexed by a dedicated structural scanner — Stateless/Stateful/Consumer/Hook widgets (State classes are attributed to their widget), GoRouter routes and `routes:` maps, `Navigator.pushNamed` / `context.go` / `Get.toNamed` navigation, `http`/`dio` API calls, and Riverpod providers / `ChangeNotifier` / Bloc state containers. Mixed React + Flutter monorepos merge into a single graph.
 
@@ -79,6 +79,10 @@ Ask Claude Code things like:
 | `analyze_project` | Architecture score (0–100) with a breakdown: circular imports, possibly-dead components/hooks, API routes never called from the UI, oversized components, duplicate names |
 | `search_graph`    | Find components/routes/APIs by name and see their relationships — e.g. map a screenshot's "Checkout" button to the component that renders it |
 | `graph_diff`      | Temporal graph: compare against an earlier snapshot — added/removed routes, components, APIs, and coupling changes |
+| `match_screenshot`| Semantic screenshot ↔ code matching: "Orange Checkout Button" → the component that implements it and the routes it appears on; feed it a whole `analyze_screenshot` output to map every detected element at once |
+| `graph_timeline`  | Architecture timeline: chronological evolution across all snapshots — what was added/removed at each step, tagged with dates and git commits |
+
+**Reverse queries** work through `get_impact`: ask it about an endpoint (`get_impact . "GET /products"`) and it returns every screen where that API appears visually, via the components that call it.
 
 ### Bundled skills (the AI layer)
 

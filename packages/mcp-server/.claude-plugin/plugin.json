@@ -2,7 +2,7 @@
   "name": "contextify",
   "displayName": "Contextify",
   "version": "0.3.0",
-  "description": "Persistent context engine for Claude Code: your project gets a permanent understanding layer (screenshots → structured markdown, code → live knowledge graph) so Claude queries instead of re-discovering. React/Next.js + Flutter. Impact analysis, architecture score, temporal diffs — all local, code never leaves your machine.",
+  "description": "Persistent context engine for Claude Code: your project gets a permanent understanding layer (screenshots → structured markdown, code → live Software Knowledge Graph) so Claude queries instead of re-discovering. React/Next.js + Flutter. Impact analysis, architecture score, temporal diffs — all local, code never leaves your machine.",
   "author": {
     "name": "PixelContextify"
   },
