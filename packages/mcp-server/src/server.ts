@@ -2,6 +2,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { MCP_TOOL_NAMES, type ScreenshotRecord } from '@contextify/shared';
 import { z } from 'zod/v3';
 import { BackendClient, BackendError } from './backend-client';
+import { recordScreenshotSavings } from './graph/stats';
 import { registerGraphTools } from './graph/tools';
 
 export interface BuildServerOptions {
@@ -39,6 +40,12 @@ export function buildServer(opts: BuildServerOptions): McpServer {
         const final = await backend.waitForCompletion(uploaded.id, {
           timeoutMs: timeoutMs ?? DEFAULT_ANALYZE_TIMEOUT_MS,
         });
+        if (final.status === 'done' && final.tokenSavings) {
+          recordScreenshotSavings(
+            final.tokenSavings.imageTokensEstimate,
+            final.tokenSavings.markdownTokens,
+          );
+        }
         return toToolResult(final);
       } catch (err) {
         return toErrorResult(err);

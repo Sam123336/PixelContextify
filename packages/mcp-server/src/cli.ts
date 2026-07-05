@@ -14,6 +14,7 @@ import {
   renderProjectMap,
   searchNodes,
 } from './graph/queries';
+import { renderSavingsReport } from './graph/stats';
 import {
   graphDir,
   listSnapshots,
@@ -78,12 +79,13 @@ Usage: contextify-mcp <command> [args]        (no command → MCP stdio server)
   search  <dir> <query>    Find nodes by name and show their relationships
   diff    <dir> [snapshot] Compare current graph against a history snapshot
   feature <dir> [name]     List features, or show one feature's full dossier
+  savings <dir>            Token-savings report (graph queries + screenshots)
   help                     Show this help
 
 The graph is stored in <dir>/.pixelcontextify/ — see docs/GRAPH-SPEC.md for the format.
 `;
 
-const COMMANDS = new Set(['index', 'map', 'analyze', 'impact', 'search', 'diff', 'feature', 'help', '--help', '-h']);
+const COMMANDS = new Set(['index', 'map', 'analyze', 'impact', 'search', 'diff', 'feature', 'savings', 'help', '--help', '-h']);
 
 /** Handle CLI invocation. Returns false when argv is not a CLI command (→ run MCP server). */
 export function runCli(argv: string[]): boolean {
@@ -155,6 +157,10 @@ function dispatch(cmd: string, rest: string[]): void {
         console.log(`${hit.node.type.padEnd(9)} ${hit.node.id}`);
         for (const r of hit.relations) console.log(`          ${r}`);
       }
+      return;
+    }
+    case 'savings': {
+      console.log(renderSavingsReport(root));
       return;
     }
     case 'feature': {
