@@ -17,6 +17,7 @@ import {
   renderProjectMap,
   renderTimeline,
   searchNodes,
+  whatIf,
 } from './queries';
 import {
   graphDir,
@@ -27,6 +28,7 @@ import {
   staleFileCount,
 } from './store';
 import type { ProjectGraph } from './types';
+import { renderExplainVisually } from './visual';
 
 const projectDirParam = z
   .string()
@@ -228,6 +230,61 @@ export function registerGraphTools(server: McpServer): void {
           );
         }
         return text(lines.join('\n'));
+      } catch (err) {
+        return errorText(err);
+      }
+    },
+  );
+
+  server.tool(
+    'explain_visually',
+    'Explain Visually: generate a multi-diagram Mermaid dossier for any component, ' +
+      'route, state container, or API — how users reach it (navigation-in), what ' +
+      'it is composed of (render tree), where its data comes from (API → hook → ' +
+      'state → UI), a state-placement decision tree with the branch THIS project ' +
+      'actually needs highlighted, and project-specific recommendations. Every box ' +
+      'is a real node from this codebase — ideal for explaining frontend ' +
+      'architecture to backend developers. Render the returned Mermaid blocks.',
+    {
+      projectDir: projectDirParam,
+      target: z
+        .string()
+        .min(1)
+        .describe('Component, route, context/hook, or API to explain, e.g. "Checkout".'),
+    },
+    async ({ projectDir, target }) => {
+      try {
+        const { index, staleNote } = loadIndex(projectDir);
+        return text(staleNote + renderExplainVisually(index, target));
+      } catch (err) {
+        return errorText(err);
+      }
+    },
+  );
+
+  server.tool(
+    'what_if',
+    'Digital twin: simulate a change against the Software Knowledge Graph before ' +
+      'touching code. Actions: "remove" (what breaks immediately, what is at risk ' +
+      'transitively, which routes stay safe, files to touch, regression risk), ' +
+      '"split" (call sites to update, natural split boundaries from child/state ' +
+      'clusters, verdict), "lazy_load" (exclusive vs shared subtree, loading ' +
+      'boundaries needed, whether it is worth it). Deterministic traversal — ' +
+      'answers "what happens if…" without re-reading the project.',
+    {
+      projectDir: projectDirParam,
+      action: z
+        .enum(['remove', 'split', 'lazy_load'])
+        .describe('The hypothetical change to simulate.'),
+      target: z
+        .string()
+        .min(1)
+        .describe('Component name, context name, file path, or route (for lazy_load).'),
+    },
+    async ({ projectDir, action, target }) => {
+      try {
+        const { index, staleNote } = loadIndex(projectDir);
+        return text(staleNote + whatIf(index, action, target));
       } catch (err) {
         return errorText(err);
       }
