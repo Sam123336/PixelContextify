@@ -19,6 +19,7 @@ import {
   searchNodes,
   whatIf,
 } from './queries';
+import { recordUsage, renderSavingsReport } from './stats';
 import {
   graphDir,
   listSnapshots,
@@ -36,7 +37,30 @@ const projectDirParam = z
   .describe('Absolute path to the project root (the directory containing package.json).');
 
 export function registerGraphTools(server: McpServer): void {
-  server.tool(
+  // Wrapper: every successful graph answer is appended to the local
+  // token-savings ledger (best-effort — bookkeeping never breaks an answer).
+  const tool = (
+    name: string,
+    description: string,
+    schema: Record<string, unknown>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    handler: (args: any) => Promise<{ isError?: boolean; content?: { type: 'text'; text: string }[] }>,
+  ): void => {
+    (server.tool as CallableFunction)(
+      name,
+      description,
+      schema,
+      async (args: { projectDir?: string }) => {
+        const res = await handler(args);
+        if (!res.isError && typeof args?.projectDir === 'string') {
+          recordUsage(args.projectDir, name, res.content?.[0]?.text?.length ?? 0);
+        }
+        return res;
+      },
+    );
+  };
+
+  tool(
     'index_project',
     'Build (or rebuild) the local Software Knowledge Graph for a TypeScript/React/Next.js ' +
       'or Flutter/Dart project (Dart support is beta). Parses components/widgets, ' +
@@ -77,7 +101,7 @@ export function registerGraphTools(server: McpServer): void {
     },
   );
 
-  server.tool(
+  tool(
     'get_project_map',
     'Return a markdown map of an indexed project: every route with its component tree ' +
       'and API calls, plus a Mermaid diagram of route-to-route navigation. ' +
@@ -93,7 +117,7 @@ export function registerGraphTools(server: McpServer): void {
     },
   );
 
-  server.tool(
+  tool(
     'get_impact',
     'Impact analysis: given a component name, file path, or route, list everything that ' +
       'transitively depends on it — affected components, files, routes, and API call ' +
@@ -180,7 +204,7 @@ export function registerGraphTools(server: McpServer): void {
     },
   );
 
-  server.tool(
+  tool(
     'match_screenshot',
     'Semantic screenshot ↔ code matching: map UI elements from a Contextify ' +
       'screenshot analysis to the components that implement them, including which ' +
@@ -236,7 +260,7 @@ export function registerGraphTools(server: McpServer): void {
     },
   );
 
-  server.tool(
+  tool(
     'blueprint_screenshot',
     'Screenshot Blueprint — the full "eye" loop at minimal token cost. Feed it ' +
       'the complete markdown from analyze_screenshot (which includes the ASCII ' +
@@ -263,7 +287,7 @@ export function registerGraphTools(server: McpServer): void {
     },
   );
 
-  server.tool(
+  tool(
     'trace_flow',
     'Trace a user journey through the graph as a styled flow diagram — the ' +
       'low-token way to explain flows like checkout end-to-end. With from+to: ' +
@@ -294,7 +318,7 @@ export function registerGraphTools(server: McpServer): void {
     },
   );
 
-  server.tool(
+  tool(
     'explain_visually',
     'Explain Visually: generate a multi-diagram Mermaid dossier for any component, ' +
       'route, state container, or API — how users reach it (navigation-in), what ' +
@@ -320,7 +344,7 @@ export function registerGraphTools(server: McpServer): void {
     },
   );
 
-  server.tool(
+  tool(
     'what_if',
     'Digital twin: simulate a change against the Software Knowledge Graph before ' +
       'touching code. Actions: "remove" (what breaks immediately, what is at risk ' +
@@ -349,7 +373,7 @@ export function registerGraphTools(server: McpServer): void {
     },
   );
 
-  server.tool(
+  tool(
     'get_feature',
     'Feature Graph: reason about the project in features, not files. Without a ' +
       'feature name, lists all features (from contextify.features.json if present, ' +
@@ -388,7 +412,7 @@ export function registerGraphTools(server: McpServer): void {
     },
   );
 
-  server.tool(
+  tool(
     'graph_timeline',
     'Architecture timeline: chronological evolution of the project across all ' +
       'stored graph snapshots — which routes/components/APIs/state were added or ' +
@@ -412,7 +436,7 @@ export function registerGraphTools(server: McpServer): void {
     },
   );
 
-  server.tool(
+  tool(
     'search_graph',
     'Search the Software Knowledge Graph by name — components, routes, files, or API ' +
       'endpoints — and see how each match connects to the rest of the codebase. ' +
@@ -443,7 +467,7 @@ export function registerGraphTools(server: McpServer): void {
     },
   );
 
-  server.tool(
+  tool(
     'analyze_project',
     'Smart analysis of an indexed project: architecture score (0-100) with a ' +
       'breakdown of circular imports, possibly-dead components/hooks, API routes ' +
@@ -460,7 +484,7 @@ export function registerGraphTools(server: McpServer): void {
     },
   );
 
-  server.tool(
+  tool(
     'graph_diff',
     'Temporal graph: compare the current knowledge graph against an earlier snapshot ' +
       '(snapshots are archived automatically each time index_project detects changes). ' +
@@ -499,6 +523,25 @@ export function registerGraphTools(server: McpServer): void {
           );
         }
         return text(renderGraphDiff(before, current));
+      } catch (err) {
+        return errorText(err);
+      }
+    },
+  );
+
+  // Registered directly (not via the wrapper) so the report never counts itself.
+  server.tool(
+    'token_savings',
+    'Token-savings report with pie-chart diagrams: measured graph-answer sizes vs ' +
+      'estimated exploration avoided (per-tool breakdown) plus real measured ' +
+      'screenshot-compression savings. ONLY call this when the user EXPLICITLY asks ' +
+      'about token savings/usage/cost (e.g. "contextify token analyze", "how many ' +
+      'tokens has contextify saved"). Never call it proactively, never append it to ' +
+      'other answers, and do not mention it unless asked. Render the returned Mermaid.',
+    { projectDir: projectDirParam },
+    async ({ projectDir }) => {
+      try {
+        return text(renderSavingsReport(projectDir));
       } catch (err) {
         return errorText(err);
       }

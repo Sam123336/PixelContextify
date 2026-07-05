@@ -284,6 +284,7 @@ Works with any endpoint that speaks the OpenAI Chat Completions API and has a vi
 | `search_graph` | Find any component/route/API by name with its full relationship neighborhood |
 | `graph_diff` | What changed architecturally between two snapshots |
 | `graph_timeline` | The whole architecture's evolution, dated and git-commit-tagged |
+| `token_savings` | 📊 How much Contextify has saved you, with pie-chart diagrams: measured graph-answer sizes vs estimated exploration avoided (per-tool breakdown), plus real measured screenshot-compression savings. Also available as `contextify-mcp savings .` in the CLI |
 
 ### 🤖 Bundled skills (zero setup)
 
