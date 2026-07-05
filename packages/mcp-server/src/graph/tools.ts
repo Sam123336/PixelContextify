@@ -1,5 +1,11 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod/v3';
+import {
+  deriveFeatures,
+  loadFeatureConfig,
+  renderFeature,
+  renderFeatureList,
+} from './features';
 import { saveGraphHtml } from './html';
 import { indexProject } from './indexer';
 import {
@@ -43,8 +49,12 @@ export function registerGraphTools(server: McpServer): void {
         const { graph, stats, warnings } = indexProject(projectDir);
         const file = saveGraph(graph);
         const html = saveGraphHtml(graph);
+        const modeNote =
+          stats.mode === 'incremental'
+            ? ` (incremental: re-parsed ${stats.reparsed}, reused ${stats.reused})`
+            : '';
         const lines = [
-          `Indexed **${stats.files} files** in ${stats.durationMs}ms → \`${file}\``,
+          `Indexed **${stats.files} files** in ${stats.durationMs}ms${modeNote} → \`${file}\``,
           '',
           `🕸 Interactive visualization: \`${html}\` — open it in a browser.`,
           '',
@@ -218,6 +228,45 @@ export function registerGraphTools(server: McpServer): void {
           );
         }
         return text(lines.join('\n'));
+      } catch (err) {
+        return errorText(err);
+      }
+    },
+  );
+
+  server.tool(
+    'get_feature',
+    'Feature Graph: reason about the project in features, not files. Without a ' +
+      'feature name, lists all features (from contextify.features.json if present, ' +
+      'otherwise auto-derived from route groups) with member counts and cross-feature ' +
+      'shared nodes. With a name, returns the full dossier: routes, components, ' +
+      'state, APIs, and entry points from outside the feature. Answers ' +
+      '"explain Authentication" instead of "explain auth.ts".',
+    {
+      projectDir: projectDirParam,
+      feature: z
+        .string()
+        .optional()
+        .describe('Feature name from the list, e.g. "Checkout". Omit to list all features.'),
+    },
+    async ({ projectDir, feature }) => {
+      try {
+        const { index, staleNote } = loadIndex(projectDir);
+        const loaded = loadFeatureConfig(projectDir);
+        const config = loaded?.config ?? deriveFeatures(index);
+        const source = loaded?.source ?? 'auto-derived from routes';
+        if (!feature) {
+          return text(staleNote + renderFeatureList(index, config, source));
+        }
+        const key = Object.keys(config).find((k) => k.toLowerCase() === feature.toLowerCase());
+        if (!key) {
+          return text(
+            `${staleNote}No feature named \`${feature}\`. Available: ${Object.keys(config)
+              .map((k) => `\`${k}\``)
+              .join(', ')}`,
+          );
+        }
+        return text(staleNote + renderFeature(index, key, config[key]));
       } catch (err) {
         return errorText(err);
       }
