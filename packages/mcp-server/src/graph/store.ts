@@ -73,7 +73,8 @@ export function loadGraph(projectRoot: string): ProjectGraph | null {
   const file = path.join(graphDir(projectRoot), GRAPH_FILE);
   if (!existsSync(file)) return null;
   const parsed = JSON.parse(readFileSync(file, 'utf8')) as ProjectGraph;
-  if (parsed.version !== 1) return null;
+  // Older IR versions are derived data: reject and let the caller re-index.
+  if (parsed.version !== 2) return null;
   return parsed;
 }
 

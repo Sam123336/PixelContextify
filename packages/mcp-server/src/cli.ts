@@ -124,7 +124,11 @@ function dispatch(cmd: string, rest: string[]): void {
       `Indexed ${stats.files} files in ${stats.durationMs}ms${modeNote}\n` +
         `  graph: ${file}\n  visualization: ${html}\n` +
         `  components=${stats.components} routes=${stats.routes} hooks=${stats.hooks} ` +
-        `contexts=${stats.contexts} apis=${stats.apis} edges=${stats.edges}`,
+        `contexts=${stats.contexts} apis=${stats.apis} edges=${stats.edges}` +
+        (stats.controllers + stats.services + stats.modules + stats.entities > 0
+          ? `\n  controllers=${stats.controllers} services=${stats.services} ` +
+            `modules=${stats.modules} entities=${stats.entities}`
+          : ''),
     );
     for (const w of warnings) console.error(`warning: ${w}`);
     return;

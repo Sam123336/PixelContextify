@@ -272,13 +272,19 @@ export function analyzeProject(index: GraphIndex): AnalysisReport {
     (n) => n.type === 'hook' && index.inEdges(n.id, ['uses']).length === 0,
   );
 
-  // 3. Declared API routes that no frontend code calls.
-  const called = nodes.filter((n) => n.type === 'api' && !n.declared);
+  // 3. Declared API routes that no frontend code calls. An endpoint counts as
+  //    called when it has an incoming `calls` edge (declared + called merge
+  //    into one node), or when a called node's path shape matches it (Next.js
+  //    `api:ROUTE` handlers carry no method, so they stay separate nodes).
+  const called = nodes.filter(
+    (n) => n.type === 'api' && index.inEdges(n.id, ['calls']).length > 0,
+  );
   const calledPaths = called.map((n) => n.name.split(' ').pop() ?? '');
   const unusedApis = nodes.filter(
     (n) =>
       n.type === 'api' &&
       n.declared &&
+      index.inEdges(n.id, ['calls']).length === 0 &&
       !calledPaths.some((p) => samePathShape(p, n.name)),
   );
 
@@ -297,12 +303,27 @@ export function analyzeProject(index: GraphIndex): AnalysisReport {
   }
   const duplicates = [...byName.entries()].filter(([, list]) => list.length > 1);
 
+  // 6. Structural duplicates — different names, identical normalized JSX
+  //    shape (the copy-pasted-then-renamed components name matching misses).
+  const byShape = new Map<string, GraphNode[]>();
+  for (const n of nodes) {
+    if (n.type !== 'component' || !n.shape || FRAMEWORK_ENTRY.has(baseName(n.file))) continue;
+    const list = byShape.get(n.shape);
+    if (list) list.push(n);
+    else byShape.set(n.shape, [n]);
+  }
+  const structuralDups = [...byShape.values()].filter(
+    // >1 distinct names: same-name shape twins are already in `duplicates`.
+    (list) => list.length > 1 && new Set(list.map((n) => n.name)).size > 1,
+  );
+
   const penalty =
     Math.min(24, cycles.length * 8) +
     Math.min(16, (deadComponents.length + deadHooks.length) * 2) +
     Math.min(15, large.length * 3) +
     Math.min(10, unusedApis.length * 2) +
-    Math.min(10, duplicates.length * 2);
+    Math.min(10, duplicates.length * 2) +
+    Math.min(10, structuralDups.length * 2);
   const score = Math.max(0, 100 - penalty);
   const grade =
     score >= 90 ? 'excellent' : score >= 75 ? 'good' : score >= 60 ? 'fair' : 'needs attention';
@@ -322,6 +343,7 @@ export function analyzeProject(index: GraphIndex): AnalysisReport {
     check(large.length, 'All components reasonably sized', `${large.length} component(s) over 150 lines`),
     check(unusedApis.length, 'All declared API routes are used', `${unusedApis.length} API route(s) never called from the UI`),
     check(duplicates.length, 'No duplicate component names', `${duplicates.length} component name(s) defined in multiple files`),
+    check(structuralDups.length, 'No structural duplicates', `${structuralDups.length} group(s) of structurally identical components`),
     '',
   ];
 
@@ -360,6 +382,20 @@ export function analyzeProject(index: GraphIndex): AnalysisReport {
       lines.push(`- \`${name}\`: ${list.map((n) => `\`${n.file}\``).join(', ')}`);
     }
     lines.push('');
+  }
+  if (structuralDups.length > 0) {
+    lines.push('## Structural duplicates (same JSX shape, different names — merge candidates)');
+    for (const list of structuralDups.slice(0, 10)) {
+      lines.push(
+        `- ${list.map((n) => `\`${n.id}\`${n.loc ? ` (${n.loc} lines)` : ''}`).join(' ≈ ')}`,
+      );
+    }
+    lines.push(
+      '',
+      '_Shape compares normalized element/attribute structure; text and values may differ. ' +
+        'Read both before merging — identical shape does not guarantee identical purpose._',
+      '',
+    );
   }
 
   // Component heatmap: most-depended-on components = highest change risk.
@@ -474,7 +510,10 @@ export function renderGraphDiff(before: ProjectGraph, after: ProjectGraph): stri
   ] as const) {
     if (list.length === 0) continue;
     lines.push(`## ${title}`);
-    for (const type of ['route', 'component', 'hook', 'context', 'api', 'file'] as const) {
+    for (const type of [
+      'route', 'component', 'hook', 'context', 'api',
+      'controller', 'service', 'module', 'entity', 'file',
+    ] as const) {
       const ofType = list.filter((n) => n.type === type);
       if (ofType.length === 0) continue;
       lines.push(`- **${type}s:** ${ofType.map((n) => `\`${n.name}\``).join(', ')}`);
@@ -549,7 +588,10 @@ export function renderTimeline(history: ProjectGraph[]): string {
     const added = after.nodes.filter((n) => !beforeIds.has(n.id));
     const removed = before.nodes.filter((n) => !afterIds.has(n.id));
     const summarize = (list: GraphNode[], verb: string) => {
-      for (const type of ['route', 'component', 'context', 'hook', 'api'] as const) {
+      for (const type of [
+        'route', 'component', 'context', 'hook', 'api',
+        'controller', 'service', 'module', 'entity',
+      ] as const) {
         const ofType = list.filter((n) => n.type === type);
         if (ofType.length === 0) continue;
         const names = ofType.slice(0, 4).map((n) => `\`${n.name}\``).join(', ');

@@ -99,10 +99,13 @@ var DATA = ${payload};
 
 var COLORS = {
   route: '#f59e0b', component: '#60a5fa', hook: '#34d399',
-  context: '#c084fc', api: '#f87171', file: '#6b7280'
+  context: '#c084fc', api: '#f87171', file: '#6b7280',
+  controller: '#fb923c', service: '#818cf8', module: '#a3a3a3', entity: '#facc15'
 };
-var TYPES = ['route', 'component', 'hook', 'context', 'api', 'file'];
-var enabled = { route: true, component: true, hook: true, context: true, api: true, file: false };
+var TYPES = ['route', 'component', 'hook', 'context', 'api',
+  'controller', 'service', 'module', 'entity', 'file'];
+var enabled = { route: true, component: true, hook: true, context: true, api: true,
+  controller: true, service: true, module: true, entity: true, file: false };
 
 document.getElementById('title').textContent = DATA.project;
 document.getElementById('meta').textContent =

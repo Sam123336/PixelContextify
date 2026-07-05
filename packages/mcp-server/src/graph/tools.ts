@@ -89,6 +89,14 @@ export function registerGraphTools(server: McpServer): void {
           `- hooks: ${stats.hooks}`,
           `- contexts: ${stats.contexts}`,
           `- API endpoints: ${stats.apis}`,
+          ...(stats.controllers + stats.services + stats.modules + stats.entities > 0
+            ? [
+                `- controllers: ${stats.controllers}`,
+                `- services: ${stats.services}`,
+                `- modules: ${stats.modules}`,
+                `- entities: ${stats.entities}`,
+              ]
+            : []),
           `- edges: ${stats.edges}`,
         ];
         if (warnings.length > 0) {

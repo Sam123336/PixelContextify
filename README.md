@@ -8,10 +8,11 @@
 
 *Your AI re-discovers your project in every conversation. Contextify gives it a memory.*
 
-[![Version](https://img.shields.io/badge/version-0.5.0-blue)](https://github.com/Sam123336/PixelContextify)
+[![Version](https://img.shields.io/badge/version-0.6.0-blue)](https://github.com/Sam123336/PixelContextify)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![MCP](https://img.shields.io/badge/protocol-MCP-8A2BE2)](https://modelcontextprotocol.io)
 [![React](https://img.shields.io/badge/React%20%2F%20Next.js-full-61DAFB?logo=react&logoColor=white)](#-tools)
+[![NestJS](https://img.shields.io/badge/NestJS-full--stack-E0234E?logo=nestjs&logoColor=white)](#-tools)
 [![Flutter](https://img.shields.io/badge/Flutter-beta-02569B?logo=flutter&logoColor=white)](#-tools)
 
 **[Quick start](#-quick-start-60-seconds) · [Setup](#-setup) · [Your own API key](#-use-your-own-api-key-for-image-reading) · [Tools](#-tools) · [Self-hosting](#-self-hosting)**
@@ -28,8 +29,8 @@ Contextify fixes this with two engines feeding one **Software Knowledge Graph**:
 
 | | 📸 Screenshot Engine | 🕸️ Code Engine |
 |---|---|---|
-| **Input** | UI screenshots (PNG/JPEG/WebP) | Your React/Next.js or Flutter code |
-| **Output** | Structured markdown — screen type, components, layout, design issues | A live graph — components, routes, state, API calls and how they connect |
+| **Input** | UI screenshots (PNG/JPEG/WebP) | Your React/Next.js, NestJS, or Flutter code |
+| **Output** | Structured markdown — screen type, components, layout, design issues | A live graph — components, routes, state, API calls, controllers, services, entities — and how they connect, **frontend to backend**: a `fetch('/orders')` links straight to the controller that handles it |
 | **Saves** | ~95% of vision tokens per screenshot | Tens of thousands of exploration tokens per question |
 | **Runs** | Free hosted backend (or your own key/server) | **100% on your machine — code never leaves it** |
 
@@ -277,7 +278,7 @@ Works with any endpoint that speaks the OpenAI Chat Completions API and has a vi
 | `get_impact` | "What breaks if I change X?" — affected components/routes/contexts, APIs in the blast radius, Low/Med/High regression risk. Also answers reverse queries: "where does GET /products appear visually?" |
 | `what_if` | 🔥 Digital twin: simulate `remove` / `split` / `lazy_load` **before** touching code — what breaks, what stays safe, whether it's worth it |
 | `explain_visually` | Multi-diagram Mermaid dossier for any node: how users reach it, what it's made of, where its data flows, and a state-placement decision tree with *your project's* branch highlighted (speaks React *and* Flutter) |
-| `analyze_project` | Architecture score 0–100: circular imports, dead code, unused API routes, oversized components, usage heatmap, state fan-out |
+| `analyze_project` | Architecture score 0–100: circular imports, dead code, unused API routes, oversized components, duplicate component names, **structural duplicates** (copy-pasted-then-renamed components caught by JSX-shape fingerprint), usage heatmap, state fan-out |
 | `get_feature` | Think in features, not files: "explain Authentication" → its routes, components, state, APIs, and entry points |
 | `match_screenshot` | "Orange Checkout Button" → the component that implements it + the screens it appears on |
 | `blueprint_screenshot` | 🔥 The full "eye" loop: screenshot analysis (with its ASCII Screen Sketch) → every sketched element mapped to its component/file/screen → the code-side render tree → a brief for 3 design-variant sketches, generated from the tiny ASCII instead of re-reading the image |
@@ -289,13 +290,15 @@ Works with any endpoint that speaks the OpenAI Chat Completions API and has a vi
 ### 🤖 Bundled skills (zero setup)
 
 - **codegraph-copilot** — "explain this project", "find the payment flow", "estimate this feature", "break it into tickets", root-cause analysis via graph + git history
-- **codegraph-refactor** — prioritized refactoring plans where every suggestion is impact-checked first
+- **codegraph-refactor** — prioritized refactoring plans where every suggestion is impact-checked first; finds duplicate and structurally identical components and plans the merge with the verified call-site list
+- **codegraph-rosetta** — 🆕 framework translator: know NestJS but landed in a Django / Spring Boot / FastAPI / Flask / Go / Rust codebase? It detects the stack, translates every concept into the framework you know (controllers ↔ views, DI ↔ `Depends()`, guards ↔ permission classes…), and walks you through *this* repo's real files — mental-model gotchas included
 
 ---
 
 ## ✨ Why it's different
 
-- 🧠 **Compiler, not chatbot** — the graph is built by real parsers (TypeScript compiler for React/Next.js, structural scanner for Flutter). The AI only *queries*; it never guesses structure.
+- 🧠 **Compiler, not chatbot** — the graph is built by real parsers organized as pluggable providers (TypeScript compiler for React/Next.js and NestJS decorators, structural scanner for Flutter) emitting one versioned IR. The AI only *queries*; it never guesses structure. Every edge carries provenance (`file:line`) and a confidence, so answers cite evidence. See [ARCHITECTURE.md](ARCHITECTURE.md).
+- 🔗 **Full-stack tracing** — frontend `fetch`/`axios` calls and backend `@Get`/`@Post` handlers merge into the same endpoint node: checkout button → `POST /orders` → `OrderController` → `OrderService` → entity, in one traced path.
 - ⚡ **Live context** — every answer hash-checks your files first and auto-refreshes if code changed. No manual re-indexing, ever.
 - 🚀 **Incremental indexing** — only changed files (plus their importers) are re-parsed. No-op re-index: **~17ms**, verified byte-identical to a full rebuild.
 - 🗺️ **Interactive visualization** — `.pixelcontextify/graph.html`: force-directed map, color-coded types, search, filters, click any node for its relationships. Works offline, zero dependencies.
@@ -419,7 +422,7 @@ No. The code graph is built entirely on your machine by a local parser and store
 <details>
 <summary><b>Which frameworks are supported?</b></summary>
 <br>
-React and Next.js (app router + pages router) with full TypeScript-compiler fidelity. Flutter/Dart in beta: widgets, GoRouter + named routes, http/dio, Riverpod/Provider/Bloc. Mixed monorepos merge into one graph. React Router / React Navigation / Expo Router route detection is on the roadmap.
+React and Next.js (app router + pages router) with full TypeScript-compiler fidelity. NestJS with the same fidelity: controllers, services, modules, entities (TypeORM + sequelize-typescript), routes with global-prefix resolution, and constructor DI — and it links to the frontend graph, so a <code>fetch('/orders')</code> resolves to the controller that handles it. Flutter/Dart in beta: widgets, GoRouter + named routes, http/dio, Riverpod/Provider/Bloc. Mixed monorepos merge into one graph. For frameworks without a parser yet (Django, Spring Boot, FastAPI, Flask, Go, Rust), the bundled <b>codegraph-rosetta</b> skill still onboards you by translating their concepts into a framework you know. OpenAPI/Swagger import and Prisma are next on the roadmap.
 </details>
 
 <details>

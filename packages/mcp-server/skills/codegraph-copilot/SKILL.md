@@ -1,6 +1,6 @@
 ---
 name: codegraph-copilot
-description: Developer copilot over the Contextify code knowledge graph. Use when the user asks to explain this project, generate onboarding docs, find flows (auth, payment, checkout), visualize state management or architecture, generate Mermaid diagrams, estimate feature complexity, or break work into tasks/Jira tickets. Works on React/Next.js and Flutter projects.
+description: Developer copilot over the Contextify code knowledge graph. Use when the user asks to explain this project, generate onboarding docs, find flows (auth, payment, checkout), visualize state management or architecture, generate Mermaid diagrams, estimate feature complexity, or break work into tasks/Jira tickets. Works on React/Next.js, NestJS, and Flutter projects.
 ---
 
 # Codegraph Developer Copilot
