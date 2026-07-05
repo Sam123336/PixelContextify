@@ -1,6 +1,8 @@
 <div align="center">
 
-# 🕸️ Contextify
+<img src="docs/images/logo.png" alt="PixelContextify — See it. Understand it. Build better." width="320">
+
+# Contextify
 
 ### A persistent context engine for AI coding assistants
 
