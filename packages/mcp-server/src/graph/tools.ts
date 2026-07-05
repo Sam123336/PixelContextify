@@ -20,6 +20,7 @@ import {
   whatIf,
 } from './queries';
 import { recordUsage, renderSavingsReport } from './stats';
+import { saveSavingsHtml } from './stats-html';
 import {
   graphDir,
   listSnapshots,
@@ -556,7 +557,11 @@ export function registerGraphTools(server: McpServer): void {
     { projectDir: projectDirParam },
     async ({ projectDir }) => {
       try {
-        return text(renderSavingsReport(projectDir));
+        const report = renderSavingsReport(projectDir);
+        const html = saveSavingsHtml(projectDir);
+        return text(
+          html ? `${report}\n\n🖥 Styled dashboard: \`${html}\` — open it in a browser.` : report,
+        );
       } catch (err) {
         return errorText(err);
       }

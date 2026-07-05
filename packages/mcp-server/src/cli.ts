@@ -15,6 +15,7 @@ import {
   searchNodes,
 } from './graph/queries';
 import { renderSavingsReport } from './graph/stats';
+import { saveSavingsHtml } from './graph/stats-html';
 import {
   graphDir,
   listSnapshots,
@@ -165,6 +166,8 @@ function dispatch(cmd: string, rest: string[]): void {
     }
     case 'savings': {
       console.log(renderSavingsReport(root));
+      const html = saveSavingsHtml(root);
+      if (html) console.log(`\n  dashboard: ${html} — open in a browser`);
       return;
     }
     case 'feature': {
