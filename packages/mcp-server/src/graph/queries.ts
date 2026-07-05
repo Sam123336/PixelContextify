@@ -31,20 +31,25 @@ export class GraphIndex {
 
   /**
    * Resolve a user-supplied target (node id, component name, file path, or
-   * route path) to matching nodes.
+   * route path) to matching nodes — best match first: exact name beats id
+   * suffix, and components/routes beat synthesized api nodes.
    */
   resolve(target: string): GraphNode[] {
     const exact = this.byId.get(target) ?? this.byId.get(`route:${target}`);
     if (exact) return [exact];
     const t = target.toLowerCase();
-    const matches = this.graph.nodes.filter(
-      (n) =>
-        n.name.toLowerCase() === t ||
-        n.id.toLowerCase() === t ||
-        n.id.toLowerCase().endsWith(`/${t}`) ||
-        n.id.toLowerCase().endsWith(`#${t}`),
-    );
-    if (matches.length > 0) return matches;
+    const typeRank: Record<string, number> = {
+      component: 0, route: 1, hook: 2, context: 3, api: 4, file: 5,
+    };
+    const score = (n: GraphNode): number => {
+      if (n.name.toLowerCase() === t || n.id.toLowerCase() === t) return 100;
+      if (n.id.toLowerCase().endsWith(`#${t}`)) return 80;
+      if (n.id.toLowerCase().endsWith(`/${t}`)) return 60;
+      return 0;
+    };
+    const rank = (n: GraphNode) => score(n) * 10 - (typeRank[n.type] ?? 9);
+    const matches = this.graph.nodes.filter((n) => score(n) > 0);
+    if (matches.length > 0) return matches.sort((a, b) => rank(b) - rank(a));
     return this.graph.nodes.filter((n) => n.id.toLowerCase().includes(t));
   }
 
@@ -357,6 +362,40 @@ export function analyzeProject(index: GraphIndex): AnalysisReport {
     lines.push('');
   }
 
+  // Component heatmap: most-depended-on components = highest change risk.
+  const componentHeat = nodes
+    .filter((n) => n.type === 'component')
+    .map((n) => ({ n, renderers: index.inEdges(n.id, ['renders', 'routes_to']).length }))
+    .filter((h) => h.renderers > 0)
+    .sort((a, b) => b.renderers - a.renderers)
+    .slice(0, 8);
+  if (componentHeat.length > 0) {
+    lines.push('## Usage hotspots (change with care)');
+    for (const { n, renderers } of componentHeat) {
+      const routes = index.dependents(n.id).filter((d) => d.type === 'route').length;
+      const stars = '★'.repeat(Math.min(5, 1 + Math.floor(renderers / 3)));
+      lines.push(
+        `- \`${n.name}\` — rendered from ${renderers} place(s), reaches ${routes} route(s) ${stars}`,
+      );
+    }
+    lines.push('');
+  }
+
+  // State fan-out: contexts consumed by many components → re-render risk.
+  const stateFanout = nodes
+    .filter((n) => n.type === 'context')
+    .map((n) => ({ n, consumers: index.inEdges(n.id, ['uses']).length }))
+    .filter((h) => h.consumers > 0)
+    .sort((a, b) => b.consumers - a.consumers);
+  if (stateFanout.length > 0) {
+    lines.push('## State fan-out');
+    for (const { n, consumers } of stateFanout.slice(0, 6)) {
+      const warn = consumers >= 15 ? ' ⚠ high re-render risk — consider splitting' : '';
+      lines.push(`- \`${n.name}\` — consumed by ${consumers} component(s)${warn}`);
+    }
+    lines.push('');
+  }
+
   lines.push(
     '---',
     '_Score = 100 − penalties (cycles −8 each, dead code −2, large components −3, ' +
@@ -527,6 +566,179 @@ export function renderTimeline(history: ProjectGraph[]): string {
     lines.push('');
   }
   return lines.join('\n');
+}
+
+// --- what-if simulation (digital twin v1) ----------------------------------
+
+export type WhatIfAction = 'remove' | 'split' | 'lazy_load';
+
+/**
+ * Simulate a change against the graph before touching code.
+ * Deterministic traversal — the "what breaks / what's safe" answer an LLM
+ * cannot reliably produce without re-reading the whole project.
+ */
+export function whatIf(index: GraphIndex, action: WhatIfAction, target: string): string {
+  const resolved = index.resolve(target);
+  if (resolved.length === 0) {
+    return `No graph node matches \`${target}\` — try search_graph first.`;
+  }
+  const node = resolved[0];
+  const note =
+    resolved.length > 1
+      ? `\n\n_${resolved.length - 1} other match(es) ignored — pass a more specific target._`
+      : '';
+
+  switch (action) {
+    case 'remove':
+      return simulateRemove(index, node) + note;
+    case 'split':
+      return simulateSplit(index, node) + note;
+    case 'lazy_load':
+      return simulateLazyLoad(index, node) + note;
+  }
+}
+
+function simulateRemove(index: GraphIndex, node: GraphNode): string {
+  const direct = index
+    .inEdges(node.id)
+    .map((e) => ({ edge: e, from: index.byId.get(e.from) }))
+    .filter((d) => d.from && d.from.type !== 'file'); // defines/imports are mechanical, not breakage
+  const deps = index.dependents(node.id);
+  const affectedRoutes = new Set(deps.filter((d) => d.type === 'route').map((d) => d.name));
+  const safeRoutes = index
+    .routes()
+    .filter((r) => r.file && !affectedRoutes.has(r.name))
+    .map((r) => r.name);
+  const filesTouched = new Set<string>([node.file ?? '']);
+  for (const { from } of direct) if (from?.file) filesTouched.add(from.file);
+  filesTouched.delete('');
+
+  const risk = affectedRoutes.size >= 3 || deps.length >= 20 ? 'High' : affectedRoutes.size >= 1 || deps.length >= 6 ? 'Medium' : 'Low';
+
+  const lines = [
+    `# What if I remove \`${node.name}\` (${node.type})?`,
+    '',
+    `**Breaks immediately** — ${direct.length} direct reference(s):`,
+    ...direct
+      .slice(0, 15)
+      .map((d) => `- \`${d.from!.name}\` (${d.from!.type}) —${d.edge.kind}→ \`${node.name}\``),
+    '',
+    `**At risk transitively:** ${deps.filter((d) => d.type === 'component').length} components across ${affectedRoutes.size} route(s)` +
+      (affectedRoutes.size > 0 ? `: ${[...affectedRoutes].map((r) => `\`${r}\``).join(', ')}` : ''),
+    safeRoutes.length > 0 ? `**Unaffected routes:** ${safeRoutes.map((r) => `\`${r}\``).join(', ')}` : '',
+    '',
+    `**Estimated files to touch:** ${filesTouched.size}`,
+    `**Regression risk:** ${risk}`,
+  ];
+  if (node.type === 'context') {
+    const consumers = index.inEdges(node.id, ['uses']).length;
+    lines.push(
+      '',
+      `_This is a state container with ${consumers} consumer(s) — each needs a replacement state source before removal._`,
+    );
+  }
+  return lines.filter((l) => l !== undefined).join('\n');
+}
+
+function simulateSplit(index: GraphIndex, node: GraphNode): string {
+  const renderers = index.inEdges(node.id, ['renders', 'routes_to']);
+  const children = index.outEdges(node.id, ['renders']).map((e) => index.byId.get(e.to));
+  const state = index.outEdges(node.id, ['uses']).map((e) => index.byId.get(e.to));
+  const apis = index.outEdges(node.id, ['calls']).map((e) => index.byId.get(e.to));
+
+  const lines = [
+    `# What if I split \`${node.name}\`?`,
+    '',
+    `**Size:** ${node.loc ?? '?'} lines · renders ${children.length} child component(s) · ` +
+      `uses ${state.length} state source(s) · calls ${apis.length} API(s)`,
+    '',
+    `**Call sites to update after the split:** ${renderers.length}`,
+    ...renderers.slice(0, 10).map((e) => `- \`${index.byId.get(e.from)?.name ?? e.from}\``),
+    '',
+  ];
+  if (children.length > 0) {
+    lines.push(
+      '**Natural split boundaries** (each child cluster + the state/APIs only it needs):',
+      ...children.filter(Boolean).map((c) => `- extract around \`${c!.name}\``),
+      '',
+    );
+  }
+  if (state.length > 1) {
+    lines.push(
+      `_It touches ${state.length} state sources (${state.filter(Boolean).map((s) => `\`${s!.name}\``).join(', ')}) — ` +
+        'splitting along state boundaries usually reduces re-renders the most._',
+    );
+  }
+  const verdict =
+    (node.loc ?? 0) >= 150 || children.length >= 5
+      ? 'Worth splitting — size/fan-out above healthy thresholds.'
+      : 'Marginal benefit — the component is not oversized; split only if it clarifies ownership.';
+  lines.push('', `**Verdict:** ${verdict}`);
+  return lines.join('\n');
+}
+
+function simulateLazyLoad(index: GraphIndex, node: GraphNode): string {
+  // Route target: defer its exclusive subtree. Component target: defer it + its subtree.
+  const isRoute = node.type === 'route';
+  const subtree = isRoute
+    ? index.routeSubtree(node.id)
+    : [node, ...collectRenderSubtree(index, node.id)];
+  const subtreeIds = new Set(subtree.map((n) => n.id));
+
+  // Which of those nodes are ALSO reachable from other routes (stay in shared bundles)?
+  const otherRoutes = index.routes().filter((r) => r.file && r.id !== node.id);
+  const sharedIds = new Set<string>();
+  for (const r of otherRoutes) {
+    if (!isRoute && r.name === node.name) continue;
+    for (const n of index.routeSubtree(r.id)) {
+      if (subtreeIds.has(n.id)) sharedIds.add(n.id);
+    }
+  }
+  const exclusive = subtree.filter((n) => n.type === 'component' && !sharedIds.has(n.id) && n.id !== node.id);
+  const shared = subtree.filter((n) => n.type === 'component' && sharedIds.has(n.id));
+  const entries = index.inEdges(node.id, isRoute ? ['navigates_to'] : ['renders', 'routes_to']);
+  const exclusiveLoc = exclusive.reduce((sum, n) => sum + (n.loc ?? 0), 0);
+
+  const verdict =
+    exclusive.length >= 3 || exclusiveLoc > 200
+      ? 'Worthwhile — a meaningful exclusive subtree would move out of the initial bundle.'
+      : 'Minimal gain — most of this subtree is shared with other routes and stays in the bundle anyway.';
+
+  return [
+    `# What if I lazy-load \`${node.name}\`?`,
+    '',
+    `**Deferred (exclusive to this ${isRoute ? 'route' : 'component'}):** ${exclusive.length} component(s), ~${exclusiveLoc} lines` +
+      (exclusive.length > 0 ? ` — ${exclusive.slice(0, 8).map((n) => `\`${n.name}\``).join(', ')}` : ''),
+    `**Stays in shared bundle:** ${shared.length} component(s) also used elsewhere` +
+      (shared.length > 0 ? ` — ${shared.slice(0, 8).map((n) => `\`${n.name}\``).join(', ')}` : ''),
+    `**Loading boundaries to add:** ${entries.length} entry point(s) will need a loading state`,
+    '',
+    `**Verdict:** ${verdict}`,
+    '',
+    '_Line counts are a structural proxy — confirm byte sizes with your bundler analyzer._',
+  ].join('\n');
+}
+
+function collectRenderSubtree(index: GraphIndex, id: string): GraphNode[] {
+  const seen = new Set<string>([id]);
+  const out: GraphNode[] = [];
+  let frontier = [id];
+  for (let depth = 0; depth < RENDER_DEPTH && frontier.length > 0; depth++) {
+    const next: string[] = [];
+    for (const cur of frontier) {
+      for (const e of index.outEdges(cur, ['renders'])) {
+        if (seen.has(e.to)) continue;
+        seen.add(e.to);
+        const n = index.byId.get(e.to);
+        if (n) {
+          out.push(n);
+          next.push(e.to);
+        }
+      }
+    }
+    frontier = next;
+  }
+  return out;
 }
 
 // --- screenshot ↔ code matching -------------------------------------------
