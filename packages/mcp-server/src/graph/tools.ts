@@ -260,17 +260,23 @@ export function registerGraphTools(server: McpServer): void {
 }
 
 function loadIndex(projectDir: string): { index: GraphIndex; staleNote: string } {
-  const graph = loadGraph(projectDir);
+  let graph = loadGraph(projectDir);
   if (!graph) {
     throw new Error(
       `No graph found at ${graphDir(projectDir)}. Run the index_project tool first.`,
     );
   }
+  // Live context: if indexed files changed on disk, transparently re-index so
+  // every answer reflects the current code — no manual refresh step.
   const stale = staleFileCount(graph as ProjectGraph);
-  const staleNote =
-    stale > 0
-      ? `> ⚠️ ${stale} indexed file(s) changed since the last index_project run — results may be outdated.\n\n`
-      : '';
+  let staleNote = '';
+  if (stale > 0) {
+    const { graph: fresh } = indexProject(projectDir);
+    saveGraph(fresh);
+    saveGraphHtml(fresh);
+    graph = fresh;
+    staleNote = `> ♻️ ${stale} file(s) had changed — graph auto-refreshed before answering.\n\n`;
+  }
   return { index: new GraphIndex(graph), staleNote };
 }
 
