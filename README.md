@@ -8,7 +8,7 @@
 
 *Your AI re-discovers your project in every conversation. Contextify gives it a memory.*
 
-[![Version](https://img.shields.io/badge/version-0.4.0-blue)](https://github.com/Sam123336/PixelContextify)
+[![Version](https://img.shields.io/badge/version-0.5.0-blue)](https://github.com/Sam123336/PixelContextify)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![MCP](https://img.shields.io/badge/protocol-MCP-8A2BE2)](https://modelcontextprotocol.io)
 [![React](https://img.shields.io/badge/React%20%2F%20Next.js-full-61DAFB?logo=react&logoColor=white)](#-tools)
