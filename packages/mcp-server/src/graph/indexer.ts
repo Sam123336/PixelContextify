@@ -11,6 +11,7 @@ import {
   type JsxSelfClosingElement,
   type SourceFile,
 } from 'ts-morph';
+import { extractDart } from './dart';
 import type { GraphEdge, GraphNode, IndexStats, ProjectGraph } from './types';
 
 const SOURCE_GLOBS = ['**/*.{ts,tsx,js,jsx}'];
@@ -37,6 +38,8 @@ interface FileSymbols {
   hooks: Map<string, string>;
   /** context variable name → node id */
   contexts: Map<string, string>;
+  /** node id → declaration size in lines */
+  loc: Map<string, number>;
   defaultId?: string;
 }
 
@@ -106,11 +109,18 @@ export function indexProject(rootDir: string): IndexResult {
         name,
         file: relPath,
         ...(symbols.defaultId === id ? { isDefaultExport: true } : {}),
+        ...(symbols.loc.has(id) ? { loc: symbols.loc.get(id) } : {}),
       });
       addEdge({ from: relPath, to: id, kind: 'defines' });
     }
     for (const [name, id] of symbols.hooks) {
-      addNode({ id, type: 'hook', name, file: relPath });
+      addNode({
+        id,
+        type: 'hook',
+        name,
+        file: relPath,
+        ...(symbols.loc.has(id) ? { loc: symbols.loc.get(id) } : {}),
+      });
       addEdge({ from: relPath, to: id, kind: 'defines' });
     }
     for (const [name, id] of symbols.contexts) {
@@ -125,6 +135,13 @@ export function indexProject(rootDir: string): IndexResult {
       addNode({ id: routeId, type: 'route', name: route, file: relPath });
       const target = symbols.defaultId ?? relPath;
       addEdge({ from: routeId, to: target, kind: 'routes_to' });
+    }
+
+    const apiRoute = apiRouteForFile(relPath);
+    if (apiRoute) {
+      const apiId = `api:ROUTE ${apiRoute}`;
+      addNode({ id: apiId, type: 'api', name: apiRoute, file: relPath, declared: true });
+      addEdge({ from: relPath, to: apiId, kind: 'defines' });
     }
   }
 
@@ -251,6 +268,15 @@ export function indexProject(rootDir: string): IndexResult {
     }
   }
 
+  // Dart/Flutter pass (beta) — merges into the same graph when .dart files exist.
+  const dart = extractDart(root);
+  if (dart) {
+    Object.assign(files, dart.files);
+    for (const n of dart.nodes) addNode(n);
+    for (const e of dart.edges) addEdge(e);
+    warnings.push(...dart.warnings);
+  }
+
   const commit = gitHead(root);
   const graph: ProjectGraph = {
     version: 1,
@@ -302,6 +328,7 @@ function collectSymbols(sf: SourceFile, relPath: string): FileSymbols {
   const components = new Map<string, string>();
   const hooks = new Map<string, string>();
   const contexts = new Map<string, string>();
+  const loc = new Map<string, number>();
   let defaultId: string | undefined;
 
   const register = (name: string, node: Node, isDefault: boolean, initText?: string) => {
@@ -309,10 +336,12 @@ function collectSymbols(sf: SourceFile, relPath: string): FileSymbols {
     const id = `${relPath}#${name}`;
     if (/^use[A-Z]/.test(name)) {
       hooks.set(name, id);
+      loc.set(id, node.getEndLineNumber() - node.getStartLineNumber() + 1);
     } else if (initText?.includes('createContext')) {
       contexts.set(name, id);
     } else if (/^[A-Z]/.test(name) && containsJsx(node)) {
       components.set(name, id);
+      loc.set(id, node.getEndLineNumber() - node.getStartLineNumber() + 1);
       if (isDefault) defaultId = id;
     }
   };
@@ -340,7 +369,26 @@ function collectSymbols(sf: SourceFile, relPath: string): FileSymbols {
       if (id) defaultId = id;
     }
   }
-  return { components, hooks, contexts, defaultId };
+  return { components, hooks, contexts, loc, defaultId };
+}
+
+/** API route handlers: app router route.ts files and pages/api files → endpoint path. */
+export function apiRouteForFile(relPath: string): string | undefined {
+  const appMatch = relPath.match(/(?:^|\/)app\/(.*?)route\.(?:ts|js|tsx|jsx)$/);
+  if (appMatch) {
+    const segments = appMatch[1]
+      .split('/')
+      .filter(Boolean)
+      .filter((s) => !s.startsWith('(') && !s.startsWith('@'))
+      .map(segmentToRoute);
+    return '/' + segments.join('/').replace(/\/+$/, '');
+  }
+  const pagesMatch = relPath.match(/(?:^|\/)pages\/(api\/.*)\.(?:ts|js)$/);
+  if (pagesMatch) {
+    const withoutIndex = pagesMatch[1].replace(/(^|\/)index$/, '');
+    return '/' + withoutIndex.split('/').filter(Boolean).map(segmentToRoute).join('/');
+  }
+  return undefined;
 }
 
 function defaultFunctionName(relPath: string, isDefault: boolean): string {

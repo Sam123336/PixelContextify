@@ -35,24 +35,28 @@ For each screenshot, Claude receives compact markdown instead of the raw image:
 
 ## Code knowledge graph (v0.3)
 
-Contextify can also build a **local knowledge graph** of a TypeScript/React/Next.js codebase — no LLM in the pipeline and no code ever leaves your machine. It parses the AST with the TypeScript compiler (via ts-morph), extracts typed nodes (files, components, routes, hooks, contexts, API endpoints) and typed edges (imports, renders, navigates, uses, calls), and stores the graph in `<project>/.pixelcontextify/graph.json` (auto-gitignored).
+Contextify can also build a **local knowledge graph** of a TypeScript/React/Next.js or Flutter codebase — no LLM in the pipeline and no code ever leaves your machine. It parses the AST with the TypeScript compiler (via ts-morph), extracts typed nodes (files, components, routes, hooks, contexts, API endpoints) and typed edges (imports, renders, navigates, uses, calls), and stores the graph in `<project>/.pixelcontextify/graph.json` (auto-gitignored).
+
+**Flutter support (beta):** `.dart` files are indexed by a dedicated structural scanner — Stateless/Stateful/Consumer/Hook widgets (State classes are attributed to their widget), GoRouter routes and `routes:` maps, `Navigator.pushNamed` / `context.go` / `Get.toNamed` navigation, `http`/`dio` API calls, and Riverpod providers / `ChangeNotifier` / Bloc state containers. Mixed React + Flutter monorepos merge into a single graph.
 
 Ask Claude Code things like:
 
 > index this project with contextify
 > show me the project map
 > what breaks if I change ProductCard?
+> what's my architecture score?
 > what changed architecturally since the last index?
 
 | Tool              | What it does                                                                 |
 | ----------------- | ---------------------------------------------------------------------------- |
 | `index_project`   | Parse the project and build/refresh the graph (runs 100% locally). Also writes an **interactive visualization** to `.pixelcontextify/graph.html` — open it in any browser: force-directed layout, color-coded node types, search, type filters, and a click-through details panel showing every relationship. Fully self-contained (no CDN, works offline). |
 | `get_project_map` | Routes with component trees + API calls, plus a Mermaid navigation diagram   |
-| `get_impact`      | Everything that transitively depends on a component/file/route — regression risk before you change it |
+| `get_impact`      | Everything that transitively depends on a component/file/route — affected components/files/routes/contexts, APIs in the blast radius, and a Low/Medium/High regression-risk rating |
+| `analyze_project` | Architecture score (0–100) with a breakdown: circular imports, possibly-dead components/hooks, API routes never called from the UI, oversized components, duplicate names |
 | `search_graph`    | Find components/routes/APIs by name and see their relationships — e.g. map a screenshot's "Checkout" button to the component that renders it |
 | `graph_diff`      | Temporal graph: compare against an earlier snapshot — added/removed routes, components, APIs, and coupling changes |
 
-Each re-index that detects changes archives the previous graph to `.pixelcontextify/history/` (last 20 kept), which is what `graph_diff` compares against. Route detection currently covers Next.js app-router and pages-router projects; component/hook/API extraction works for any React TypeScript/JavaScript codebase.
+Each re-index that detects changes archives the previous graph to `.pixelcontextify/history/` (last 20 kept), which is what `graph_diff` compares against. Route detection currently covers Next.js app-router/pages-router and Flutter (GoRouter + named routes); component/hook/API extraction works for any React TypeScript/JavaScript codebase and idiomatic Flutter/Dart.
 
 ## Configuration
 
