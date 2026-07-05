@@ -46,7 +46,7 @@ Ask Claude Code things like:
 
 | Tool              | What it does                                                                 |
 | ----------------- | ---------------------------------------------------------------------------- |
-| `index_project`   | Parse the project and build/refresh the graph (runs 100% locally)            |
+| `index_project`   | Parse the project and build/refresh the graph (runs 100% locally). Also writes an **interactive visualization** to `.pixelcontextify/graph.html` — open it in any browser: force-directed layout, color-coded node types, search, type filters, and a click-through details panel showing every relationship. Fully self-contained (no CDN, works offline). |
 | `get_project_map` | Routes with component trees + API calls, plus a Mermaid navigation diagram   |
 | `get_impact`      | Everything that transitively depends on a component/file/route — regression risk before you change it |
 | `search_graph`    | Find components/routes/APIs by name and see their relationships — e.g. map a screenshot's "Checkout" button to the component that renders it |
