@@ -10,7 +10,7 @@
       "name": "contextify",
       "source": "./packages/mcp-server",
       "displayName": "Contextify",
-      "description": "Screenshot-to-markdown context compression + local code knowledge graph (routes, components, impact analysis) via the Contextify MCP server.",
+      "description": "Persistent context engine: screenshot-to-markdown compression + a live local code knowledge graph (routes, components, impact analysis) so Claude queries your project instead of re-discovering it.",
       "version": "0.3.0",
       "author": {
         "name": "PixelContextify"

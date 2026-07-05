@@ -1,9 +1,33 @@
 # Contextify
 
-Turn UI screenshots into structured developer markdown for Claude Code — typically **~90% fewer vision tokens** with equal or better coding output.
+**A persistent context engine for AI coding assistants.**
+
+Every AI assistant today re-discovers your project in every conversation: it searches dozens of files, re-reads the same code, re-analyzes the same screenshots, and guesses at dependencies. You pay for that three ways — **time, tokens, and wrong answers**.
+
+Contextify gives your project a permanent understanding layer that the AI queries instead:
 
 ```
-Screenshot ──► Vision LLM ──► Structured Markdown ──► Claude Code
+Without Contextify                      With Contextify
+
+Developer asks a question               Developer asks a question
+  → Claude searches 40+ files             → Claude queries the Contextify graph
+  → reads 15–20 of them                   → answers
+  → traces imports & routes by hand
+  → guesses the rest
+  → answers
+
+~45 seconds · tens of thousands         ~2 seconds · a few hundred tokens
+of exploration tokens · guessed         · verified edges, not guesses
+dependencies                            (typical architecture question)
+```
+
+Two engines feed one knowledge graph, and the AI is always the *last* step, never the parser:
+
+```
+UI screenshots ──► Screenshot Engine ─┐
+                                      ├──► Knowledge Graph ──► Claude / any MCP client
+Source code ─────► Codegraph ─────────┘      (lives in your project folder —
+                                              code never leaves your machine)
 ```
 
 ## Quick start
@@ -62,6 +86,8 @@ The plugin also ships two skills that teach Claude how to chain the graph tools 
 
 - **codegraph-refactor** — "suggest refactorings", "what should I split?": produces a prioritized plan (split/merge/extract/dead-code/lazy-load candidates) where every suggestion is scoped with `get_impact` and grounded in real file paths before it's proposed.
 - **codegraph-copilot** — "explain this project", "generate onboarding docs", "find the payment flow", "visualize state management", "estimate this feature", "break it into tickets": answers from graph queries first, source reading second, with Mermaid diagrams where they help.
+
+**Live context:** every graph tool checks content hashes before answering — if indexed files changed on disk, the graph (and `graph.html`) auto-refreshes transparently first. No manual re-index step. (Brand-new files are picked up on the next refresh or `index_project` run.)
 
 Each re-index that detects changes archives the previous graph to `.pixelcontextify/history/` (last 20 kept), which is what `graph_diff` compares against. Route detection currently covers Next.js app-router/pages-router and Flutter (GoRouter + named routes); component/hook/API extraction works for any React TypeScript/JavaScript codebase and idiomatic Flutter/Dart.
 
