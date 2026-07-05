@@ -23,6 +23,50 @@ import {
   staleFileCount,
 } from './graph/store';
 
+// ---- terminal branding ------------------------------------------------------
+
+const BANNER_LINES = [
+  ' ▄▄▄▄▄ ▄▄▄▄▄ ▄   ▄ ▄▄▄▄▄ ▄▄▄▄▄ ▄   ▄ ▄▄▄▄▄ ▄▄▄ ▄▄▄▄▄ ▄   ▄',
+  ' █     █   █ ██  █   █   █      ▀▄▀    █    █  █      ▀▄▀',
+  ' █     █   █ █ █ █   █   █▄▄▄  ▄▀ ▀▄   █    █  █▄▄▄    █',
+  ' █▄▄▄▄ █▄▄▄█ █  ██   █   █▄▄▄▄ █   █   █   ▄█▄ █       █',
+];
+const TAGLINE = ' see it · understand it · build better';
+
+/** Blue → purple gradient (matches the PixelContextify logo). */
+function gradient(line: string, row: number, rows: number): string {
+  const from = [59, 130, 246]; // #3b82f6
+  const to = [168, 85, 247]; // #a855f7
+  let out = '';
+  const len = Math.max(1, line.length - 1);
+  for (let i = 0; i < line.length; i++) {
+    const t = Math.min(1, i / len + row / (rows * 4));
+    const r = Math.round(from[0] + (to[0] - from[0]) * t);
+    const g = Math.round(from[1] + (to[1] - from[1]) * t);
+    const b = Math.round(from[2] + (to[2] - from[2]) * t);
+    out += `\x1b[38;2;${r};${g};${b}m${line[i]}`;
+  }
+  return out + '\x1b[0m';
+}
+
+function useColor(): boolean {
+  return Boolean(process.stdout.isTTY) && !process.env.NO_COLOR;
+}
+
+function banner(): string {
+  if (!useColor()) {
+    return ['', ...BANNER_LINES, TAGLINE, ''].join('\n');
+  }
+  const colored = BANNER_LINES.map((l, i) => gradient(l, i, BANNER_LINES.length));
+  return ['', ...colored, `\x1b[2m${TAGLINE}\x1b[0m`, ''].join('\n');
+}
+
+/** One-line brand mark for command output (only when a human is watching). */
+function brandLine(): string {
+  if (!useColor()) return '';
+  return gradient('🕸 contextify', 0, 1) + ' \x1b[2m· software knowledge graph\x1b[0m\n';
+}
+
 const USAGE = `Contextify — software knowledge graph CLI
 
 Usage: contextify-mcp <command> [args]        (no command → MCP stdio server)
@@ -57,7 +101,7 @@ export function runCli(argv: string[]): boolean {
 
 function dispatch(cmd: string, rest: string[]): void {
   if (cmd === 'help' || cmd === '--help' || cmd === '-h') {
-    console.log(USAGE);
+    console.log(banner() + USAGE);
     return;
   }
 
@@ -73,6 +117,7 @@ function dispatch(cmd: string, rest: string[]): void {
       stats.mode === 'incremental'
         ? ` (incremental: ${stats.reparsed} re-parsed, ${stats.reused} reused)`
         : '';
+    process.stdout.write(brandLine());
     console.log(
       `Indexed ${stats.files} files in ${stats.durationMs}ms${modeNote}\n` +
         `  graph: ${file}\n  visualization: ${html}\n` +

@@ -166,7 +166,15 @@ Any MCP-capable client works the same way as Claude Desktop: run the server over
 
 <br>
 
-The same binary is a standalone CLI:
+The same binary is a standalone CLI — with its own terminal branding (blue→purple gradient on real TTYs, plain when piped, respects `NO_COLOR`):
+
+```
+ ▄▄▄▄▄ ▄▄▄▄▄ ▄   ▄ ▄▄▄▄▄ ▄▄▄▄▄ ▄   ▄ ▄▄▄▄▄ ▄▄▄ ▄▄▄▄▄ ▄   ▄
+ █     █   █ ██  █   █   █      ▀▄▀    █    █  █      ▀▄▀
+ █     █   █ █ █ █   █   █▄▄▄  ▄▀ ▀▄   █    █  █▄▄▄    █
+ █▄▄▄▄ █▄▄▄█ █  ██   █   █▄▄▄▄ █   █   █   ▄█▄ █       █
+ see it · understand it · build better
+```
 
 ```bash
 node packages/mcp-server/bundle/index.cjs index .              # build graph + graph.html
