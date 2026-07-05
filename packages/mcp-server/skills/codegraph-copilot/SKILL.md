@@ -24,12 +24,15 @@ does, route inventory, component architecture, state management approach, API
 surface, and "start reading here" pointers. For onboarding docs, write it to
 `docs/ONBOARDING.md` only if the user asks for a file.
 
-**"Find the X flow" (auth, payment, checkout…)**
-`search_graph` for the domain terms (login, auth, pay, checkout, cart…), then follow
-the hits' relations: route → component → hooks/contexts → APIs → navigates_to.
-Present the flow end-to-end in order (UI → state → API → next screen) with file
-paths, then a Mermaid `flowchart TD` of it. If search returns nothing, say the flow
-doesn't exist in this codebase rather than inventing one.
+**"Find the X flow" / "how does checkout work" (auth, payment, checkout…)**
+Use `trace_flow` FIRST — it is the purpose-built, low-token answer: pass the flow's
+start and end (`trace_flow from="/cart" to="/orders"`) for the traced path with
+side-branches, or just the entry (`from="/cart"`) for the journey tree. It returns
+a styled Mermaid diagram plus numbered steps with file paths. Only read source
+files afterwards to add behavioral detail the graph can't see (validation rules,
+error dialogs, retry logic) — and read only the specific files the step list names,
+never search broadly. If you don't know the endpoints, `search_graph` the domain
+terms first to find them. If no path exists, say so rather than inventing one.
 
 **"Visualize state management"**
 Filter the graph to context/hook nodes: `search_graph` for each context, list which

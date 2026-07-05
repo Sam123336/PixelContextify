@@ -28,7 +28,7 @@ import {
   staleFileCount,
 } from './store';
 import type { ProjectGraph } from './types';
-import { renderExplainVisually } from './visual';
+import { renderExplainVisually, traceFlow } from './visual';
 
 const projectDirParam = z
   .string()
@@ -230,6 +230,37 @@ export function registerGraphTools(server: McpServer): void {
           );
         }
         return text(lines.join('\n'));
+      } catch (err) {
+        return errorText(err);
+      }
+    },
+  );
+
+  server.tool(
+    'trace_flow',
+    'Trace a user journey through the graph as a styled flow diagram — the ' +
+      'low-token way to explain flows like checkout end-to-end. With from+to: ' +
+      'shortest path over navigation/render/API edges, decorated with the API ' +
+      'calls and alternative branches at each step, plus a numbered step list ' +
+      'with file paths. With only from: the forward journey tree from that entry ' +
+      'point. Use this INSTEAD of reading source files when asked "how does the ' +
+      'X flow work" — a few hundred tokens of verified edges replaces reading ' +
+      'dozens of files. Render the returned Mermaid.',
+    {
+      projectDir: projectDirParam,
+      from: z
+        .string()
+        .min(1)
+        .describe('Flow start: route ("/cart"), component ("CartPage"), or screen name.'),
+      to: z
+        .string()
+        .optional()
+        .describe('Flow destination, e.g. "/orders" or "OrderTracking". Omit for the forward journey tree.'),
+    },
+    async ({ projectDir, from, to }) => {
+      try {
+        const { index, staleNote } = loadIndex(projectDir);
+        return text(staleNote + traceFlow(index, from, to));
       } catch (err) {
         return errorText(err);
       }
