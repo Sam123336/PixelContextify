@@ -10,8 +10,8 @@
       "name": "contextify",
       "source": "./packages/mcp-server",
       "displayName": "Contextify",
-      "description": "Persistent context engine: Claude queries your project instead of re-discovering it. 13 tools — screenshot→markdown compression (~95% fewer vision tokens), live Software Knowledge Graph for React/Next.js + Flutter with incremental indexing, what-if change simulation, visual Mermaid explanations, impact analysis with regression risk, architecture score, feature graph, screenshot↔code matching, and a git-tagged architecture timeline. Interactive graph.html visualization + CLI included. 100% local — code never leaves your machine.",
-      "version": "0.4.0",
+      "description": "Persistent context engine — an eye and a memory for your AI. 16 tools: Screenshot Blueprint eye-loop (screenshot → wireframe → mapped to the code that implements it → design variants), live Software Knowledge Graph (React/Next.js + Flutter, incremental), flow tracing, what-if simulation, visual Mermaid explanations, impact analysis + regression risk, architecture score, feature graph, temporal timeline, and an on-demand token-savings report. Interactive visualization + CLI. 100% local.",
+      "version": "0.5.0",
       "author": {
         "name": "PixelContextify"
       },
