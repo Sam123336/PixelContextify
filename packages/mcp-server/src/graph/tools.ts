@@ -1,5 +1,6 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod/v3';
+import { saveGraphHtml } from './html';
 import { indexProject } from './indexer';
 import { GraphIndex, renderGraphDiff, renderProjectMap, searchNodes } from './queries';
 import {
@@ -22,16 +23,20 @@ export function registerGraphTools(server: McpServer): void {
     'index_project',
     'Build (or rebuild) the local code knowledge graph for a TypeScript/React/Next.js ' +
       'project. Parses components, routes, navigation, and API calls with ts-morph and ' +
-      'stores the graph in <project>/.pixelcontextify/graph.json. Everything runs ' +
-      'locally — no code leaves the machine. Run this once before using the other ' +
-      'graph tools, and re-run after significant code changes.',
+      'stores the graph in <project>/.pixelcontextify/graph.json, along with an ' +
+      'interactive HTML visualization at .pixelcontextify/graph.html the user can ' +
+      'open in a browser. Everything runs locally — no code leaves the machine. Run ' +
+      'this once before using the other graph tools, and re-run after code changes.',
     { projectDir: projectDirParam },
     async ({ projectDir }) => {
       try {
         const { graph, stats, warnings } = indexProject(projectDir);
         const file = saveGraph(graph);
+        const html = saveGraphHtml(graph);
         const lines = [
           `Indexed **${stats.files} files** in ${stats.durationMs}ms → \`${file}\``,
+          '',
+          `🕸 Interactive visualization: \`${html}\` — open it in a browser.`,
           '',
           `- components: ${stats.components}`,
           `- routes: ${stats.routes}`,
