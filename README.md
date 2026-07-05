@@ -56,6 +56,13 @@ Ask Claude Code things like:
 | `search_graph`    | Find components/routes/APIs by name and see their relationships — e.g. map a screenshot's "Checkout" button to the component that renders it |
 | `graph_diff`      | Temporal graph: compare against an earlier snapshot — added/removed routes, components, APIs, and coupling changes |
 
+### Bundled skills (the AI layer)
+
+The plugin also ships two skills that teach Claude how to chain the graph tools — no extra setup, they activate on matching requests:
+
+- **codegraph-refactor** — "suggest refactorings", "what should I split?": produces a prioritized plan (split/merge/extract/dead-code/lazy-load candidates) where every suggestion is scoped with `get_impact` and grounded in real file paths before it's proposed.
+- **codegraph-copilot** — "explain this project", "generate onboarding docs", "find the payment flow", "visualize state management", "estimate this feature", "break it into tickets": answers from graph queries first, source reading second, with Mermaid diagrams where they help.
+
 Each re-index that detects changes archives the previous graph to `.pixelcontextify/history/` (last 20 kept), which is what `graph_diff` compares against. Route detection currently covers Next.js app-router/pages-router and Flutter (GoRouter + named routes); component/hook/API extraction works for any React TypeScript/JavaScript codebase and idiomatic Flutter/Dart.
 
 ## Configuration
