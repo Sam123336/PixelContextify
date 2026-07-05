@@ -1,4 +1,10 @@
 import * as path from 'node:path';
+import {
+  deriveFeatures,
+  loadFeatureConfig,
+  renderFeature,
+  renderFeatureList,
+} from './graph/features';
 import { saveGraphHtml } from './graph/html';
 import { indexProject } from './graph/indexer';
 import {
@@ -27,12 +33,13 @@ Usage: contextify-mcp <command> [args]        (no command → MCP stdio server)
   impact  <dir> <target>   What depends on a component/file/route
   search  <dir> <query>    Find nodes by name and show their relationships
   diff    <dir> [snapshot] Compare current graph against a history snapshot
+  feature <dir> [name]     List features, or show one feature's full dossier
   help                     Show this help
 
 The graph is stored in <dir>/.pixelcontextify/ — see docs/GRAPH-SPEC.md for the format.
 `;
 
-const COMMANDS = new Set(['index', 'map', 'analyze', 'impact', 'search', 'diff', 'help', '--help', '-h']);
+const COMMANDS = new Set(['index', 'map', 'analyze', 'impact', 'search', 'diff', 'feature', 'help', '--help', '-h']);
 
 /** Handle CLI invocation. Returns false when argv is not a CLI command (→ run MCP server). */
 export function runCli(argv: string[]): boolean {
@@ -62,8 +69,12 @@ function dispatch(cmd: string, rest: string[]): void {
     const { graph, stats, warnings } = indexProject(root);
     const file = saveGraph(graph);
     const html = saveGraphHtml(graph);
+    const modeNote =
+      stats.mode === 'incremental'
+        ? ` (incremental: ${stats.reparsed} re-parsed, ${stats.reused} reused)`
+        : '';
     console.log(
-      `Indexed ${stats.files} files in ${stats.durationMs}ms\n` +
+      `Indexed ${stats.files} files in ${stats.durationMs}ms${modeNote}\n` +
         `  graph: ${file}\n  visualization: ${html}\n` +
         `  components=${stats.components} routes=${stats.routes} hooks=${stats.hooks} ` +
         `contexts=${stats.contexts} apis=${stats.apis} edges=${stats.edges}`,
@@ -99,6 +110,22 @@ function dispatch(cmd: string, rest: string[]): void {
         console.log(`${hit.node.type.padEnd(9)} ${hit.node.id}`);
         for (const r of hit.relations) console.log(`          ${r}`);
       }
+      return;
+    }
+    case 'feature': {
+      const loaded = loadFeatureConfig(root);
+      const config = loaded?.config ?? deriveFeatures(index);
+      const source = loaded?.source ?? 'auto-derived from routes';
+      const name = rest[1];
+      if (!name) {
+        console.log(renderFeatureList(index, config, source));
+        return;
+      }
+      const key = Object.keys(config).find((k) => k.toLowerCase() === name.toLowerCase());
+      if (!key) {
+        throw new Error(`No feature "${name}". Available: ${Object.keys(config).join(', ')}`);
+      }
+      console.log(renderFeature(index, key, config[key]));
       return;
     }
     case 'diff': {

@@ -33,6 +33,15 @@ export interface GraphEdge {
   kind: EdgeKind;
 }
 
+/** Serialized per-file symbol table — enables incremental re-indexing. */
+export interface StoredFileSymbols {
+  components: Record<string, string>;
+  hooks: Record<string, string>;
+  contexts: Record<string, string>;
+  loc: Record<string, number>;
+  defaultId?: string;
+}
+
 export interface ProjectGraph {
   version: 1;
   /** Absolute project root the graph was built from. */
@@ -44,6 +53,8 @@ export interface ProjectGraph {
   files: Record<string, { hash: string }>;
   nodes: GraphNode[];
   edges: GraphEdge[];
+  /** Per-file symbol tables (TS files only) — cache that powers incremental indexing. */
+  symbols?: Record<string, StoredFileSymbols>;
 }
 
 export interface IndexStats {
@@ -55,4 +66,10 @@ export interface IndexStats {
   contexts: number;
   edges: number;
   durationMs: number;
+  /** Context memory: 'incremental' means only changed files (+ their importers) were re-parsed. */
+  mode: 'full' | 'incremental';
+  /** Number of TS files re-parsed this run. */
+  reparsed: number;
+  /** Number of TS files whose nodes/edges were reused from the previous graph. */
+  reused: number;
 }

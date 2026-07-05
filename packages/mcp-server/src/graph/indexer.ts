@@ -1,6 +1,6 @@
 import { execSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { existsSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import * as path from 'node:path';
 import {
   Node,
@@ -12,22 +12,20 @@ import {
   type SourceFile,
 } from 'ts-morph';
 import { extractDart } from './dart';
-import type { GraphEdge, GraphNode, IndexStats, ProjectGraph } from './types';
+import { loadGraph } from './store';
+import type {
+  GraphEdge,
+  GraphNode,
+  IndexStats,
+  ProjectGraph,
+  StoredFileSymbols,
+} from './types';
 
-const SOURCE_GLOBS = ['**/*.{ts,tsx,js,jsx}'];
-const IGNORE_GLOBS = [
-  '!**/node_modules/**',
-  '!**/.next/**',
-  '!**/.pixelcontextify/**',
-  '!**/dist/**',
-  '!**/build/**',
-  '!**/out/**',
-  '!**/coverage/**',
-  '!**/*.d.ts',
-  '!**/*.test.*',
-  '!**/*.spec.*',
-];
+const TS_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx']);
+const SKIP_DIRS = new Set(['node_modules', 'dist', 'build', 'out', 'coverage']);
 const MAX_FILES = 5_000;
+/** Above this fraction of dirty files a full rebuild is cheaper than incremental. */
+const INCREMENTAL_MAX_RATIO = 0.4;
 
 const HTTP_METHODS = ['get', 'post', 'put', 'patch', 'delete', 'head'] as const;
 
@@ -43,44 +41,76 @@ interface FileSymbols {
   defaultId?: string;
 }
 
+interface DiscoveredFile {
+  rel: string;
+  abs: string;
+  hash: string;
+}
+
 export interface IndexResult {
   graph: ProjectGraph;
   stats: IndexStats;
   warnings: string[];
 }
 
-export function indexProject(rootDir: string): IndexResult {
+export interface IndexOptions {
+  /** Force a full rebuild even when an incremental update would be possible. */
+  force?: boolean;
+}
+
+export function indexProject(rootDir: string, opts: IndexOptions = {}): IndexResult {
   const started = Date.now();
   const root = path.resolve(rootDir);
   const warnings: string[] = [];
 
-  const tsConfigPath = path.join(root, 'tsconfig.json');
-  const project = new Project({
-    ...(existsSync(tsConfigPath) ? { tsConfigFilePath: tsConfigPath } : {}),
-    skipAddingFilesFromTsConfig: true,
-    compilerOptions: { allowJs: true },
-  });
-  project.addSourceFilesAtPaths([
-    ...SOURCE_GLOBS.map((g) => path.join(root, g)),
-    ...IGNORE_GLOBS.map((g) => '!' + path.join(root, g.slice(1))),
-  ]);
-
-  let sourceFiles = project
-    .getSourceFiles()
-    .filter((sf) => !sf.getFilePath().includes('/node_modules/'));
-  if (sourceFiles.length > MAX_FILES) {
+  let discovered = discoverTsFiles(root);
+  if (discovered.length > MAX_FILES) {
     warnings.push(
-      `Project has ${sourceFiles.length} source files; indexing only the first ${MAX_FILES}.`,
+      `Project has ${discovered.length} source files; indexing only the first ${MAX_FILES}.`,
     );
-    sourceFiles = sourceFiles.slice(0, MAX_FILES);
+    discovered = discovered.slice(0, MAX_FILES);
   }
+  const currentRels = new Set(discovered.map((f) => f.rel));
 
+  // ---- context memory: decide what actually needs re-parsing -------------
+  const prev = opts.force ? null : safeLoadPrevious(root);
+  let mode: IndexStats['mode'] = 'full';
+  let parseSet = currentRels;
+  if (prev?.symbols) {
+    const dirty = new Set<string>();
+    const invalidTargets = new Set<string>();
+    for (const f of discovered) {
+      const before = prev.files[f.rel];
+      if (!before) {
+        dirty.add(f.rel); // new file
+      } else if (before.hash !== f.hash) {
+        dirty.add(f.rel);
+        invalidTargets.add(f.rel);
+      }
+    }
+    for (const rel of Object.keys(prev.files)) {
+      if (!rel.endsWith('.dart') && !currentRels.has(rel)) invalidTargets.add(rel); // deleted
+    }
+    // A changed/deleted file invalidates every file that imports it: their
+    // renders/uses resolution depends on the target's symbol table.
+    for (const e of prev.edges) {
+      if (e.kind === 'imports' && invalidTargets.has(e.to) && currentRels.has(e.from)) {
+        dirty.add(e.from);
+      }
+    }
+    if (dirty.size <= discovered.length * INCREMENTAL_MAX_RATIO) {
+      mode = 'incremental';
+      parseSet = dirty;
+    }
+  }
+  const keep = new Set([...currentRels].filter((r) => !parseSet.has(r)));
+
+  // ---- sinks ---------------------------------------------------------------
   const nodes = new Map<string, GraphNode>();
   const edges: GraphEdge[] = [];
   const edgeSeen = new Set<string>();
   const files: ProjectGraph['files'] = {};
-  const symbolsByFile = new Map<string, FileSymbols>();
-  const declaredRoutes: string[] = [];
+  const symbolsOut: Record<string, StoredFileSymbols> = {};
 
   const addNode = (node: GraphNode) => {
     if (!nodes.has(node.id)) nodes.set(node.id, node);
@@ -91,62 +121,102 @@ export function indexProject(rootDir: string): IndexResult {
     edgeSeen.add(key);
     edges.push(edge);
   };
-  const rel = (sf: SourceFile) =>
-    path.relative(root, sf.getFilePath()).split(path.sep).join('/');
 
-  // Phase 1: file nodes, hashes, symbol declarations (components/hooks/contexts), routes.
-  for (const sf of sourceFiles) {
-    const relPath = rel(sf);
-    files[relPath] = { hash: sha1(sf.getFullText()) };
-    addNode({ id: relPath, type: 'file', name: path.basename(relPath), file: relPath });
+  for (const f of discovered) files[f.rel] = { hash: f.hash };
 
-    const symbols = collectSymbols(sf, relPath);
-    symbolsByFile.set(relPath, symbols);
+  // ---- carry over everything owned by clean files --------------------------
+  if (mode === 'incremental' && prev) {
+    const prevById = new Map(prev.nodes.map((n) => [n.id, n]));
+    for (const n of prev.nodes) {
+      const owner = nodeOwnerFile(n);
+      if (owner && keep.has(owner)) addNode(n);
+    }
+    for (const e of prev.edges) {
+      const owner = edgeOwnerFile(e, prevById);
+      if (owner && keep.has(owner)) addEdge(e);
+    }
+    for (const rel of keep) {
+      if (prev.symbols![rel]) symbolsOut[rel] = prev.symbols![rel];
+    }
+  }
+
+  // ---- parse the dirty set --------------------------------------------------
+  const freshSymbols = new Map<string, FileSymbols>();
+  const parsed: { sf: SourceFile; rel: string }[] = [];
+  if (parseSet.size > 0) {
+    const tsConfigPath = path.join(root, 'tsconfig.json');
+    const project = new Project({
+      ...(existsSync(tsConfigPath) ? { tsConfigFilePath: tsConfigPath } : {}),
+      skipAddingFilesFromTsConfig: true,
+      compilerOptions: { allowJs: true },
+    });
+    for (const f of discovered) {
+      if (parseSet.has(f.rel)) {
+        parsed.push({ sf: project.addSourceFileAtPath(f.abs), rel: f.rel });
+      }
+    }
+  }
+
+  const lookupSymbols = (rel: string): FileSymbols | undefined => {
+    const fresh = freshSymbols.get(rel);
+    if (fresh) return fresh;
+    const stored = symbolsOut[rel];
+    return stored ? thawSymbols(stored) : undefined;
+  };
+
+  // Phase 1: symbol declarations, routes, API route handlers.
+  for (const { sf, rel } of parsed) {
+    addNode({ id: rel, type: 'file', name: path.basename(rel), file: rel });
+
+    const symbols = collectSymbols(sf, rel);
+    freshSymbols.set(rel, symbols);
+    symbolsOut[rel] = freezeSymbols(symbols);
+
     for (const [name, id] of symbols.components) {
       addNode({
         id,
         type: 'component',
         name,
-        file: relPath,
+        file: rel,
         ...(symbols.defaultId === id ? { isDefaultExport: true } : {}),
         ...(symbols.loc.has(id) ? { loc: symbols.loc.get(id) } : {}),
       });
-      addEdge({ from: relPath, to: id, kind: 'defines' });
+      addEdge({ from: rel, to: id, kind: 'defines' });
     }
     for (const [name, id] of symbols.hooks) {
       addNode({
         id,
         type: 'hook',
         name,
-        file: relPath,
+        file: rel,
         ...(symbols.loc.has(id) ? { loc: symbols.loc.get(id) } : {}),
       });
-      addEdge({ from: relPath, to: id, kind: 'defines' });
+      addEdge({ from: rel, to: id, kind: 'defines' });
     }
     for (const [name, id] of symbols.contexts) {
-      addNode({ id, type: 'context', name, file: relPath });
-      addEdge({ from: relPath, to: id, kind: 'defines' });
+      addNode({ id, type: 'context', name, file: rel });
+      addEdge({ from: rel, to: id, kind: 'defines' });
     }
 
-    const route = routeForFile(relPath);
+    const route = routeForFile(rel);
     if (route) {
-      declaredRoutes.push(route);
       const routeId = `route:${route}`;
-      addNode({ id: routeId, type: 'route', name: route, file: relPath });
-      const target = symbols.defaultId ?? relPath;
-      addEdge({ from: routeId, to: target, kind: 'routes_to' });
+      addNode({ id: routeId, type: 'route', name: route, file: rel });
+      addEdge({ from: routeId, to: symbols.defaultId ?? rel, kind: 'routes_to' });
     }
 
-    const apiRoute = apiRouteForFile(relPath);
+    const apiRoute = apiRouteForFile(rel);
     if (apiRoute) {
       const apiId = `api:ROUTE ${apiRoute}`;
-      addNode({ id: apiId, type: 'api', name: apiRoute, file: relPath, declared: true });
-      addEdge({ from: relPath, to: apiId, kind: 'defines' });
+      addNode({ id: apiId, type: 'api', name: apiRoute, file: rel, declared: true });
+      addEdge({ from: rel, to: apiId, kind: 'defines' });
     }
   }
 
-  // A nav target like "/product/:param" should collapse onto the declared
-  // route "/product/:id" when exactly one declared route matches its shape.
+  // Declared routes (kept + fresh) drive nav-target canonicalization.
+  const declaredRoutes = [...nodes.values()]
+    .filter((n) => n.type === 'route' && n.file)
+    .map((n) => n.name);
   const canonicalRoute = (nav: string): string => {
     if (declaredRoutes.includes(nav)) return nav;
     const navSegs = nav.split('/').filter(Boolean);
@@ -161,21 +231,20 @@ export function indexProject(rootDir: string): IndexResult {
   };
 
   // Phase 2: imports, renders, navigation, hook/context usage, API calls.
-  for (const sf of sourceFiles) {
-    const relPath = rel(sf);
-    const importMap = buildImportMap(sf, root, rel);
+  for (const { sf, rel } of parsed) {
+    const importMap = buildImportMap(sf, root);
 
     for (const target of new Set(importMap.fileTargets)) {
-      if (nodes.has(target)) addEdge({ from: relPath, to: target, kind: 'imports' });
+      if (currentRels.has(target)) addEdge({ from: rel, to: target, kind: 'imports' });
     }
 
-    const own = symbolsByFile.get(relPath)!;
+    const own = freshSymbols.get(rel)!;
     const resolveTag = (tag: string): string | undefined => {
       const head = tag.split('.')[0];
       if (!/^[A-Z]/.test(head)) return undefined;
       const imported = importMap.locals.get(head);
       if (imported) {
-        const target = symbolsByFile.get(imported.fromFile);
+        const target = lookupSymbols(imported.fromFile);
         if (!target) return undefined;
         return imported.name === 'default'
           ? target.defaultId
@@ -184,14 +253,10 @@ export function indexProject(rootDir: string): IndexResult {
       return own.components.get(head);
     };
 
-    /** Resolve an identifier to a symbol id in the given table (hooks or contexts). */
-    const resolveSymbol = (
-      name: string,
-      table: 'hooks' | 'contexts',
-    ): string | undefined => {
+    const resolveSymbol = (name: string, table: 'hooks' | 'contexts'): string | undefined => {
       const imported = importMap.locals.get(name);
       if (imported && imported.name !== 'default') {
-        return symbolsByFile.get(imported.fromFile)?.[table].get(imported.name);
+        return lookupSymbols(imported.fromFile)?.[table].get(imported.name);
       }
       return own[table].get(name);
     };
@@ -205,7 +270,7 @@ export function indexProject(rootDir: string): IndexResult {
     const enclosingId = (node: Node): string => {
       const pos = node.getPos();
       const hit = declRanges.find((r) => pos >= r.start && pos < r.end);
-      return hit?.id ?? relPath;
+      return hit?.id ?? rel;
     };
 
     for (const jsx of [
@@ -220,7 +285,6 @@ export function indexProject(rootDir: string): IndexResult {
         addEdge({ from, to: targetId, kind: 'renders' });
       }
 
-      // <Link href="/checkout"> → navigation edge.
       if (tag.split('.')[0] === 'Link') {
         const href = literalAttr(jsx, 'href');
         if (href?.startsWith('/')) {
@@ -232,16 +296,13 @@ export function indexProject(rootDir: string): IndexResult {
     }
 
     for (const call of sf.getDescendantsOfKind(SyntaxKind.CallExpression)) {
-      // Hook / context usage: useCart(), useContext(CartContext).
       const callee = call.getExpression();
       if (Node.isIdentifier(callee) && /^use[A-Z]/.test(callee.getText())) {
         const from = enclosingId(call);
         if (callee.getText() === 'useContext') {
           const arg = call.getArguments()[0];
           const ctxId =
-            arg && Node.isIdentifier(arg)
-              ? resolveSymbol(arg.getText(), 'contexts')
-              : undefined;
+            arg && Node.isIdentifier(arg) ? resolveSymbol(arg.getText(), 'contexts') : undefined;
           if (ctxId) addEdge({ from, to: ctxId, kind: 'uses' });
           continue;
         }
@@ -268,13 +329,26 @@ export function indexProject(rootDir: string): IndexResult {
     }
   }
 
-  // Dart/Flutter pass (beta) — merges into the same graph when .dart files exist.
+  // Dart/Flutter pass (beta) — fast structural scan, always run in full.
   const dart = extractDart(root);
   if (dart) {
     Object.assign(files, dart.files);
     for (const n of dart.nodes) addNode(n);
     for (const e of dart.edges) addEdge(e);
     warnings.push(...dart.warnings);
+  }
+
+  // Repair pass: kept edges may reference synthesized route/api nodes that
+  // carried no owning file — recreate them deterministically from their ids.
+  for (const e of edges) {
+    for (const id of [e.from, e.to]) {
+      if (nodes.has(id)) continue;
+      if (id.startsWith('route:')) {
+        addNode({ id, type: 'route', name: id.slice('route:'.length) });
+      } else if (id.startsWith('api:')) {
+        addNode({ id, type: 'api', name: id.slice('api:'.length) });
+      }
+    }
   }
 
   const commit = gitHead(root);
@@ -284,8 +358,9 @@ export function indexProject(rootDir: string): IndexResult {
     indexedAt: new Date().toISOString(),
     ...(commit ? { commit } : {}),
     files,
-    nodes: [...nodes.values()],
-    edges,
+    nodes: sortNodes([...nodes.values()]),
+    edges: sortEdges(edges),
+    symbols: symbolsOut,
   };
   const count = (t: string) => graph.nodes.filter((n) => n.type === t).length;
   const stats: IndexStats = {
@@ -297,21 +372,99 @@ export function indexProject(rootDir: string): IndexResult {
     contexts: count('context'),
     edges: edges.length,
     durationMs: Date.now() - started,
+    mode,
+    reparsed: parseSet.size,
+    reused: keep.size,
   };
   return { graph, stats, warnings };
 }
 
-function gitHead(root: string): string | undefined {
+// Deterministic ordering so incremental and full rebuilds produce identical output.
+function sortNodes(list: GraphNode[]): GraphNode[] {
+  return list.sort((a, b) => a.id.localeCompare(b.id));
+}
+function sortEdges(list: GraphEdge[]): GraphEdge[] {
+  return list.sort(
+    (a, b) =>
+      a.from.localeCompare(b.from) || a.kind.localeCompare(b.kind) || a.to.localeCompare(b.to),
+  );
+}
+
+/** The file whose re-parse would regenerate this node (undefined = synthesized). */
+function nodeOwnerFile(n: GraphNode): string | undefined {
+  return n.type === 'file' ? n.id : n.file;
+}
+
+/** The file whose re-parse would regenerate this edge. */
+function edgeOwnerFile(e: GraphEdge, byId: Map<string, GraphNode>): string | undefined {
+  const from = e.from;
+  if (from.includes('#')) return from.split('#')[0];
+  if (from.startsWith('route:')) return byId.get(from)?.file;
+  if (from.startsWith('api:')) return undefined;
+  return from; // plain file id
+}
+
+function safeLoadPrevious(root: string): ProjectGraph | null {
   try {
-    return execSync('git rev-parse HEAD', {
-      cwd: root,
-      stdio: ['ignore', 'pipe', 'ignore'],
-    })
-      .toString()
-      .trim();
+    const prev = loadGraph(root);
+    return prev && prev.root === root ? prev : null;
   } catch {
-    return undefined;
+    return null;
   }
+}
+
+function freezeSymbols(s: FileSymbols): StoredFileSymbols {
+  return {
+    components: Object.fromEntries(s.components),
+    hooks: Object.fromEntries(s.hooks),
+    contexts: Object.fromEntries(s.contexts),
+    loc: Object.fromEntries(s.loc),
+    ...(s.defaultId ? { defaultId: s.defaultId } : {}),
+  };
+}
+
+function thawSymbols(s: StoredFileSymbols): FileSymbols {
+  return {
+    components: new Map(Object.entries(s.components)),
+    hooks: new Map(Object.entries(s.hooks)),
+    contexts: new Map(Object.entries(s.contexts)),
+    loc: new Map(Object.entries(s.loc)),
+    defaultId: s.defaultId,
+  };
+}
+
+/** Walk the project for TS/JS source files, hashing as we go (parse-free). */
+function discoverTsFiles(root: string): DiscoveredFile[] {
+  const out: DiscoveredFile[] = [];
+  const walk = (dir: string) => {
+    let entries: string[];
+    try {
+      entries = readdirSync(dir);
+    } catch {
+      return;
+    }
+    for (const entry of entries) {
+      if (entry.startsWith('.') || SKIP_DIRS.has(entry)) continue;
+      const abs = path.join(dir, entry);
+      let st;
+      try {
+        st = statSync(abs);
+      } catch {
+        continue;
+      }
+      if (st.isDirectory()) {
+        walk(abs);
+        continue;
+      }
+      const ext = path.extname(entry);
+      if (!TS_EXTENSIONS.has(ext)) continue;
+      if (entry.endsWith('.d.ts') || /\.(test|spec)\./.test(entry)) continue;
+      const rel = path.relative(root, abs).split(path.sep).join('/');
+      out.push({ rel, abs, hash: sha1(readFileSync(abs, 'utf8')) });
+    }
+  };
+  walk(root);
+  return out.sort((a, b) => a.rel.localeCompare(b.rel));
 }
 
 function sha1(text: string): string {
@@ -372,25 +525,6 @@ function collectSymbols(sf: SourceFile, relPath: string): FileSymbols {
   return { components, hooks, contexts, loc, defaultId };
 }
 
-/** API route handlers: app router route.ts files and pages/api files → endpoint path. */
-export function apiRouteForFile(relPath: string): string | undefined {
-  const appMatch = relPath.match(/(?:^|\/)app\/(.*?)route\.(?:ts|js|tsx|jsx)$/);
-  if (appMatch) {
-    const segments = appMatch[1]
-      .split('/')
-      .filter(Boolean)
-      .filter((s) => !s.startsWith('(') && !s.startsWith('@'))
-      .map(segmentToRoute);
-    return '/' + segments.join('/').replace(/\/+$/, '');
-  }
-  const pagesMatch = relPath.match(/(?:^|\/)pages\/(api\/.*)\.(?:ts|js)$/);
-  if (pagesMatch) {
-    const withoutIndex = pagesMatch[1].replace(/(^|\/)index$/, '');
-    return '/' + withoutIndex.split('/').filter(Boolean).map(segmentToRoute).join('/');
-  }
-  return undefined;
-}
-
 function defaultFunctionName(relPath: string, isDefault: boolean): string {
   if (!isDefault) return '';
   const base = path.basename(relPath).replace(/\.[^.]+$/, '');
@@ -411,17 +545,16 @@ interface ImportMap {
   fileTargets: string[];
 }
 
-function buildImportMap(
-  sf: SourceFile,
-  root: string,
-  rel: (sf: SourceFile) => string,
-): ImportMap {
+function buildImportMap(sf: SourceFile, root: string): ImportMap {
   const locals = new Map<string, { fromFile: string; name: string }>();
   const fileTargets: string[] = [];
   for (const imp of sf.getImportDeclarations()) {
     const target = imp.getModuleSpecifierSourceFile();
     if (!target || target.getFilePath().includes('/node_modules/')) continue;
-    const fromFile = rel(target);
+    const fromFile = path
+      .relative(root, target.getFilePath())
+      .split(path.sep)
+      .join('/');
     fileTargets.push(fromFile);
     const def = imp.getDefaultImport();
     if (def) locals.set(def.getText(), { fromFile, name: 'default' });
@@ -451,6 +584,25 @@ export function routeForFile(relPath: string): string | undefined {
     const p = pagesMatch[1];
     if (p.startsWith('api/') || p.startsWith('_')) return undefined;
     const withoutIndex = p.replace(/(^|\/)index$/, '');
+    return '/' + withoutIndex.split('/').filter(Boolean).map(segmentToRoute).join('/');
+  }
+  return undefined;
+}
+
+/** API route handlers: app router route.ts files and pages/api files → endpoint path. */
+export function apiRouteForFile(relPath: string): string | undefined {
+  const appMatch = relPath.match(/(?:^|\/)app\/(.*?)route\.(?:ts|js|tsx|jsx)$/);
+  if (appMatch) {
+    const segments = appMatch[1]
+      .split('/')
+      .filter(Boolean)
+      .filter((s) => !s.startsWith('(') && !s.startsWith('@'))
+      .map(segmentToRoute);
+    return '/' + segments.join('/').replace(/\/+$/, '');
+  }
+  const pagesMatch = relPath.match(/(?:^|\/)pages\/(api\/.*)\.(?:ts|js)$/);
+  if (pagesMatch) {
+    const withoutIndex = pagesMatch[1].replace(/(^|\/)index$/, '');
     return '/' + withoutIndex.split('/').filter(Boolean).map(segmentToRoute).join('/');
   }
   return undefined;
@@ -559,6 +711,19 @@ function toPathname(raw: string): string | undefined {
   if (raw.startsWith('/')) return raw.split(/[?#]/)[0];
   try {
     return new URL(raw).pathname;
+  } catch {
+    return undefined;
+  }
+}
+
+function gitHead(root: string): string | undefined {
+  try {
+    return execSync('git rev-parse HEAD', {
+      cwd: root,
+      stdio: ['ignore', 'pipe', 'ignore'],
+    })
+      .toString()
+      .trim();
   } catch {
     return undefined;
   }

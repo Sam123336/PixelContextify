@@ -29,9 +29,20 @@ The directory is derived data: it self-gitignores and can always be rebuilt from
     "src/App.tsx": { "hash": "<sha1 of file content>" }
   },
   "nodes": [ /* GraphNode */ ],
-  "edges": [ /* GraphEdge */ ]
+  "edges": [ /* GraphEdge */ ],
+  "symbols": {                     // optional: per-file symbol tables (TS files only) —
+    "src/App.tsx": {               // the cache that powers incremental re-indexing.
+      "components": { "App": "src/App.tsx#App" },  // consumers may ignore it.
+      "hooks": {}, "contexts": {}, "loc": { "src/App.tsx#App": 12 },
+      "defaultId": "src/App.tsx#App"
+    }
+  }
 }
 ```
+
+Nodes and edges are sorted (by id, then by from/kind/to), so identical projects
+produce identical files regardless of indexing mode — incremental updates are
+verified byte-identical to full rebuilds.
 
 ## Nodes
 

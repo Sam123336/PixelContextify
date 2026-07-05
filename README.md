@@ -81,6 +81,9 @@ Ask Claude Code things like:
 | `graph_diff`      | Temporal graph: compare against an earlier snapshot — added/removed routes, components, APIs, and coupling changes |
 | `match_screenshot`| Semantic screenshot ↔ code matching: "Orange Checkout Button" → the component that implements it and the routes it appears on; feed it a whole `analyze_screenshot` output to map every detected element at once |
 | `graph_timeline`  | Architecture timeline: chronological evolution across all snapshots — what was added/removed at each step, tagged with dates and git commits |
+| `get_feature`     | Feature Graph: reason in features, not files — "explain Authentication" lists that feature's routes, components, state, APIs, and entry points. Features come from a committable `contextify.features.json` (name → route/glob/symbol patterns) or are auto-derived from route groups, with cross-feature shared nodes flagged |
+
+**Context memory (incremental indexing):** re-indexing only re-parses changed files plus the files that import them — everything else is reused from the cached per-file symbol tables, compiler-style. A no-op re-index of an indexed project takes milliseconds; results are verified byte-identical to a full rebuild.
 
 **Reverse queries** work through `get_impact`: ask it about an endpoint (`get_impact . "GET /products"`) and it returns every screen where that API appears visually, via the components that call it.
 
