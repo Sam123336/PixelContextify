@@ -33,6 +33,27 @@ For each screenshot, Claude receives compact markdown instead of the raw image:
 - **Design style** — colors, typography, elevation
 - **Problems & suggestions** — contrast, density, hierarchy issues
 
+## Code knowledge graph (v0.3)
+
+Contextify can also build a **local knowledge graph** of a TypeScript/React/Next.js codebase — no LLM in the pipeline and no code ever leaves your machine. It parses the AST with the TypeScript compiler (via ts-morph), extracts typed nodes (files, components, routes, hooks, contexts, API endpoints) and typed edges (imports, renders, navigates, uses, calls), and stores the graph in `<project>/.pixelcontextify/graph.json` (auto-gitignored).
+
+Ask Claude Code things like:
+
+> index this project with contextify
+> show me the project map
+> what breaks if I change ProductCard?
+> what changed architecturally since the last index?
+
+| Tool              | What it does                                                                 |
+| ----------------- | ---------------------------------------------------------------------------- |
+| `index_project`   | Parse the project and build/refresh the graph (runs 100% locally)            |
+| `get_project_map` | Routes with component trees + API calls, plus a Mermaid navigation diagram   |
+| `get_impact`      | Everything that transitively depends on a component/file/route — regression risk before you change it |
+| `search_graph`    | Find components/routes/APIs by name and see their relationships — e.g. map a screenshot's "Checkout" button to the component that renders it |
+| `graph_diff`      | Temporal graph: compare against an earlier snapshot — added/removed routes, components, APIs, and coupling changes |
+
+Each re-index that detects changes archives the previous graph to `.pixelcontextify/history/` (last 20 kept), which is what `graph_diff` compares against. Route detection currently covers Next.js app-router and pages-router projects; component/hook/API extraction works for any React TypeScript/JavaScript codebase.
+
 ## Configuration
 
 The plugin works with zero configuration. To customize, set these environment variables where Claude Code runs (all optional):

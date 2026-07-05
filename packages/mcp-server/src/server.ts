@@ -2,6 +2,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { MCP_TOOL_NAMES, type ScreenshotRecord } from '@contextify/shared';
 import { z } from 'zod/v3';
 import { BackendClient, BackendError } from './backend-client';
+import { registerGraphTools } from './graph/tools';
 
 export interface BuildServerOptions {
   backend: BackendClient;
@@ -13,7 +14,7 @@ export function buildServer(opts: BuildServerOptions): McpServer {
   const { backend } = opts;
   const server = new McpServer({
     name: 'contextify-mcp',
-    version: '0.1.0',
+    version: '0.3.0',
   });
 
   server.tool(
@@ -60,6 +61,8 @@ export function buildServer(opts: BuildServerOptions): McpServer {
       }
     },
   );
+
+  registerGraphTools(server);
 
   return server;
 }
