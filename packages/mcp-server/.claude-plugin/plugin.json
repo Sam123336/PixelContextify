@@ -1,15 +1,15 @@
 {
   "name": "contextify",
   "displayName": "Contextify",
-  "version": "0.2.2",
-  "description": "Turn UI screenshots into structured developer markdown — ~95% fewer vision tokens for Claude Code. Bring your own LLM key (Gemini / OpenAI / Anthropic / any OpenAI-compatible endpoint).",
+  "version": "0.3.0",
+  "description": "Turn UI screenshots into structured developer markdown (~95% fewer vision tokens) + a local code knowledge graph for React/Next.js: routes, components, hooks, API calls, impact analysis, and architecture diffs — no code leaves your machine.",
   "author": {
     "name": "PixelContextify"
   },
   "homepage": "https://github.com/Sam123336/PixelContextify",
   "repository": "https://github.com/Sam123336/PixelContextify",
   "license": "MIT",
-  "keywords": ["mcp", "screenshot", "vision", "ui", "context-compression"],
+  "keywords": ["mcp", "screenshot", "vision", "ui", "context-compression", "knowledge-graph", "impact-analysis", "nextjs"],
   "mcpServers": {
     "contextify": {
       "command": "node",
