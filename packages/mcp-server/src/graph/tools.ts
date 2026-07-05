@@ -51,9 +51,15 @@ export function registerGraphTools(server: McpServer): void {
       description,
       schema,
       async (args: { projectDir?: string }) => {
+        const started = Date.now();
         const res = await handler(args);
         if (!res.isError && typeof args?.projectDir === 'string') {
-          recordUsage(args.projectDir, name, res.content?.[0]?.text?.length ?? 0);
+          recordUsage(
+            args.projectDir,
+            name,
+            res.content?.[0]?.text?.length ?? 0,
+            Date.now() - started,
+          );
         }
         return res;
       },
@@ -540,12 +546,13 @@ export function registerGraphTools(server: McpServer): void {
   // Registered directly (not via the wrapper) so the report never counts itself.
   server.tool(
     'token_savings',
-    'Token-savings report with pie-chart diagrams: measured graph-answer sizes vs ' +
-      'estimated exploration avoided (per-tool breakdown) plus real measured ' +
-      'screenshot-compression savings. ONLY call this when the user EXPLICITLY asks ' +
-      'about token savings/usage/cost (e.g. "contextify token analyze", "how many ' +
-      'tokens has contextify saved"). Never call it proactively, never append it to ' +
-      'other answers, and do not mention it unless asked. Render the returned Mermaid.',
+    'Exploration-avoided report with pie-chart diagrams: estimated files/tokens of ' +
+      'repository exploration replaced by graph queries (clearly labeled estimates), ' +
+      'measured answer sizes and latency, plus real measured screenshot-compression ' +
+      'savings. ONLY call this when the user EXPLICITLY asks about savings/usage/cost ' +
+      '(e.g. "contextify token analyze", "how much has contextify saved"). Never call ' +
+      'it proactively, never append it to other answers, and do not mention it unless ' +
+      'asked. Render the returned Mermaid.',
     { projectDir: projectDirParam },
     async ({ projectDir }) => {
       try {

@@ -31,7 +31,7 @@ Contextify fixes this with two engines feeding one **Software Knowledge Graph**:
 |---|---|---|
 | **Input** | UI screenshots (PNG/JPEG/WebP) | Your React/Next.js, NestJS, or Flutter code |
 | **Output** | Structured markdown — screen type, components, layout, design issues | A live graph — components, routes, state, API calls, controllers, services, entities — and how they connect, **frontend to backend**: a `fetch('/orders')` links straight to the controller that handles it |
-| **Saves** | ~95% of vision tokens per screenshot | Tens of thousands of exploration tokens per question |
+| **Saves** | ~95% of vision tokens per screenshot (measured) | Repeated code exploration — a ~25–40-file search becomes one graph query (est. ~90% fewer exploration tokens) |
 | **Runs** | Free hosted backend (or your own key/server) | **100% on your machine — code never leaves it** |
 
 ```
@@ -285,7 +285,7 @@ Works with any endpoint that speaks the OpenAI Chat Completions API and has a vi
 | `search_graph` | Find any component/route/API by name with its full relationship neighborhood |
 | `graph_diff` | What changed architecturally between two snapshots |
 | `graph_timeline` | The whole architecture's evolution, dated and git-commit-tagged |
-| `token_savings` | 📊 How much Contextify has saved you, with pie-chart diagrams: measured graph-answer sizes vs estimated exploration avoided (per-tool breakdown), plus real measured screenshot-compression savings. Also available as `contextify-mcp savings .` in the CLI |
+| `token_savings` | 📊 Exploration-avoided report: how many files the AI *didn't* have to read (estimated, per-question baseline), measured answer sizes + latency, estimated reduction %, and real measured screenshot-compression savings — every number labeled measured or estimated. Also available as `contextify-mcp savings .` in the CLI |
 
 ### 🤖 Bundled skills (zero setup)
 

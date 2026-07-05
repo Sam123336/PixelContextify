@@ -79,7 +79,7 @@ Usage: contextify-mcp <command> [args]        (no command → MCP stdio server)
   search  <dir> <query>    Find nodes by name and show their relationships
   diff    <dir> [snapshot] Compare current graph against a history snapshot
   feature <dir> [name]     List features, or show one feature's full dossier
-  savings <dir>            Token-savings report (graph queries + screenshots)
+  savings <dir>            Exploration-avoided report (files, tokens, latency)
   help                     Show this help
 
 The graph is stored in <dir>/.pixelcontextify/ — see docs/GRAPH-SPEC.md for the format.
