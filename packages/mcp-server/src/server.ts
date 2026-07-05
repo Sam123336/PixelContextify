@@ -14,7 +14,7 @@ export function buildServer(opts: BuildServerOptions): McpServer {
   const { backend } = opts;
   const server = new McpServer({
     name: 'contextify-mcp',
-    version: '0.3.0',
+    version: '0.4.0',
   });
 
   server.tool(
