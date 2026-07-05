@@ -40,6 +40,13 @@ function llmFromEnv(): LlmOverride | null {
 }
 
 async function main(): Promise<void> {
+  // CLI mode: `contextify-mcp index|map|analyze|impact|search|diff <dir>` —
+  // lets any tool or AI assistant use the knowledge graph without MCP.
+  const { runCli } = await import('./cli');
+  if (runCli(process.argv.slice(2))) {
+    return;
+  }
+
   const baseUrl =
     process.env.CONTEXTIFY_BACKEND_URL?.trim() ||
     process.env.BACKEND_URL?.trim() ||
