@@ -84,6 +84,23 @@ Ask Claude Code things like:
 
 **Reverse queries** work through `get_impact`: ask it about an endpoint (`get_impact . "GET /products"`) and it returns every screen where that API appears visually, via the components that call it.
 
+### The graph is an open IR — not locked to Claude
+
+The knowledge graph is a documented intermediate representation ([docs/GRAPH-SPEC.md](docs/GRAPH-SPEC.md)) with three consumption paths:
+
+1. **Claude Code plugin** — the MCP tools above.
+2. **Any MCP client** (Cursor, ChatGPT/Gemini MCP hosts, custom agents) — run `contextify-mcp` over stdio.
+3. **Anything else** — the same binary is a CLI, and `graph.json` is plain JSON:
+
+```bash
+contextify-mcp index .              # build graph + graph.html
+contextify-mcp map .                # routes, component trees, Mermaid nav flow
+contextify-mcp analyze .            # architecture score + debt report
+contextify-mcp impact . ProductCard # blast radius + regression risk
+contextify-mcp search . checkout    # find nodes + relationships
+contextify-mcp diff .               # what changed since the last snapshot
+```
+
 ### Bundled skills (the AI layer)
 
 The plugin also ships two skills that teach Claude how to chain the graph tools — no extra setup, they activate on matching requests:
