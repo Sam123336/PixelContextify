@@ -21,6 +21,10 @@ export interface GraphNode {
   file?: string;
   /** Component only: true when it is the file's default export. */
   isDefaultExport?: boolean;
+  /** Component/hook only: size of the declaration in lines. */
+  loc?: number;
+  /** API only: true for endpoints declared in this codebase (route handlers), false/absent for called endpoints. */
+  declared?: boolean;
 }
 
 export interface GraphEdge {

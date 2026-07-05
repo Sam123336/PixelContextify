@@ -2,7 +2,13 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod/v3';
 import { saveGraphHtml } from './html';
 import { indexProject } from './indexer';
-import { GraphIndex, renderGraphDiff, renderProjectMap, searchNodes } from './queries';
+import {
+  analyzeProject,
+  GraphIndex,
+  renderGraphDiff,
+  renderProjectMap,
+  searchNodes,
+} from './queries';
 import {
   graphDir,
   listSnapshots,
@@ -22,7 +28,8 @@ export function registerGraphTools(server: McpServer): void {
   server.tool(
     'index_project',
     'Build (or rebuild) the local code knowledge graph for a TypeScript/React/Next.js ' +
-      'project. Parses components, routes, navigation, and API calls with ts-morph and ' +
+      'or Flutter/Dart project (Dart support is beta). Parses components/widgets, ' +
+      'routes, navigation, state, and API calls statically and ' +
       'stores the graph in <project>/.pixelcontextify/graph.json, along with an ' +
       'interactive HTML visualization at .pixelcontextify/graph.html the user can ' +
       'open in a browser. Everything runs locally — no code leaves the machine. Run ' +
@@ -100,11 +107,38 @@ export function registerGraphTools(server: McpServer): void {
           const deps = index.dependents(node.id);
           const byType = (t: string) => deps.filter((d) => d.type === t);
           const routes = byType('route');
+
+          // APIs and contexts inside the blast radius (used by anything affected).
+          const affectedIds = new Set([node.id, ...deps.map((d) => d.id)]);
+          const blastApis = new Set<string>();
+          const blastContexts = new Set<string>();
+          for (const id of affectedIds) {
+            for (const e of index.outEdges(id, ['calls'])) {
+              blastApis.add(index.byId.get(e.to)?.name ?? e.to);
+            }
+            for (const e of index.outEdges(id, ['uses'])) {
+              const t = index.byId.get(e.to);
+              if (t?.type === 'context') blastContexts.add(t.name);
+            }
+          }
+
+          const risk =
+            routes.length >= 3 || deps.length >= 20
+              ? 'High'
+              : routes.length >= 1 || deps.length >= 6
+                ? 'Medium'
+                : 'Low';
+
           lines.push(
             `## ${node.type}: \`${node.id}\``,
             '',
-            `**${deps.length} dependents** — ` +
-              `${byType('component').length} components, ${byType('file').length} files, ${routes.length} routes`,
+            `**Affected:** ${byType('component').length} components · ` +
+              `${byType('file').length} files · ${routes.length} routes · ` +
+              `${byType('hook').length} hooks · ${blastContexts.size} contexts`,
+            blastApis.size > 0
+              ? `**APIs in blast radius:** ${[...blastApis].map((a) => `\`${a}\``).join(', ')}`
+              : '',
+            `**Regression risk:** ${risk}`,
             '',
           );
           if (routes.length > 0) {
@@ -156,6 +190,23 @@ export function registerGraphTools(server: McpServer): void {
           }
         }
         return text(lines.join('\n'));
+      } catch (err) {
+        return errorText(err);
+      }
+    },
+  );
+
+  server.tool(
+    'analyze_project',
+    'Smart analysis of an indexed project: architecture score (0-100) with a ' +
+      'breakdown of circular imports, possibly-dead components/hooks, API routes ' +
+      'never called from the UI, oversized components, and duplicate component ' +
+      'names. Pure static graph analysis — fast, deterministic, no LLM involved.',
+    { projectDir: projectDirParam },
+    async ({ projectDir }) => {
+      try {
+        const { index, staleNote } = loadIndex(projectDir);
+        return text(staleNote + analyzeProject(index).markdown);
       } catch (err) {
         return errorText(err);
       }
