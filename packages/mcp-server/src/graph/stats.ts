@@ -113,10 +113,80 @@ export function recordScreenshotSavings(imageTokens: number, markdownTokens: num
   });
 }
 
-export function renderSavingsReport(projectRoot: string): string {
+export interface ToolSavings {
+  tool: string;
+  calls: number;
+  /** measured answer tokens */
+  out: number;
+  /** estimated exploration tokens replaced */
+  base: number;
+}
+
+export interface SavingsSummary {
+  /** graph queries excluding index_project */
+  queries: number;
+  /** measured tokens spent on graph answers */
+  spent: number;
+  /** estimated exploration tokens avoided */
+  avoided: number;
+  /** estimated files the AI did not have to read */
+  filesAvoided: number;
+  /** estimated reduction percentage */
+  reduction: number;
+  /** measured median answer latency (only over timed entries) */
+  medianMs?: number;
+  /** per-tool aggregates, sorted by net avoided desc */
+  byTool: ToolSavings[];
+  /** screenshot compression (measured) or null when none recorded */
+  shots: { count: number; image: number; markdown: number } | null;
+  tokensPerFile: number;
+}
+
+/** Aggregate the ledger into the numbers both renderers (markdown + HTML) use. */
+export function computeSavings(projectRoot: string): SavingsSummary | null {
   const usage = readJson<UsageEntry>(statsFile(projectRoot));
-  const shots = readJson<ScreenshotEntry>(screenshotStatsFile());
-  if (usage.length === 0 && shots.length === 0) {
+  const shotEntries = readJson<ScreenshotEntry>(screenshotStatsFile());
+  if (usage.length === 0 && shotEntries.length === 0) return null;
+
+  const spent = usage.reduce((s, u) => s + u.out, 0);
+  const avoided = usage.reduce((s, u) => s + u.base, 0);
+  const timed = usage.filter((u) => typeof u.ms === 'number');
+  const medianMs = timed.length
+    ? [...timed].map((u) => u.ms!).sort((a, b) => a - b)[Math.floor(timed.length / 2)]
+    : undefined;
+
+  const byToolMap = new Map<string, ToolSavings>();
+  for (const u of usage) {
+    const agg = byToolMap.get(u.tool) ?? { tool: u.tool, calls: 0, out: 0, base: 0 };
+    agg.calls++;
+    agg.out += u.out;
+    agg.base += u.base;
+    byToolMap.set(u.tool, agg);
+  }
+
+  return {
+    queries: usage.filter((u) => u.tool !== 'index_project').length,
+    spent,
+    avoided,
+    filesAvoided: Math.round(avoided / TOKENS_PER_FILE),
+    reduction: avoided > 0 ? Math.round(((avoided - spent) / avoided) * 100) : 0,
+    ...(medianMs !== undefined ? { medianMs } : {}),
+    byTool: [...byToolMap.values()].sort((a, b) => b.base - b.out - (a.base - a.out)),
+    shots:
+      shotEntries.length > 0
+        ? {
+            count: shotEntries.length,
+            image: shotEntries.reduce((s, e) => s + e.image, 0),
+            markdown: shotEntries.reduce((s, e) => s + e.markdown, 0),
+          }
+        : null,
+    tokensPerFile: TOKENS_PER_FILE,
+  };
+}
+
+export function renderSavingsReport(projectRoot: string): string {
+  const s = computeSavings(projectRoot);
+  if (!s) {
     return (
       '# Exploration avoided\n\n_No usage recorded yet. The ledger fills ' +
       'automatically as graph tools and screenshot analyses run._'
@@ -126,21 +196,12 @@ export function renderSavingsReport(projectRoot: string): string {
   const lines: string[] = ['# Contextify — exploration avoided', ''];
 
   // ---- graph side -----------------------------------------------------------
-  const queries = usage.filter((u) => u.tool !== 'index_project');
-  if (usage.length > 0) {
-    const spent = usage.reduce((s, u) => s + u.out, 0);
-    const avoided = usage.reduce((s, u) => s + u.base, 0);
-    const filesAvoided = Math.round(avoided / TOKENS_PER_FILE);
-    const reduction = avoided > 0 ? Math.round(((avoided - spent) / avoided) * 100) : 0;
-    const timed = usage.filter((u) => typeof u.ms === 'number');
-    const medianMs = timed.length
-      ? [...timed].map((u) => u.ms!).sort((a, b) => a - b)[Math.floor(timed.length / 2)]
-      : undefined;
-
+  if (s.byTool.length > 0) {
+    const { queries, spent, avoided, filesAvoided, reduction, medianMs } = s;
     lines.push(
       '## Software Knowledge Graph (this project)',
       '',
-      `**${queries.length} architecture question(s)** answered from verified graph edges — ` +
+      `**${queries} architecture question(s)** answered from verified graph edges — ` +
         'no repository search.',
       '',
       '| Metric | Without graph | With graph |',
@@ -161,38 +222,27 @@ export function renderSavingsReport(projectRoot: string): string {
     );
 
     // Per-tool breakdown — measured answer cost next to the estimate it replaced.
-    const byTool = new Map<string, { calls: number; out: number; base: number }>();
-    for (const u of usage) {
-      const agg = byTool.get(u.tool) ?? { calls: 0, out: 0, base: 0 };
-      agg.calls++;
-      agg.out += u.out;
-      agg.base += u.base;
-      byTool.set(u.tool, agg);
-    }
     lines.push(
       '| Tool | Calls | Answer tokens (measured) | Est. files avoided | Est. exploration avoided | Est. reduction |',
       '|---|---|---|---|---|---|',
     );
-    for (const [tool, a] of [...byTool.entries()].sort(
-      (x, y) => y[1].base - y[1].out - (x[1].base - x[1].out),
-    )) {
+    for (const a of s.byTool) {
       const red = a.base > 0 ? `${Math.round(((a.base - a.out) / a.base) * 100)}%` : '—';
       lines.push(
-        `| \`${tool}\` | ${a.calls} | ${fmt(a.out)} | ~${fmt(Math.round(a.base / TOKENS_PER_FILE))} | ~${fmt(a.base)} | ${red} |`,
+        `| \`${a.tool}\` | ${a.calls} | ${fmt(a.out)} | ~${fmt(Math.round(a.base / TOKENS_PER_FILE))} | ~${fmt(a.base)} | ${red} |`,
       );
     }
     lines.push('');
   }
 
   // ---- screenshot side --------------------------------------------------------
-  if (shots.length > 0) {
-    const img = shots.reduce((s, e) => s + e.image, 0);
-    const md = shots.reduce((s, e) => s + e.markdown, 0);
+  if (s.shots) {
+    const { count, image: img, markdown: md } = s.shots;
     const saved = img - md;
     lines.push(
       '## Screenshot engine (all projects — measured by the backend)',
       '',
-      `**${shots.length} screenshot(s)** compressed to markdown.`,
+      `**${count} screenshot(s)** compressed to markdown.`,
       '',
       `| | Tokens |`,
       `|---|---|`,
