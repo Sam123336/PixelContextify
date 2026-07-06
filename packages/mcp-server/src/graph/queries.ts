@@ -39,7 +39,7 @@ export class GraphIndex {
     if (exact) return [exact];
     const t = target.toLowerCase();
     const typeRank: Record<string, number> = {
-      component: 0, route: 1, hook: 2, context: 3, api: 4, file: 5,
+      component: 0, route: 1, hook: 2, context: 3, api: 4, channel: 4, file: 5, native: 6,
     };
     const score = (n: GraphNode): number => {
       if (n.name.toLowerCase() === t || n.id.toLowerCase() === t) return 100;
@@ -317,13 +317,32 @@ export function analyzeProject(index: GraphIndex): AnalysisReport {
     (list) => list.length > 1 && new Set(list.map((n) => n.name)).size > 1,
   );
 
+  // 7. Native bridge integrity — platform channels the Dart side invokes with no
+  //    native handler (a MissingPluginException waiting to happen), and native
+  //    handlers no Dart code invokes (dead bridge). Channel-level & best-effort:
+  //    names built dynamically or handled in unscanned/plugin code aren't
+  //    resolved, so these are hints to verify, not proofs.
+  const channels = nodes.filter((n) => n.type === 'channel');
+  const danglingChannels = channels.filter(
+    (c) =>
+      index.inEdges(c.id, ['invokes']).length > 0 &&
+      index.inEdges(c.id, ['handles']).length === 0,
+  );
+  const orphanHandlers = channels.filter(
+    (c) =>
+      index.inEdges(c.id, ['handles']).length > 0 &&
+      index.inEdges(c.id, ['invokes']).length === 0,
+  );
+
   const penalty =
     Math.min(24, cycles.length * 8) +
     Math.min(16, (deadComponents.length + deadHooks.length) * 2) +
     Math.min(15, large.length * 3) +
     Math.min(10, unusedApis.length * 2) +
     Math.min(10, duplicates.length * 2) +
-    Math.min(10, structuralDups.length * 2);
+    Math.min(10, structuralDups.length * 2) +
+    Math.min(12, danglingChannels.length * 4) +
+    Math.min(6, orphanHandlers.length * 2);
   const score = Math.max(0, 100 - penalty);
   const grade =
     score >= 90 ? 'excellent' : score >= 75 ? 'good' : score >= 60 ? 'fair' : 'needs attention';
@@ -344,6 +363,15 @@ export function analyzeProject(index: GraphIndex): AnalysisReport {
     check(unusedApis.length, 'All declared API routes are used', `${unusedApis.length} API route(s) never called from the UI`),
     check(duplicates.length, 'No duplicate component names', `${duplicates.length} component name(s) defined in multiple files`),
     check(structuralDups.length, 'No structural duplicates', `${structuralDups.length} group(s) of structurally identical components`),
+    ...(channels.length > 0
+      ? [
+          check(
+            danglingChannels.length,
+            'Every invoked platform channel has a native handler',
+            `${danglingChannels.length} platform channel(s) invoked from Dart with no native handler`,
+          ),
+        ]
+      : []),
     '',
   ];
 
@@ -396,6 +424,31 @@ export function analyzeProject(index: GraphIndex): AnalysisReport {
         'Read both before merging — identical shape does not guarantee identical purpose._',
       '',
     );
+  }
+
+  if (danglingChannels.length > 0) {
+    lines.push('## Platform channels invoked from Dart with no native handler');
+    for (const c of danglingChannels.slice(0, 15)) {
+      const callers = index.inEdges(c.id, ['invokes']).map((e) => e.from);
+      const shown = callers.slice(0, 3).map((f) => `\`${f}\``).join(', ');
+      const more = callers.length > 3 ? ` +${callers.length - 3} more` : '';
+      lines.push(`- \`${c.name}\` — invoked from ${shown}${more}; no Android/iOS handler found`);
+    }
+    lines.push(
+      '',
+      '_Runtime MissingPluginException risk. Channel-level static scan — a name built ' +
+        'dynamically, or handled in a plugin/unscanned file, will show here as a false ' +
+        'positive. Verify against the native source before acting._',
+      '',
+    );
+  }
+  if (orphanHandlers.length > 0) {
+    lines.push('## Native channel handlers with no Dart caller');
+    for (const c of orphanHandlers.slice(0, 15)) {
+      const handlers = index.inEdges(c.id, ['handles']).map((e) => e.from);
+      lines.push(`- \`${c.name}\` — handled in ${handlers.map((f) => `\`${f}\``).join(', ')}; no Dart invokeMethod found`);
+    }
+    lines.push('', '_Possibly dead native bridge code, or invoked from Dart via a dynamic channel name._', '');
   }
 
   // Component heatmap: most-depended-on components = highest change risk.
@@ -822,7 +875,7 @@ export function matchUiElement(index: GraphIndex, description: string): UiMatch[
     }));
 }
 
-/** Pull candidate UI-element names out of a Contextify screenshot markdown. */
+/** Pull candidate UI-element names out of a Contextifly screenshot markdown. */
 export function extractUiCandidates(markdown: string): string[] {
   const seen = new Set<string>();
   const out: string[] = [];

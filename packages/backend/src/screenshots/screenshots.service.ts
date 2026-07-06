@@ -15,7 +15,7 @@ import type {
   LlmOverride,
   ScreenshotJobPayload,
   ScreenshotRecord,
-} from '@contextify/shared';
+} from '@contextifly/shared';
 import { Screenshot } from '../database/models/screenshot.model';
 import { SCREENSHOT_JOB_NAME } from '../queue/queue.constants';
 import { SCREENSHOT_QUEUE } from '../queue/queue.tokens';

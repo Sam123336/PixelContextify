@@ -7,14 +7,14 @@ name: Deploy backend to Azure (manual)
 # One-time setup (repo Settings):
 #   Secrets:
 #     AZURE_CREDENTIALS  → output of:
-#        az ad sp create-for-rbac --name contextify-deployer \
+#        az ad sp create-for-rbac --name contextifly-deployer \
 #          --role contributor \
-#          --scopes /subscriptions/<sub-id>/resourceGroups/contextify-rg \
+#          --scopes /subscriptions/<sub-id>/resourceGroups/contextifly-rg \
 #          --sdk-auth
 #   Variables (Settings → Secrets and variables → Actions → Variables):
-#     AZURE_RESOURCE_GROUP   e.g. contextify-rg
-#     ACR_NAME               e.g. contextifyacr1234
-#     CONTAINERAPP_NAME      e.g. contextify-backend
+#     AZURE_RESOURCE_GROUP   e.g. contextifly-rg
+#     ACR_NAME               e.g. contextiflyacr1234
+#     CONTAINERAPP_NAME      e.g. contextifly-backend
 #
 # Assumes the infra already exists (run ./deploy/azure.sh once first). This
 # pipeline only builds a new image from the chosen branch and rolls the app
@@ -82,8 +82,8 @@ jobs:
           set -euo pipefail
           az acr build \
             -r "${{ steps.vars.outputs.acr }}" \
-            -t "contextify-backend:${{ steps.vars.outputs.tag }}" \
-            -t "contextify-backend:latest" \
+            -t "contextifly-backend:${{ steps.vars.outputs.tag }}" \
+            -t "contextifly-backend:latest" \
             .
 
       - name: Roll Container App to the new image
@@ -93,7 +93,7 @@ jobs:
           az containerapp update \
             -g "${{ steps.vars.outputs.rg }}" \
             -n "${{ steps.vars.outputs.app }}" \
-            --image "$ACR_SERVER/contextify-backend:${{ steps.vars.outputs.tag }}"
+            --image "$ACR_SERVER/contextifly-backend:${{ steps.vars.outputs.tag }}"
 
       - name: Report URL
         run: |

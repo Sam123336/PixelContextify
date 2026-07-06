@@ -35,7 +35,7 @@ const BANNER_LINES = [
 ];
 const TAGLINE = ' see it · understand it · build better';
 
-/** Blue → purple gradient (matches the PixelContextify logo). */
+/** Blue → purple gradient (matches the Contextifly logo). */
 function gradient(line: string, row: number, rows: number): string {
   const from = [59, 130, 246]; // #3b82f6
   const to = [168, 85, 247]; // #a855f7
@@ -66,12 +66,12 @@ function banner(): string {
 /** One-line brand mark for command output (only when a human is watching). */
 function brandLine(): string {
   if (!useColor()) return '';
-  return gradient('🕸 contextify', 0, 1) + ' \x1b[2m· software knowledge graph\x1b[0m\n';
+  return gradient('🕸 contextifly', 0, 1) + ' \x1b[2m· software knowledge graph\x1b[0m\n';
 }
 
-const USAGE = `Contextify — software knowledge graph CLI
+const USAGE = `Contextifly — software knowledge graph CLI
 
-Usage: contextify-mcp <command> [args]        (no command → MCP stdio server)
+Usage: contextifly-mcp <command> [args]        (no command → MCP stdio server)
 
   index   <dir>            Build/refresh the graph (+ graph.html) for a project
   map     <dir>            Route/component/API map with Mermaid navigation flow
@@ -83,7 +83,7 @@ Usage: contextify-mcp <command> [args]        (no command → MCP stdio server)
   savings <dir>            Exploration-avoided report (files, tokens, latency)
   help                     Show this help
 
-The graph is stored in <dir>/.pixelcontextify/ — see docs/GRAPH-SPEC.md for the format.
+The graph is stored in <dir>/.pixelcontextifly/ — see docs/GRAPH-SPEC.md for the format.
 `;
 
 const COMMANDS = new Set(['index', 'map', 'analyze', 'impact', 'search', 'diff', 'feature', 'savings', 'help', '--help', '-h']);
@@ -146,13 +146,13 @@ function dispatch(cmd: string, rest: string[]): void {
       return;
     case 'impact': {
       const target = rest[1];
-      if (!target) throw new Error('Usage: contextify-mcp impact <dir> <target>');
+      if (!target) throw new Error('Usage: contextifly-mcp impact <dir> <target>');
       console.log(renderImpact(index, target));
       return;
     }
     case 'search': {
       const query = rest[1];
-      if (!query) throw new Error('Usage: contextify-mcp search <dir> <query>');
+      if (!query) throw new Error('Usage: contextifly-mcp search <dir> <query>');
       const hits = searchNodes(index, query);
       if (hits.length === 0) {
         console.log(`No nodes match "${query}".`);
@@ -206,7 +206,7 @@ function dispatch(cmd: string, rest: string[]): void {
 function loadIndexOrThrow(root: string): GraphIndex {
   const graph = loadGraph(root);
   if (!graph) {
-    throw new Error(`No graph at ${graphDir(root)} — run: contextify-mcp index ${root}`);
+    throw new Error(`No graph at ${graphDir(root)} — run: contextifly-mcp index ${root}`);
   }
   const stale = staleFileCount(graph);
   if (stale > 0) {
@@ -218,7 +218,7 @@ function loadIndexOrThrow(root: string): GraphIndex {
 function renderImpact(index: GraphIndex, target: string): string {
   const resolved = index.resolve(target);
   if (resolved.length === 0) {
-    return `No graph node matches "${target}" — try: contextify-mcp search <dir> ${target}`;
+    return `No graph node matches "${target}" — try: contextifly-mcp search <dir> ${target}`;
   }
   const lines: string[] = [];
   for (const node of resolved.slice(0, 3)) {

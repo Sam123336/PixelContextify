@@ -1,3 +1,4 @@
+import * as path from 'node:path';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod/v3';
 import {
@@ -6,6 +7,14 @@ import {
   renderFeature,
   renderFeatureList,
 } from './features';
+import {
+  ensureGitState,
+  type GitState,
+  gitDrift,
+  loadGitState,
+  readGitState,
+  saveGitState,
+} from './git';
 import { saveGraphHtml } from './html';
 import { indexProject } from './indexer';
 import {
@@ -71,17 +80,34 @@ export function registerGraphTools(server: McpServer): void {
     'index_project',
     'Build (or rebuild) the local Software Knowledge Graph for a TypeScript/React/Next.js ' +
       'or Flutter/Dart project (Dart support is beta). Parses components/widgets, ' +
-      'routes, navigation, state, and API calls statically and ' +
-      'stores the graph in <project>/.pixelcontextify/graph.json, along with an ' +
-      'interactive HTML visualization at .pixelcontextify/graph.html the user can ' +
+      'routes, navigation, state, and API calls statically — and for Flutter also the ' +
+      'native platform-channel bridge (Dart MethodChannel/EventChannel ↔ Android/iOS ' +
+      'handlers, linked by channel name) — then ' +
+      'stores the graph in <project>/.pixelcontextifly/graph.json, along with an ' +
+      'interactive HTML visualization at .pixelcontextifly/graph.html the user can ' +
       'open in a browser. Everything runs locally — no code leaves the machine. Run ' +
-      'this once before using the other graph tools, and re-run after code changes.',
+      'this once before using the other graph tools; re-running is a cheap no-op that ' +
+      'reuses the stored graph when nothing changed (tracked via a git-state sidecar) ' +
+      'and only rebuilds when files change, you commit, or you switch branches.',
     { projectDir: projectDirParam },
     async ({ projectDir }) => {
       try {
+        // Reuse the stored graph untouched when git says nothing moved (same
+        // branch + commit + main head) and no file changed on disk — no
+        // rebuild, no file rewrite. Re-running becomes a fast no-op.
+        const existing = loadGraph(projectDir);
+        const current = readGitState(projectDir);
+        if (existing) {
+          const saved = loadGitState(projectDir);
+          if (graphIsFresh(existing, saved, current)) {
+            ensureGitState(projectDir, saved, current); // upgrade pre-git graphs
+            return text(renderReuse(projectDir, existing, current));
+          }
+        }
         const { graph, stats, warnings } = indexProject(projectDir);
         const file = saveGraph(graph);
         const html = saveGraphHtml(graph);
+        if (current) saveGitState(projectDir, current);
         const modeNote =
           stats.mode === 'incremental'
             ? ` (incremental: re-parsed ${stats.reparsed}, reused ${stats.reused})`
@@ -102,6 +128,12 @@ export function registerGraphTools(server: McpServer): void {
                 `- services: ${stats.services}`,
                 `- modules: ${stats.modules}`,
                 `- entities: ${stats.entities}`,
+              ]
+            : []),
+          ...(stats.channels + stats.natives > 0
+            ? [
+                `- native channels: ${stats.channels}`,
+                `- native handlers: ${stats.natives}`,
               ]
             : []),
           `- edges: ${stats.edges}`,
@@ -166,6 +198,7 @@ export function registerGraphTools(server: McpServer): void {
           const affectedIds = new Set([node.id, ...deps.map((d) => d.id)]);
           const blastApis = new Set<string>();
           const blastContexts = new Set<string>();
+          const blastChannels = new Set<string>();
           for (const id of affectedIds) {
             for (const e of index.outEdges(id, ['calls'])) {
               blastApis.add(index.byId.get(e.to)?.name ?? e.to);
@@ -173,6 +206,9 @@ export function registerGraphTools(server: McpServer): void {
             for (const e of index.outEdges(id, ['uses'])) {
               const t = index.byId.get(e.to);
               if (t?.type === 'context') blastContexts.add(t.name);
+            }
+            for (const e of index.outEdges(id, ['invokes'])) {
+              blastChannels.add(index.byId.get(e.to)?.name ?? e.to);
             }
           }
 
@@ -191,6 +227,9 @@ export function registerGraphTools(server: McpServer): void {
               `${byType('hook').length} hooks · ${blastContexts.size} contexts`,
             blastApis.size > 0
               ? `**APIs in blast radius:** ${[...blastApis].map((a) => `\`${a}\``).join(', ')}`
+              : '',
+            blastChannels.size > 0
+              ? `**Native channels in blast radius:** ${[...blastChannels].map((c) => `\`${c}\``).join(', ')}`
               : '',
             `**Regression risk:** ${risk}`,
             '',
@@ -221,7 +260,7 @@ export function registerGraphTools(server: McpServer): void {
 
   tool(
     'match_screenshot',
-    'Semantic screenshot ↔ code matching: map UI elements from a Contextify ' +
+    'Semantic screenshot ↔ code matching: map UI elements from a Contextifly ' +
       'screenshot analysis to the components that implement them, including which ' +
       'routes/screens each match appears on. Pass either a single element ' +
       'description ("Orange Checkout Button") or the full markdown from ' +
@@ -391,7 +430,7 @@ export function registerGraphTools(server: McpServer): void {
   tool(
     'get_feature',
     'Feature Graph: reason about the project in features, not files. Without a ' +
-      'feature name, lists all features (from contextify.features.json if present, ' +
+      'feature name, lists all features (from contextifly.features.json if present, ' +
       'otherwise auto-derived from route groups) with member counts and cross-feature ' +
       'shared nodes. With a name, returns the full dossier: routes, components, ' +
       'state, APIs, and entry points from outside the feature. Answers ' +
@@ -456,7 +495,7 @@ export function registerGraphTools(server: McpServer): void {
     'Search the Software Knowledge Graph by name — components, routes, files, or API ' +
       'endpoints — and see how each match connects to the rest of the codebase. ' +
       'Useful for mapping UI elements from a screenshot analysis to the code that ' +
-      'renders them (e.g. search for the component or button name Contextify identified).',
+      'renders them (e.g. search for the component or button name Contextifly identified).',
     {
       projectDir: projectDirParam,
       query: z.string().min(1).describe('Name or fragment, e.g. "checkout", "ProductCard".'),
@@ -511,7 +550,7 @@ export function registerGraphTools(server: McpServer): void {
         .string()
         .optional()
         .describe(
-          'Snapshot filename from .pixelcontextify/history/ to compare against. ' +
+          'Snapshot filename from .pixelcontextifly/history/ to compare against. ' +
             'Omit to compare against the most recent snapshot.',
         ),
     },
@@ -551,7 +590,7 @@ export function registerGraphTools(server: McpServer): void {
       'repository exploration replaced by graph queries (clearly labeled estimates), ' +
       'measured answer sizes and latency, plus real measured screenshot-compression ' +
       'savings. ONLY call this when the user EXPLICITLY asks about savings/usage/cost ' +
-      '(e.g. "contextify token analyze", "how much has contextify saved"). Never call ' +
+      '(e.g. "contextifly token analyze", "how much has contextifly saved"). Never call ' +
       'it proactively, never append it to other answers, and do not mention it unless ' +
       'asked. Render the returned Mermaid.',
     { projectDir: projectDirParam },
@@ -576,18 +615,66 @@ function loadIndex(projectDir: string): { index: GraphIndex; staleNote: string }
       `No graph found at ${graphDir(projectDir)}. Run the index_project tool first.`,
     );
   }
-  // Live context: if indexed files changed on disk, transparently re-index so
-  // every answer reflects the current code — no manual refresh step.
-  const stale = staleFileCount(graph as ProjectGraph);
+  // Live context: if git moved (new commits, branch switch, main advanced) or a
+  // file changed on disk, transparently re-index so every answer reflects the
+  // current code — no manual refresh step.
+  const current = readGitState(projectDir);
+  const saved = loadGitState(projectDir);
+  const reason = staleReason(graph, saved, current);
   let staleNote = '';
-  if (stale > 0) {
+  if (reason) {
     const { graph: fresh } = indexProject(projectDir);
     saveGraph(fresh);
     saveGraphHtml(fresh);
+    if (current) saveGitState(projectDir, current);
     graph = fresh;
-    staleNote = `> ♻️ ${stale} file(s) had changed — graph auto-refreshed before answering.\n\n`;
+    staleNote = `> ♻️ ${reason} — graph auto-refreshed before answering.\n\n`;
+  } else {
+    ensureGitState(projectDir, saved, current); // upgrade pre-git graphs
   }
   return { index: new GraphIndex(graph), staleNote };
+}
+
+/**
+ * Why the stored graph is out of date, or null when it can be served as-is.
+ * Git is the primary signal (branch / commit / main-branch head); file hashes
+ * catch uncommitted working-tree edits that don't move HEAD. When git can't be
+ * consulted (non-repo or no prior sidecar) only the file-hash check applies.
+ */
+function staleReason(
+  graph: ProjectGraph,
+  saved: GitState | null,
+  current: GitState | null,
+): string | null {
+  const drift = gitDrift(saved, current);
+  if (drift) return drift;
+  const stale = staleFileCount(graph);
+  return stale > 0 ? `${stale} file(s) changed on disk` : null;
+}
+
+function graphIsFresh(
+  graph: ProjectGraph,
+  saved: GitState | null,
+  current: GitState | null,
+): boolean {
+  return staleReason(graph, saved, current) === null;
+}
+
+function renderReuse(root: string, graph: ProjectGraph, git: GitState | null): string {
+  const where = git ? `branch \`${git.branch}\` @ \`${git.head.slice(0, 7)}\`` : 'no git repo';
+  const file = path.join(graphDir(root), 'graph.json');
+  const count = (t: string) => graph.nodes.filter((n) => n.type === t).length;
+  return [
+    `✓ **Graph already up to date** — reused \`${file}\` (${where}); no rebuild needed.`,
+    '',
+    '_Nothing changed since the last index. Edit a file, commit, or switch branches to trigger a refresh._',
+    '',
+    `- files: ${Object.keys(graph.files).length}`,
+    `- components: ${count('component')}`,
+    `- routes: ${count('route')}`,
+    `- API endpoints: ${count('api')}`,
+    `- edges: ${graph.edges.length}`,
+  ].join('\n');
 }
 
 function text(body: string) {

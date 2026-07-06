@@ -6,7 +6,7 @@ import type { ProjectGraph } from './types';
 /**
  * Render the graph as a fully self-contained interactive HTML page
  * (vanilla JS force-directed canvas — no CDN, works offline) and save it
- * to <project>/.pixelcontextify/graph.html.
+ * to <project>/.pixelcontextifly/graph.html.
  */
 export function saveGraphHtml(graph: ProjectGraph): string {
   const file = path.join(graphDir(graph.root), 'graph.html');
@@ -28,7 +28,7 @@ export function renderGraphHtml(graph: ProjectGraph): string {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PixelContextify — code knowledge graph</title>
+<title>Contextifly — code knowledge graph</title>
 <style>
   :root {
     --bg: #0d1117; --panel: #161b22; --border: #30363d;
@@ -100,12 +100,14 @@ var DATA = ${payload};
 var COLORS = {
   route: '#f59e0b', component: '#60a5fa', hook: '#34d399',
   context: '#c084fc', api: '#f87171', file: '#6b7280',
-  controller: '#fb923c', service: '#818cf8', module: '#a3a3a3', entity: '#facc15'
+  controller: '#fb923c', service: '#818cf8', module: '#a3a3a3', entity: '#facc15',
+  channel: '#2dd4bf', native: '#f472b6'
 };
 var TYPES = ['route', 'component', 'hook', 'context', 'api',
-  'controller', 'service', 'module', 'entity', 'file'];
+  'controller', 'service', 'module', 'entity', 'channel', 'native', 'file'];
 var enabled = { route: true, component: true, hook: true, context: true, api: true,
-  controller: true, service: true, module: true, entity: true, file: false };
+  controller: true, service: true, module: true, entity: true,
+  channel: true, native: true, file: false };
 
 document.getElementById('title').textContent = DATA.project;
 document.getElementById('meta').textContent =

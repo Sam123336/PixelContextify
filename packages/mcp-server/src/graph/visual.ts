@@ -262,7 +262,7 @@ function recommendations(index: GraphIndex, node: GraphNode): string | null {
 // --- screenshot blueprint (sketch → code mapping) -----------------------------
 
 /**
- * Screenshot Blueprint: take a Contextify screenshot analysis (which contains
+ * Screenshot Blueprint: take a Contextifly screenshot analysis (which contains
  * an ASCII Screen Sketch), locate every sketched element in the codebase via
  * the graph, and render the code-side diagram next to it. Ends with an
  * explicit brief for generating design-variant sketches, so the whole

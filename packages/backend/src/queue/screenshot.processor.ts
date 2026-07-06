@@ -10,7 +10,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { UnrecoverableError, Worker, type Job } from 'bullmq';
 import IORedis from 'ioredis';
 import { promises as fs } from 'fs';
-import type { ScreenshotJobPayload } from '@contextify/shared';
+import type { ScreenshotJobPayload } from '@contextifly/shared';
 import { Screenshot } from '../database/models/screenshot.model';
 import { LlmService } from '../llm/llm.service';
 import { LlmNotConfiguredError } from '../llm/llm.types';

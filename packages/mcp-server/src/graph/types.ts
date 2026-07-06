@@ -27,7 +27,10 @@ export type NodeType =
   | 'controller'
   | 'service'
   | 'module'
-  | 'entity';
+  | 'entity'
+  // native bridge (Flutter platform channels)
+  | 'channel' // a named platform channel, spanning the Dart↔native boundary
+  | 'native'; // a native source file (Kotlin/Java/Swift/Obj-C) that handles a channel
 
 /**
  * Framework-agnostic role assigned by the normalizer. Algorithms that want to
@@ -52,7 +55,9 @@ export type EdgeKind =
   | 'uses' // component | hook | file | service → hook | context | entity
   | 'calls' // component | file → api
   | 'injects' // controller | service | module → service (constructor DI)
-  | 'contains'; // module → controller | service
+  | 'contains' // module → controller | service
+  | 'invokes' // component | file → channel (Dart side calls a platform channel)
+  | 'handles'; // native → channel (native code implements a platform channel)
 
 /** Where an edge was discovered. Mandatory for all AST-derived edges. */
 export interface EdgeSource {
@@ -143,6 +148,8 @@ export interface IndexStats {
   services: number;
   modules: number;
   entities: number;
+  channels: number;
+  natives: number;
   edges: number;
   durationMs: number;
   /** Context memory: 'incremental' means only changed files (+ their importers) were re-parsed. */

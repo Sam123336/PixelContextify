@@ -35,7 +35,7 @@ export default (): AppConfig => {
     port: parseInt(process.env.PORT ?? '3000', 10),
     databaseUrl:
       process.env.DATABASE_URL ??
-      'postgres://contextify:contextify@localhost:5432/contextify',
+      'postgres://contextifly:contextifly@localhost:5432/contextifly',
     databaseSsl:
       process.env.DATABASE_SSL === 'true' ||
       (process.env.DATABASE_URL?.includes('sslmode=require') ?? false),

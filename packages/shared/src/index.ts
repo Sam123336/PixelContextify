@@ -1,5 +1,5 @@
 /**
- * Shared types for the Contextify monorepo.
+ * Shared types for the Contextifly monorepo.
  *
  * These types describe the public contract between the backend, MCP server,
  * and VS Code extension. Keep this package free of runtime dependencies.

@@ -1,14 +1,14 @@
 {
-  "name": "contextify",
-  "displayName": "Contextify",
+  "name": "contextifly",
+  "displayName": "Contextifly",
   "version": "0.2.0",
   "private": true,
-  "description": "Drop or paste UI screenshots into VS Code — Contextify turns them into structured developer markdown.",
-  "publisher": "contextify",
+  "description": "Drop or paste UI screenshots into VS Code — Contextifly turns them into structured developer markdown.",
+  "publisher": "contextifly",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Sam123336/PixelContextify.git",
+    "url": "https://github.com/Sam123336/Contextifly.git",
     "directory": "packages/vscode-extension"
   },
   "engines": {
@@ -20,29 +20,29 @@
   "contributes": {
     "commands": [
       {
-        "command": "contextify.analyzeFile",
-        "title": "Contextify: Analyze Image File…"
+        "command": "contextifly.analyzeFile",
+        "title": "Contextifly: Analyze Image File…"
       },
       {
-        "command": "contextify.selectProvider",
-        "title": "Contextify: Select LLM Provider…"
+        "command": "contextifly.selectProvider",
+        "title": "Contextifly: Select LLM Provider…"
       }
     ],
     "configuration": {
-      "title": "Contextify",
+      "title": "Contextifly",
       "properties": {
-        "contextify.backendUrl": {
+        "contextifly.backendUrl": {
           "type": "string",
           "default": "http://localhost:3000",
-          "description": "Base URL of the Contextify backend (e.g. http://localhost:3000)."
+          "description": "Base URL of the Contextifly backend (e.g. http://localhost:3000)."
         },
-        "contextify.timeoutMs": {
+        "contextifly.timeoutMs": {
           "type": "number",
           "default": 120000,
           "minimum": 1000,
           "description": "Maximum time (ms) to wait for a screenshot analysis to complete."
         },
-        "contextify.llm.provider": {
+        "contextifly.llm.provider": {
           "type": "string",
           "enum": ["default", "gemini", "openai", "anthropic", "openai-compatible"],
           "enumDescriptions": [
@@ -53,22 +53,22 @@
             "Any OpenAI-compatible endpoint (OpenRouter, Together, Groq, vLLM, LM Studio, …). Requires a base URL and model."
           ],
           "default": "default",
-          "markdownDescription": "Advanced: which LLM provider to use for analysis. Choose `default` to use the backend's own key, or pick a provider and supply your own key in `#contextify.llm.apiKey#`. The model must support image input."
+          "markdownDescription": "Advanced: which LLM provider to use for analysis. Choose `default` to use the backend's own key, or pick a provider and supply your own key in `#contextifly.llm.apiKey#`. The model must support image input."
         },
-        "contextify.llm.apiKey": {
+        "contextifly.llm.apiKey": {
           "type": "string",
           "default": "",
-          "markdownDescription": "Advanced: your own API key for the selected `#contextify.llm.provider#`. Sent to the backend with each upload and never stored server-side. Leave blank to use the backend's default key."
+          "markdownDescription": "Advanced: your own API key for the selected `#contextifly.llm.provider#`. Sent to the backend with each upload and never stored server-side. Leave blank to use the backend's default key."
         },
-        "contextify.llm.model": {
+        "contextifly.llm.model": {
           "type": "string",
           "default": "",
           "markdownDescription": "Advanced: model id for the selected provider (e.g. `gemini-2.0-flash`, `gpt-4o`, `claude-3-5-sonnet-latest`). Required for `openai-compatible`; leave blank elsewhere for the provider's default. Must be a vision-capable model."
         },
-        "contextify.llm.baseUrl": {
+        "contextifly.llm.baseUrl": {
           "type": "string",
           "default": "",
-          "markdownDescription": "Advanced: base URL of an OpenAI-compatible endpoint (e.g. `https://openrouter.ai/api/v1`). Only used when `#contextify.llm.provider#` is `openai-compatible`."
+          "markdownDescription": "Advanced: base URL of an OpenAI-compatible endpoint (e.g. `https://openrouter.ai/api/v1`). Only used when `#contextifly.llm.provider#` is `openai-compatible`."
         }
       }
     }
@@ -81,7 +81,7 @@
     "lint": "echo \"no lint\" && exit 0"
   },
   "dependencies": {
-    "@contextify/shared": "workspace:*"
+    "@contextifly/shared": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20.14.10",

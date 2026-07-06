@@ -1,4 +1,4 @@
-# Render Blueprint — deploys the Contextify backend on Render's free plan.
+# Render Blueprint — deploys the Contextifly backend on Render's free plan.
 #
 # One-time setup (all free, no card):
 #   1. Create a Postgres DB at https://neon.tech  → copy its connection string
@@ -11,7 +11,7 @@
 
 services:
   - type: web
-    name: contextify-backend
+    name: contextifly-backend
     runtime: docker
     plan: free
     dockerfilePath: ./Dockerfile

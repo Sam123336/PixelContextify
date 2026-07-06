@@ -250,6 +250,17 @@ export const dartProvider: Provider = {
         sink.addEdge({ from: owner(m.index!), to: apiId, kind: 'calls', source: at(m.index!) });
       }
 
+      // Platform channels (native bridge): MethodChannel('name'), EventChannel("name").
+      // The native provider emits the matching `channel:name` node + `handles` edge.
+      const dartConsts = stringConstMap(df.text);
+      for (const m of df.text.matchAll(/\b(?:Method|Event|BasicMessage)Channel\s*\(\s*([^,)]+)/g)) {
+        const name = resolveDartString(m[1], dartConsts);
+        if (!name) continue;
+        const channelId = `channel:${name}`;
+        sink.addNode({ id: channelId, type: 'channel', name, framework: 'flutter' });
+        sink.addEdge({ from: owner(m.index!), to: channelId, kind: 'invokes', source: at(m.index!) });
+      }
+
       // State usage: ref.watch(xProvider), Provider.of<X>(ctx), context.watch<X>()
       for (const m of df.text.matchAll(/\bref\.(?:watch|read|listen)\s*\(\s*(\w+)/g)) {
         const id = providersByName.get(m[1]);
@@ -264,6 +275,24 @@ export const dartProvider: Provider = {
     return { files, nodes: [...sink.nodes.values()], edges: sink.edges, warnings };
   },
 };
+
+/** Same-file Dart string constants, for resolving channel names given as identifiers. */
+function stringConstMap(text: string): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const m of text.matchAll(/\b(\w+)\s*=\s*['"]([^'"]+)['"]/g)) {
+    if (!map.has(m[1])) map.set(m[1], m[2]);
+  }
+  return map;
+}
+
+/** A channel-name argument → its string value, or null when unresolvable statically. */
+function resolveDartString(expr: string, consts: Map<string, string>): string | null {
+  const s = expr.trim();
+  const lit = s.match(/^['"]([^'"]+)['"]$/);
+  if (lit) return lit[1];
+  if (/^[\w.]+$/.test(s)) return consts.get(s.split('.').pop()!) ?? null;
+  return null;
+}
 
 /** 1-based line number of a character offset (stripComments keeps lines stable). */
 function lineAt(text: string, offset: number): number {

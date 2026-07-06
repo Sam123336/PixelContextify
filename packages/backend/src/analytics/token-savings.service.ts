@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import imageSize from 'image-size';
 import { encode } from 'gpt-tokenizer';
-import type { TokenSavings } from '@contextify/shared';
+import type { TokenSavings } from '@contextifly/shared';
 
 /**
  * Estimates the vision-token cost of an image as Gemini 2.0 Flash bills it,

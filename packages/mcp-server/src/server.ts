@@ -1,5 +1,5 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { MCP_TOOL_NAMES, type ScreenshotRecord } from '@contextify/shared';
+import { MCP_TOOL_NAMES, type ScreenshotRecord } from '@contextifly/shared';
 import { z } from 'zod/v3';
 import { BackendClient, BackendError } from './backend-client';
 import { recordScreenshotSavings } from './graph/stats';
@@ -14,13 +14,13 @@ const DEFAULT_ANALYZE_TIMEOUT_MS = 120_000;
 export function buildServer(opts: BuildServerOptions): McpServer {
   const { backend } = opts;
   const server = new McpServer({
-    name: 'contextify-mcp',
+    name: 'contextifly-mcp',
     version: '0.6.0',
   });
 
   server.tool(
     MCP_TOOL_NAMES.ANALYZE_SCREENSHOT,
-    'Upload a UI screenshot (PNG/JPEG/WebP) to the Contextify backend and return ' +
+    'Upload a UI screenshot (PNG/JPEG/WebP) to the Contextifly backend and return ' +
       'structured developer markdown. Blocks until the analysis job completes or times out.',
     {
       filePath: z

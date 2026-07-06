@@ -9,7 +9,7 @@ export async function runAnalysisWithProgress(
   return vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
-      title: `Contextify: analyzing ${input.filename}…`,
+      title: `Contextifly: analyzing ${input.filename}…`,
       cancellable: true,
     },
     async (_progress, token) => {
@@ -20,17 +20,17 @@ export async function runAnalysisWithProgress(
 
         if (record.status === 'failed') {
           void vscode.window.showErrorMessage(
-            `Contextify: ${record.errorMessage ?? 'analysis failed'}`,
+            `Contextifly: ${record.errorMessage ?? 'analysis failed'}`,
           );
           return undefined;
         }
         if (!record.markdown) {
-          void vscode.window.showWarningMessage('Contextify: backend returned no markdown.');
+          void vscode.window.showWarningMessage('Contextifly: backend returned no markdown.');
           return undefined;
         }
         if (record.tokenSavings) {
           vscode.window.setStatusBarMessage(
-            `Contextify: ${record.tokenSavings.savingsPercent}% token savings`,
+            `Contextifly: ${record.tokenSavings.savingsPercent}% token savings`,
             5_000,
           );
         }
@@ -40,7 +40,7 @@ export async function runAnalysisWithProgress(
           return undefined;
         }
         const msg = err instanceof BackendError ? err.message : (err as Error).message;
-        void vscode.window.showErrorMessage(`Contextify: ${msg}`);
+        void vscode.window.showErrorMessage(`Contextifly: ${msg}`);
         return undefined;
       } finally {
         sub.dispose();

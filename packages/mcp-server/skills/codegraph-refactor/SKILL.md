@@ -1,6 +1,6 @@
 ---
 name: codegraph-refactor
-description: AI refactoring advisor powered by the Contextify code knowledge graph. Use when the user asks for refactoring suggestions, wants to split large components, merge duplicates, extract shared logic, clean up dead code, improve architecture, or reduce bundle size. Works on React/Next.js, NestJS, and Flutter projects.
+description: AI refactoring advisor powered by the Contextifly code knowledge graph. Use when the user asks for refactoring suggestions, wants to split large components, merge duplicates, extract shared logic, clean up dead code, improve architecture, or reduce bundle size. Works on React/Next.js, NestJS, and Flutter projects.
 ---
 
 # Codegraph Refactoring Advisor

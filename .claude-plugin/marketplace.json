@@ -1,22 +1,22 @@
 {
-  "name": "contextify",
+  "name": "contextifly",
   "owner": {
-    "name": "PixelContextify",
-    "url": "https://github.com/Sam123336/PixelContextify"
+    "name": "Contextifly",
+    "url": "https://github.com/Sam123336/Contextifly"
   },
-  "description": "Contextify — persistent context engine for AI coding assistants: screenshot compression + a live Software Knowledge Graph of your codebase.",
+  "description": "Contextifly — persistent context engine for AI coding assistants: screenshot compression + a live Software Knowledge Graph of your codebase.",
   "plugins": [
     {
-      "name": "contextify",
+      "name": "contextifly",
       "source": "./packages/mcp-server",
-      "displayName": "Contextify",
+      "displayName": "Contextifly",
       "description": "Persistent context engine — an eye and a memory for your AI. 16 tools: Screenshot Blueprint eye-loop (screenshot → wireframe → mapped to the code that implements it → design variants), live Software Knowledge Graph (React/Next.js, NestJS + Flutter — full-stack, incremental), flow tracing, what-if simulation, visual Mermaid explanations, impact analysis + regression risk, architecture score, feature graph, temporal timeline, token-savings report, and the Rosetta framework-translator skill (onboard into Django/Spring/FastAPI/Flask/Go/Rust codebases through the framework you already know). Interactive visualization + CLI. 100% local.",
       "version": "0.6.0",
       "author": {
-        "name": "PixelContextify"
+        "name": "Contextifly"
       },
-      "homepage": "https://github.com/Sam123336/PixelContextify",
-      "repository": "https://github.com/Sam123336/PixelContextify",
+      "homepage": "https://github.com/Sam123336/Contextifly",
+      "repository": "https://github.com/Sam123336/Contextifly",
       "license": "MIT",
       "keywords": ["mcp", "screenshot", "vision", "ui", "knowledge-graph", "impact-analysis", "nextjs", "react", "nestjs", "flutter", "full-stack", "onboarding", "architecture", "what-if", "mermaid", "context-engine"],
       "category": "productivity"

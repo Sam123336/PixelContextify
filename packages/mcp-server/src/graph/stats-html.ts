@@ -6,7 +6,7 @@ import { graphDir } from './store';
 /**
  * Render the exploration-avoided analytics as a fully self-contained styled
  * HTML dashboard (no CDN, works offline — same theme as graph.html) and save
- * it to <project>/.pixelcontextify/savings.html.
+ * it to <project>/.pixelcontextifly/savings.html.
  *
  * Every figure is badged measured or estimated — the page is honest by
  * construction, mirroring the markdown report.
@@ -80,7 +80,7 @@ export function renderSavingsHtml(project: string, s: SavingsSummary): string {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PixelContextify — exploration avoided</title>
+<title>Contextifly — exploration avoided</title>
 <style>
   :root {
     --bg: #0d1117; --panel: #161b22; --border: #30363d;
@@ -143,7 +143,7 @@ export function renderSavingsHtml(project: string, s: SavingsSummary): string {
 <main>
   <header>
     <h1>Exploration avoided <span class="badge est">estimated</span> <span class="badge meas">measured</span></h1>
-    <div class="meta">${esc(project)} · generated ${new Date().toISOString().slice(0, 19).replace('T', ' ')} · PixelContextify</div>
+    <div class="meta">${esc(project)} · generated ${new Date().toISOString().slice(0, 19).replace('T', ' ')} · Contextifly</div>
   </header>
 
   <div class="cards">

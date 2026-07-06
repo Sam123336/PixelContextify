@@ -30,7 +30,7 @@ importers:
       '@anthropic-ai/sdk':
         specifier: ^0.32.1
         version: 0.32.1
-      '@contextify/shared':
+      '@contextifly/shared':
         specifier: workspace:*
         version: link:../shared
       '@google/generative-ai':
@@ -157,7 +157,7 @@ importers:
 
   packages/mcp-server:
     dependencies:
-      '@contextify/shared':
+      '@contextifly/shared':
         specifier: workspace:*
         version: link:../shared
       '@modelcontextprotocol/sdk':
@@ -188,7 +188,7 @@ importers:
 
   packages/vscode-extension:
     dependencies:
-      '@contextify/shared':
+      '@contextifly/shared':
         specifier: workspace:*
         version: link:../shared
     devDependencies:

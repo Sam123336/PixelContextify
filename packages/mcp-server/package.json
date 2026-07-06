@@ -1,12 +1,12 @@
 {
-  "name": "@contextify/mcp-server",
+  "name": "@contextifly/mcp-server",
   "version": "0.1.0",
   "private": true,
-  "description": "Contextify MCP server — exposes screenshot-to-markdown tools to Claude Code over stdio",
+  "description": "Contextifly MCP server — exposes screenshot-to-markdown tools to Claude Code over stdio",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "contextify-mcp": "dist/index.js"
+    "contextifly-mcp": "dist/index.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
@@ -16,7 +16,7 @@
     "lint": "echo \"no lint\" && exit 0"
   },
   "dependencies": {
-    "@contextify/shared": "workspace:*",
+    "@contextifly/shared": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "ts-morph": "^28.0.0",
     "zod": "^3.25.0"

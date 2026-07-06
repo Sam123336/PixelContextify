@@ -6,10 +6,10 @@ export function registerAnalyzeFileCommand(
   getClient: () => BackendClient,
   getTimeoutMs: () => number,
 ): vscode.Disposable {
-  return vscode.commands.registerCommand('contextify.analyzeFile', async () => {
+  return vscode.commands.registerCommand('contextifly.analyzeFile', async () => {
     const picks = await vscode.window.showOpenDialog({
       canSelectMany: false,
-      openLabel: 'Analyze with Contextify',
+      openLabel: 'Analyze with Contextifly',
       filters: { Images: ['png', 'jpg', 'jpeg', 'webp'] },
     });
     const uri = picks?.[0];
@@ -21,7 +21,7 @@ export function registerAnalyzeFileCommand(
     try {
       input = await BackendClient.loadFromPath(uri.fsPath);
     } catch (err) {
-      void vscode.window.showErrorMessage(`Contextify: ${(err as Error).message}`);
+      void vscode.window.showErrorMessage(`Contextifly: ${(err as Error).message}`);
       return;
     }
 

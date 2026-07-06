@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import type { LlmOverride, LlmProvider } from '@contextify/shared';
+import type { LlmOverride, LlmProvider } from '@contextifly/shared';
 import {
   LlmNotConfiguredError,
   type LlmProviderImpl,

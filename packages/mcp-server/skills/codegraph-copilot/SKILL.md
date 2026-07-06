@@ -1,6 +1,6 @@
 ---
 name: codegraph-copilot
-description: Developer copilot over the Contextify code knowledge graph. Use when the user asks to explain this project, generate onboarding docs, find flows (auth, payment, checkout), visualize state management or architecture, generate Mermaid diagrams, estimate feature complexity, or break work into tasks/Jira tickets. Works on React/Next.js, NestJS, and Flutter projects.
+description: Developer copilot over the Contextifly code knowledge graph. Use when the user asks to explain this project, generate onboarding docs, find flows (auth, payment, checkout), visualize state management or architecture, generate Mermaid diagrams, estimate feature complexity, or break work into tasks/Jira tickets. Works on React/Next.js, NestJS, and Flutter projects.
 ---
 
 # Codegraph Developer Copilot
@@ -46,7 +46,7 @@ variant to the matched components so the redesign is actionable. Total cost is
 **"Visualize state management"**
 Filter the graph to context/hook nodes: `search_graph` for each context, list which
 components `use` each one. Mermaid diagram: contexts/stores as one rank, consuming
-components grouped per route. Remind the user `.pixelcontextify/graph.html` has the
+components grouped per route. Remind the user `.pixelcontextifly/graph.html` has the
 interactive version.
 
 **"Estimate complexity of changing/adding X"**

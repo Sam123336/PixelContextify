@@ -1,13 +1,13 @@
 import * as vscode from 'vscode';
-import type { LlmOverride, LlmProvider } from '@contextify/shared';
+import type { LlmOverride, LlmProvider } from '@contextifly/shared';
 import { BackendClient, SUPPORTED_MIME_TYPES } from './backend-client';
 import {
-  CONTEXTIFY_DROP_KIND,
-  ContextifyDropEditProvider,
+  CONTEXTIFLY_DROP_KIND,
+  ContextiflyDropEditProvider,
 } from './providers/drop-edit-provider';
 import {
-  CONTEXTIFY_PASTE_KIND,
-  ContextifyPasteEditProvider,
+  CONTEXTIFLY_PASTE_KIND,
+  ContextiflyPasteEditProvider,
 } from './providers/paste-edit-provider';
 import { registerAnalyzeFileCommand } from './commands/analyze-file';
 import { registerProviderStatusBar } from './provider-status-bar';
@@ -17,7 +17,7 @@ const DEFAULT_TIMEOUT_MS = 120_000;
 
 export function activate(context: vscode.ExtensionContext): void {
   const getLlmOverride = (): LlmOverride | null => {
-    const cfg = vscode.workspace.getConfiguration('contextify');
+    const cfg = vscode.workspace.getConfiguration('contextifly');
     const provider = cfg.get<string>('llm.provider', 'default');
     const apiKey = cfg.get<string>('llm.apiKey', '').trim();
     if (provider === 'default' || !apiKey) {
@@ -35,14 +35,14 @@ export function activate(context: vscode.ExtensionContext): void {
 
   const getClient = (): BackendClient => {
     const baseUrl = vscode.workspace
-      .getConfiguration('contextify')
+      .getConfiguration('contextifly')
       .get<string>('backendUrl', DEFAULT_BACKEND_URL);
     return new BackendClient({ baseUrl, llm: getLlmOverride() });
   };
 
   const getTimeoutMs = (): number =>
     vscode.workspace
-      .getConfiguration('contextify')
+      .getConfiguration('contextifly')
       .get<number>('timeoutMs', DEFAULT_TIMEOUT_MS);
 
   const dropMimeTypes = [...SUPPORTED_MIME_TYPES, 'text/uri-list'];
@@ -52,18 +52,18 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     vscode.languages.registerDocumentDropEditProvider(
       selector,
-      new ContextifyDropEditProvider(getClient, getTimeoutMs),
+      new ContextiflyDropEditProvider(getClient, getTimeoutMs),
       {
         dropMimeTypes,
-        providedDropEditKinds: [CONTEXTIFY_DROP_KIND],
+        providedDropEditKinds: [CONTEXTIFLY_DROP_KIND],
       },
     ),
     vscode.languages.registerDocumentPasteEditProvider(
       selector,
-      new ContextifyPasteEditProvider(getClient, getTimeoutMs),
+      new ContextiflyPasteEditProvider(getClient, getTimeoutMs),
       {
         pasteMimeTypes,
-        providedPasteEditKinds: [CONTEXTIFY_PASTE_KIND],
+        providedPasteEditKinds: [CONTEXTIFLY_PASTE_KIND],
       },
     ),
     registerAnalyzeFileCommand(getClient, getTimeoutMs),
