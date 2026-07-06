@@ -28,10 +28,10 @@ import {
 // ---- terminal branding ------------------------------------------------------
 
 const BANNER_LINES = [
-  ' ▄▄▄▄▄ ▄▄▄▄▄ ▄   ▄ ▄▄▄▄▄ ▄▄▄▄▄ ▄   ▄ ▄▄▄▄▄ ▄▄▄ ▄▄▄▄▄ ▄   ▄',
-  ' █     █   █ ██  █   █   █      ▀▄▀    █    █  █      ▀▄▀',
-  ' █     █   █ █ █ █   █   █▄▄▄  ▄▀ ▀▄   █    █  █▄▄▄    █',
-  ' █▄▄▄▄ █▄▄▄█ █  ██   █   █▄▄▄▄ █   █   █   ▄█▄ █       █',
+  ' ▄▄▄▄▄ ▄▄▄▄▄ ▄   ▄ ▄▄▄▄▄ ▄▄▄▄▄ ▄   ▄ ▄▄▄▄▄ ▄▄▄ ▄▄▄▄▄ ▄     ▄   ▄',
+  ' █     █   █ ██  █   █   █      ▀▄▀    █    █  █     █      ▀▄▀',
+  ' █     █   █ █ █ █   █   █▄▄▄  ▄▀ ▀▄   █    █  █▄▄▄  █       █',
+  ' █▄▄▄▄ █▄▄▄█ █  ██   █   █▄▄▄▄ █   █   █   ▄█▄ █     █▄▄▄▄   █',
 ];
 const TAGLINE = ' see it · understand it · build better';
 
@@ -71,7 +71,7 @@ function brandLine(): string {
 
 const USAGE = `Contextifly — software knowledge graph CLI
 
-Usage: contextifly-mcp <command> [args]        (no command → MCP stdio server)
+Usage: contextifly <command> [args]        (no command → MCP stdio server)
 
   index   <dir>            Build/refresh the graph (+ graph.html) for a project
   map     <dir>            Route/component/API map with Mermaid navigation flow
@@ -146,13 +146,13 @@ function dispatch(cmd: string, rest: string[]): void {
       return;
     case 'impact': {
       const target = rest[1];
-      if (!target) throw new Error('Usage: contextifly-mcp impact <dir> <target>');
+      if (!target) throw new Error('Usage: contextifly impact <dir> <target>');
       console.log(renderImpact(index, target));
       return;
     }
     case 'search': {
       const query = rest[1];
-      if (!query) throw new Error('Usage: contextifly-mcp search <dir> <query>');
+      if (!query) throw new Error('Usage: contextifly search <dir> <query>');
       const hits = searchNodes(index, query);
       if (hits.length === 0) {
         console.log(`No nodes match "${query}".`);
@@ -206,7 +206,7 @@ function dispatch(cmd: string, rest: string[]): void {
 function loadIndexOrThrow(root: string): GraphIndex {
   const graph = loadGraph(root);
   if (!graph) {
-    throw new Error(`No graph at ${graphDir(root)} — run: contextifly-mcp index ${root}`);
+    throw new Error(`No graph at ${graphDir(root)} — run: contextifly index ${root}`);
   }
   const stale = staleFileCount(graph);
   if (stale > 0) {
@@ -218,7 +218,7 @@ function loadIndexOrThrow(root: string): GraphIndex {
 function renderImpact(index: GraphIndex, target: string): string {
   const resolved = index.resolve(target);
   if (resolved.length === 0) {
-    return `No graph node matches "${target}" — try: contextifly-mcp search <dir> ${target}`;
+    return `No graph node matches "${target}" — try: contextifly search <dir> ${target}`;
   }
   const lines: string[] = [];
   for (const node of resolved.slice(0, 3)) {

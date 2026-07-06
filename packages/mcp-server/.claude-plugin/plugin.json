@@ -1,7 +1,7 @@
 {
   "name": "contextifly",
   "displayName": "Contextifly",
-  "version": "0.6.0",
+  "version": "1.0.0",
   "description": "Persistent context engine for Claude Code — an eye and a memory for your AI. 16 tools: the Screenshot Blueprint eye-loop (screenshot → ASCII wireframe → every element mapped to the code that implements it → design-variant sketches, ~1k tokens total), a live Software Knowledge Graph (React/Next.js, NestJS + Flutter — full-stack: frontend fetch calls link to the backend controllers that handle them) with incremental indexing, flow tracing (whole checkout journey ≈ 300 tokens instead of reading dozens of files), what-if change simulation, visual Mermaid explanations, impact analysis + regression risk, architecture score, feature graph, temporal diffs + timeline, an on-demand token-savings report, and the Rosetta skill that onboards you into unfamiliar frameworks (Django, Spring Boot, FastAPI, Flask, Go, Rust) by translating them into the one you know. Interactive graph.html + CLI. 100% local — code never leaves your machine.",
   "author": {
     "name": "Contextifly"

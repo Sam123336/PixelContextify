@@ -6,7 +6,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "contextifly-mcp": "dist/index.js"
+    "contextifly": "dist/index.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

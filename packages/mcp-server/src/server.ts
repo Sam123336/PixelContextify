@@ -14,8 +14,8 @@ const DEFAULT_ANALYZE_TIMEOUT_MS = 120_000;
 export function buildServer(opts: BuildServerOptions): McpServer {
   const { backend } = opts;
   const server = new McpServer({
-    name: 'contextifly-mcp',
-    version: '0.6.0',
+    name: 'contextifly',
+    version: '1.0.0',
   });
 
   server.tool(
