@@ -19,10 +19,10 @@ RUN pnpm install --frozen-lockfile
 # Build only what the backend needs (shared + backend).
 COPY packages/shared packages/shared
 COPY packages/backend packages/backend
-RUN pnpm --filter @contextify/shared --filter @contextify/backend run build
+RUN pnpm --filter @contextifly/shared --filter @contextifly/backend run build
 
 # Produce a self-contained deploy dir (real node_modules, no symlinks).
-RUN pnpm --filter=@contextify/backend deploy --prod /app/deploy
+RUN pnpm --filter=@contextifly/backend deploy --prod /app/deploy
 
 # ---- Runner: minimal image that just runs the built backend ----
 FROM node:20-slim AS runner

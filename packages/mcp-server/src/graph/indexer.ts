@@ -1,8 +1,9 @@
-import { execSync } from 'node:child_process';
 import * as path from 'node:path';
+import { gitHead } from './git';
 import { normalize } from './normalizer';
 import { dartProvider } from './providers/dart';
 import { frontendProvider } from './providers/frontend';
+import { nativeProvider } from './providers/native';
 import { nestjsProvider } from './providers/nestjs';
 import { GraphSink, type Provider } from './providers/provider';
 import { loadGraph } from './store';
@@ -16,7 +17,7 @@ export { apiRouteForFile, routeForFile } from './providers/frontend';
  * their IR output (providers link only through shared deterministic node
  * ids), runs the normalizer, and assembles the versioned graph.
  */
-const PROVIDERS: Provider[] = [frontendProvider, nestjsProvider, dartProvider];
+const PROVIDERS: Provider[] = [frontendProvider, nestjsProvider, dartProvider, nativeProvider];
 
 export interface IndexResult {
   graph: ProjectGraph;
@@ -96,6 +97,8 @@ export function indexProject(rootDir: string, opts: IndexOptions = {}): IndexRes
     services: count('service'),
     modules: count('module'),
     entities: count('entity'),
+    channels: count('channel'),
+    natives: count('native'),
     edges: graph.edges.length,
     durationMs: Date.now() - started,
     mode,
@@ -122,18 +125,5 @@ function safeLoadPrevious(root: string): ProjectGraph | null {
     return prev && prev.root === root ? prev : null;
   } catch {
     return null;
-  }
-}
-
-function gitHead(root: string): string | undefined {
-  try {
-    return execSync('git rev-parse HEAD', {
-      cwd: root,
-      stdio: ['ignore', 'pipe', 'ignore'],
-    })
-      .toString()
-      .trim();
-  } catch {
-    return undefined;
   }
 }

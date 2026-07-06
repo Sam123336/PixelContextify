@@ -5,7 +5,7 @@ import {
   type LlmOverride,
   type ScreenshotRecord,
   type ScreenshotStatus,
-} from '@contextify/shared';
+} from '@contextifly/shared';
 
 const TERMINAL_STATUSES: ReadonlySet<ScreenshotStatus> = new Set(['done', 'failed']);
 

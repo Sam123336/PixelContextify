@@ -15,7 +15,7 @@ in this project and to its equivalent in the user's home framework.
 **1. Establish the two frameworks.**
 
 - *Home framework* (what the user knows): from their words ("I'm a NestJS dev"),
-  else ask one short question. Default assumption if they've used Contextify on
+  else ask one short question. Default assumption if they've used Contextifly on
   NestJS projects before: NestJS.
 - *Target framework* (this codebase): detect from marker files, do not ask:
 

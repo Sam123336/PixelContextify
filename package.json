@@ -1,5 +1,5 @@
 {
-  "name": "contextify",
+  "name": "contextifly",
   "version": "0.1.0",
   "private": true,
   "description": "AI Context Compression Infrastructure — screenshots → structured markdown for Claude Code",

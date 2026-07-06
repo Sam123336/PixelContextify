@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Deploy the Contextify backend to Azure Container Apps, with managed
+# Deploy the Contextifly backend to Azure Container Apps, with managed
 # Postgres + Redis. Single-replica by default (see MIN/MAX_REPLICAS).
 #
 # Prereqs: `az login` done, Docker not required (image is built in ACR).
@@ -10,15 +10,15 @@ set -euo pipefail
 
 # ---- Config (override via env) ------------------------------------------
 LOCATION="${LOCATION:-eastus}"
-RG="${RG:-contextify-rg}"
-ACR="${ACR:-contextifyacr$RANDOM}"        # must be globally unique
-PG_SERVER="${PG_SERVER:-contextify-pg-$RANDOM}"
-PG_ADMIN="${PG_ADMIN:-contextify}"
+RG="${RG:-contextifly-rg}"
+ACR="${ACR:-contextiflyacr$RANDOM}"        # must be globally unique
+PG_SERVER="${PG_SERVER:-contextifly-pg-$RANDOM}"
+PG_ADMIN="${PG_ADMIN:-contextifly}"
 PG_PASSWORD="${PG_PASSWORD:?set PG_PASSWORD}"
-PG_DB="${PG_DB:-contextify}"
-REDIS_NAME="${REDIS_NAME:-contextify-redis-$RANDOM}"
-APP_ENV="${APP_ENV:-contextify-env}"
-APP_NAME="${APP_NAME:-contextify-backend}"
+PG_DB="${PG_DB:-contextifly}"
+REDIS_NAME="${REDIS_NAME:-contextifly-redis-$RANDOM}"
+APP_ENV="${APP_ENV:-contextifly-env}"
+APP_NAME="${APP_NAME:-contextifly-backend}"
 IMAGE_TAG="${IMAGE_TAG:-0.2.0}"
 MIN_REPLICAS="${MIN_REPLICAS:-1}"
 MAX_REPLICAS="${MAX_REPLICAS:-1}"
@@ -56,7 +56,7 @@ REDIS_KEY="$(az redis list-keys -g "$RG" -n "$REDIS_NAME" --query primaryKey -o 
 REDIS_HOST="$REDIS_NAME.redis.cache.windows.net"
 
 echo "==> Building image in ACR…"
-az acr build -r "$ACR" -t "contextify-backend:$IMAGE_TAG" . -o none
+az acr build -r "$ACR" -t "contextifly-backend:$IMAGE_TAG" . -o none
 ACR_SERVER="$(az acr show -n "$ACR" --query loginServer -o tsv)"
 ACR_USER="$(az acr credential show -n "$ACR" --query username -o tsv)"
 ACR_PASS="$(az acr credential show -n "$ACR" --query 'passwords[0].value' -o tsv)"
@@ -70,7 +70,7 @@ REDIS_URL="rediss://:$REDIS_KEY@$REDIS_HOST:6380"
 echo "==> Deploying app: $APP_NAME"
 az containerapp create \
   -g "$RG" -n "$APP_NAME" --environment "$APP_ENV" \
-  --image "$ACR_SERVER/contextify-backend:$IMAGE_TAG" \
+  --image "$ACR_SERVER/contextifly-backend:$IMAGE_TAG" \
   --registry-server "$ACR_SERVER" \
   --registry-username "$ACR_USER" --registry-password "$ACR_PASS" \
   --target-port 3000 --ingress external \

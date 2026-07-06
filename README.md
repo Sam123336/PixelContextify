@@ -1,14 +1,14 @@
 <div align="center">
 
-<img src="docs/images/logo.png" alt="PixelContextify — See it. Understand it. Build better." width="320">
+<img src="docs/images/logo.png" alt="Contextifly — See it. Understand it. Build better." width="320">
 
-# Contextify
+# Contextifly
 
 ### A persistent context engine for AI coding assistants
 
-*Your AI re-discovers your project in every conversation. Contextify gives it a memory.*
+*Your AI re-discovers your project in every conversation. Contextifly gives it a memory.*
 
-[![Version](https://img.shields.io/badge/version-0.6.0-blue)](https://github.com/Sam123336/PixelContextify)
+[![Version](https://img.shields.io/badge/version-0.6.0-blue)](https://github.com/Sam123336/Contextifly)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![MCP](https://img.shields.io/badge/protocol-MCP-8A2BE2)](https://modelcontextprotocol.io)
 [![React](https://img.shields.io/badge/React%20%2F%20Next.js-full-61DAFB?logo=react&logoColor=white)](#-tools)
@@ -21,11 +21,11 @@
 
 ---
 
-## 🤔 What is Contextify?
+## 🤔 What is Contextifly?
 
 Every AI assistant has the same problem: **it forgets your project between conversations.** Each time you ask a question, it searches dozens of files, re-reads the same code, re-analyzes the same screenshots, and guesses at dependencies. You pay in **time, tokens, and wrong answers**.
 
-Contextify fixes this with two engines feeding one **Software Knowledge Graph**:
+Contextifly fixes this with two engines feeding one **Software Knowledge Graph**:
 
 | | 📸 Screenshot Engine | 🕸️ Code Engine |
 |---|---|---|
@@ -35,7 +35,7 @@ Contextify fixes this with two engines feeding one **Software Knowledge Graph**:
 | **Runs** | Free hosted backend (or your own key/server) | **100% on your machine — code never leaves it** |
 
 ```
-Without Contextify                      With Contextify
+Without Contextifly                      With Contextifly
 
 "How does checkout work?"               "How does checkout work?"
   → Claude searches 40+ files             → Claude asks the graph
@@ -52,22 +52,22 @@ Without Contextify                      With Contextify
 **1.** Install the plugin (no account, no API key needed):
 
 ```bash
-claude plugin marketplace add Sam123336/PixelContextify
-claude plugin install contextify@contextify
+claude plugin marketplace add Sam123336/Contextifly
+claude plugin install contextifly@contextifly
 ```
 
 **2.** Open a new Claude Code session inside your project and ask:
 
-> index this project with contextify
+> index this project with contextifly
 
 **3.** That's it. Now try:
 
 > show me the project map
 > what breaks if I change ProductCard?
 > trace the flow from /cart to /orders
-> analyze this screenshot with contextify: /path/to/screenshot.png
+> analyze this screenshot with contextifly: /path/to/screenshot.png
 
-💡 Bonus: open `.pixelcontextify/graph.html` in any browser — an interactive map of your whole app.
+💡 Bonus: open `.pixelcontextifly/graph.html` in any browser — an interactive map of your whole app.
 
 ---
 
@@ -89,18 +89,18 @@ npm install -g @anthropic-ai/claude-code
 Then install the plugin (from any terminal):
 
 ```bash
-claude plugin marketplace add Sam123336/PixelContextify
-claude plugin install contextify@contextify
+claude plugin marketplace add Sam123336/Contextifly
+claude plugin install contextifly@contextifly
 ```
 
 Or from *inside* a Claude Code session:
 
 ```
-/plugin marketplace add Sam123336/PixelContextify
-/plugin install contextify@contextify
+/plugin marketplace add Sam123336/Contextifly
+/plugin install contextifly@contextifly
 ```
 
-Start a **new** session and the 14 tools + 2 skills are available automatically. Updating later: `claude plugin update contextify`.
+Start a **new** session and the 14 tools + 2 skills are available automatically. Updating later: `claude plugin update contextifly`.
 
 </details>
 
@@ -114,7 +114,7 @@ Claude Desktop uses an MCP config file instead of the plugin marketplace.
 **1.** Clone this repo somewhere permanent:
 
 ```bash
-git clone https://github.com/Sam123336/PixelContextify.git ~/contextify
+git clone https://github.com/Sam123336/Contextifly.git ~/contextifly
 ```
 
 **2.** Open your Claude Desktop config:
@@ -122,23 +122,23 @@ git clone https://github.com/Sam123336/PixelContextify.git ~/contextify
 - **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
 - **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
 
-**3.** Add Contextify to `mcpServers` (use your real absolute path):
+**3.** Add Contextifly to `mcpServers` (use your real absolute path):
 
 ```json
 {
   "mcpServers": {
-    "contextify": {
+    "contextifly": {
       "command": "node",
-      "args": ["/Users/you/contextify/packages/mcp-server/bundle/index.cjs"],
+      "args": ["/Users/you/contextifly/packages/mcp-server/bundle/index.cjs"],
       "env": {
-        "CONTEXTIFY_BACKEND_URL": "https://contextify-backend-mdrs.onrender.com"
+        "CONTEXTIFLY_BACKEND_URL": "https://contextifly-backend-mdrs.onrender.com"
       }
     }
   }
 }
 ```
 
-**4.** Restart Claude Desktop. Ask Claude to *"index the project at /path/to/my/app with contextify"* (Desktop needs absolute paths since it has no working directory).
+**4.** Restart Claude Desktop. Ask Claude to *"index the project at /path/to/my/app with contextifly"* (Desktop needs absolute paths since it has no working directory).
 
 </details>
 
@@ -152,9 +152,9 @@ Any MCP-capable client works the same way as Claude Desktop: run the server over
 ```json
 {
   "mcpServers": {
-    "contextify": {
+    "contextifly": {
       "command": "node",
-      "args": ["/absolute/path/to/PixelContextify/packages/mcp-server/bundle/index.cjs"]
+      "args": ["/absolute/path/to/Contextifly/packages/mcp-server/bundle/index.cjs"]
     }
   }
 }
@@ -186,7 +186,7 @@ node packages/mcp-server/bundle/index.cjs feature . Checkout   # feature dossier
 node packages/mcp-server/bundle/index.cjs diff .               # what changed
 ```
 
-The graph itself is plain JSON at `.pixelcontextify/graph.json` — the format is documented in [docs/GRAPH-SPEC.md](docs/GRAPH-SPEC.md), so any tool can consume it.
+The graph itself is plain JSON at `.pixelcontextifly/graph.json` — the format is documented in [docs/GRAPH-SPEC.md](docs/GRAPH-SPEC.md), so any tool can consume it.
 
 </details>
 
@@ -200,18 +200,18 @@ Set these environment variables where Claude Code runs:
 
 | Env var | What it does | Required? |
 |---|---|---|
-| `CONTEXTIFY_LLM_PROVIDER` | `gemini`, `openai`, `anthropic`, or `openai-compatible` | yes (to enable) |
-| `CONTEXTIFY_LLM_API_KEY` | Your key for that provider | yes (to enable) |
-| `CONTEXTIFY_LLM_MODEL` | Model id | only for `openai-compatible` |
-| `CONTEXTIFY_LLM_BASE_URL` | Endpoint URL | only for `openai-compatible` |
-| `CONTEXTIFY_BACKEND_URL` | Your own backend instead of the hosted one | no |
+| `CONTEXTIFLY_LLM_PROVIDER` | `gemini`, `openai`, `anthropic`, or `openai-compatible` | yes (to enable) |
+| `CONTEXTIFLY_LLM_API_KEY` | Your key for that provider | yes (to enable) |
+| `CONTEXTIFLY_LLM_MODEL` | Model id | only for `openai-compatible` |
+| `CONTEXTIFLY_LLM_BASE_URL` | Endpoint URL | only for `openai-compatible` |
+| `CONTEXTIFLY_BACKEND_URL` | Your own backend instead of the hosted one | no |
 
 <details>
 <summary><b>Example: Google Gemini</b></summary>
 
 ```bash
-export CONTEXTIFY_LLM_PROVIDER=gemini
-export CONTEXTIFY_LLM_API_KEY=AIza...
+export CONTEXTIFLY_LLM_PROVIDER=gemini
+export CONTEXTIFLY_LLM_API_KEY=AIza...
 ```
 </details>
 
@@ -219,8 +219,8 @@ export CONTEXTIFY_LLM_API_KEY=AIza...
 <summary><b>Example: OpenAI</b></summary>
 
 ```bash
-export CONTEXTIFY_LLM_PROVIDER=openai
-export CONTEXTIFY_LLM_API_KEY=sk-...
+export CONTEXTIFLY_LLM_PROVIDER=openai
+export CONTEXTIFLY_LLM_API_KEY=sk-...
 ```
 </details>
 
@@ -228,8 +228,8 @@ export CONTEXTIFY_LLM_API_KEY=sk-...
 <summary><b>Example: Anthropic Claude</b></summary>
 
 ```bash
-export CONTEXTIFY_LLM_PROVIDER=anthropic
-export CONTEXTIFY_LLM_API_KEY=sk-ant-...
+export CONTEXTIFLY_LLM_PROVIDER=anthropic
+export CONTEXTIFLY_LLM_API_KEY=sk-ant-...
 ```
 </details>
 
@@ -237,10 +237,10 @@ export CONTEXTIFY_LLM_API_KEY=sk-ant-...
 <summary><b>Example: Groq / OpenRouter / Ollama / any OpenAI-compatible endpoint</b></summary>
 
 ```bash
-export CONTEXTIFY_LLM_PROVIDER=openai-compatible
-export CONTEXTIFY_LLM_API_KEY=gsk_...
-export CONTEXTIFY_LLM_MODEL=llama-3.2-90b-vision-preview
-export CONTEXTIFY_LLM_BASE_URL=https://api.groq.com/openai/v1
+export CONTEXTIFLY_LLM_PROVIDER=openai-compatible
+export CONTEXTIFLY_LLM_API_KEY=gsk_...
+export CONTEXTIFLY_LLM_MODEL=llama-3.2-90b-vision-preview
+export CONTEXTIFLY_LLM_BASE_URL=https://api.groq.com/openai/v1
 ```
 
 Works with any endpoint that speaks the OpenAI Chat Completions API and has a vision-capable model — Groq, OpenRouter, Together, Fireworks, vLLM, Ollama…
@@ -285,7 +285,7 @@ Works with any endpoint that speaks the OpenAI Chat Completions API and has a vi
 | `search_graph` | Find any component/route/API by name with its full relationship neighborhood |
 | `graph_diff` | What changed architecturally between two snapshots |
 | `graph_timeline` | The whole architecture's evolution, dated and git-commit-tagged |
-| `token_savings` | 📊 Exploration-avoided report: how many files the AI *didn't* have to read (estimated, per-question baseline), measured answer sizes + latency, estimated reduction %, and real measured screenshot-compression savings — every number labeled measured or estimated. Also available as `contextify-mcp savings .` in the CLI |
+| `token_savings` | 📊 Exploration-avoided report: how many files the AI *didn't* have to read (estimated, per-question baseline), measured answer sizes + latency, estimated reduction %, and real measured screenshot-compression savings — every number labeled measured or estimated. Also available as `contextifly-mcp savings .` in the CLI |
 
 ### 🤖 Bundled skills (zero setup)
 
@@ -301,7 +301,7 @@ Works with any endpoint that speaks the OpenAI Chat Completions API and has a vi
 - 🔗 **Full-stack tracing** — frontend `fetch`/`axios` calls and backend `@Get`/`@Post` handlers merge into the same endpoint node: checkout button → `POST /orders` → `OrderController` → `OrderService` → entity, in one traced path.
 - ⚡ **Live context** — every answer hash-checks your files first and auto-refreshes if code changed. No manual re-indexing, ever.
 - 🚀 **Incremental indexing** — only changed files (plus their importers) are re-parsed. No-op re-index: **~17ms**, verified byte-identical to a full rebuild.
-- 🗺️ **Interactive visualization** — `.pixelcontextify/graph.html`: force-directed map, color-coded types, search, filters, click any node for its relationships. Works offline, zero dependencies.
+- 🗺️ **Interactive visualization** — `.pixelcontextifly/graph.html`: force-directed map, color-coded types, search, filters, click any node for its relationships. Works offline, zero dependencies.
 - 🕰️ **Temporal graph** — snapshots on every change, tagged with git commits. Ask "what changed this month?"
 - 🔓 **Open format** — the graph is documented JSON ([spec](docs/GRAPH-SPEC.md)); any MCP client or plain script can use it.
 - 🔒 **Private by design** — source code never leaves your machine. Only screenshots touch a server (and you can self-host that too).
@@ -347,7 +347,7 @@ cp .env.example packages/backend/.env   # set LLM_API_KEY
 pnpm dev                                # API on http://localhost:3000
 ```
 
-Point the plugin at it with `CONTEXTIFY_BACKEND_URL=http://localhost:3000`.
+Point the plugin at it with `CONTEXTIFLY_BACKEND_URL=http://localhost:3000`.
 
 Server-default LLM config (`packages/backend/.env`):
 
@@ -403,10 +403,10 @@ Notes for any host: schema is created automatically on boot (Sequelize `synchron
 Rebuild the plugin bundle after changing `packages/mcp-server`:
 
 ```bash
-pnpm --filter @contextify/mcp-server run bundle:plugin   # → bundle/index.cjs
+pnpm --filter @contextifly/mcp-server run bundle:plugin   # → bundle/index.cjs
 ```
 
-**VS Code extension:** drop or paste a screenshot into any editor, or run **"Contextify: Analyze Image File…"** from the Command Palette; markdown is inserted at the cursor. Configure via `contextify.*` settings. Package with `cd packages/vscode-extension && pnpm run package`.
+**VS Code extension:** drop or paste a screenshot into any editor, or run **"Contextifly: Analyze Image File…"** from the Command Palette; markdown is inserted at the cursor. Configure via `contextifly.*` settings. Package with `cd packages/vscode-extension && pnpm run package`.
 </details>
 
 ---
@@ -441,6 +441,6 @@ The free-tier backend sleeps when idle and takes ~30–60s to wake. Subsequent c
 
 <div align="center">
 
-**MIT License** · Built by [PixelContextify](https://github.com/Sam123336/PixelContextify) · Issues and PRs welcome 🙌
+**MIT License** · Built by [Contextifly](https://github.com/Sam123336/Contextifly) · Issues and PRs welcome 🙌
 
 </div>

@@ -3,12 +3,12 @@ import type { BackendClient } from '../backend-client';
 import { runAnalysisWithProgress } from '../analyze-flow';
 import { extractImageFromDataTransfer } from '../extract-image';
 
-export const CONTEXTIFY_DROP_KIND = vscode.DocumentDropOrPasteEditKind.Text.append(
-  'contextify',
+export const CONTEXTIFLY_DROP_KIND = vscode.DocumentDropOrPasteEditKind.Text.append(
+  'contextifly',
   'screenshot',
 );
 
-export class ContextifyDropEditProvider implements vscode.DocumentDropEditProvider {
+export class ContextiflyDropEditProvider implements vscode.DocumentDropEditProvider {
   constructor(
     private readonly getClient: () => BackendClient,
     private readonly getTimeoutMs: () => number,
@@ -34,8 +34,8 @@ export class ContextifyDropEditProvider implements vscode.DocumentDropEditProvid
     }
     return new vscode.DocumentDropEdit(
       markdown,
-      'Contextify: insert structured markdown',
-      CONTEXTIFY_DROP_KIND,
+      'Contextifly: insert structured markdown',
+      CONTEXTIFLY_DROP_KIND,
     );
   }
 }

@@ -4,7 +4,7 @@ import {
   LLM_PROVIDERS,
   type LlmOverride,
   type LlmProvider,
-} from '@contextify/shared';
+} from '@contextifly/shared';
 import { BackendClient } from './backend-client';
 import { buildServer } from './server';
 
@@ -14,21 +14,21 @@ import { buildServer } from './server';
  * instead of the backend's default. Returns null when no key is supplied.
  */
 function llmFromEnv(): LlmOverride | null {
-  const apiKey = process.env.CONTEXTIFY_LLM_API_KEY?.trim();
+  const apiKey = process.env.CONTEXTIFLY_LLM_API_KEY?.trim();
   if (!apiKey) {
     return null;
   }
-  const provider = process.env.CONTEXTIFY_LLM_PROVIDER?.trim();
+  const provider = process.env.CONTEXTIFLY_LLM_PROVIDER?.trim();
   if (!provider || !LLM_PROVIDERS.includes(provider as LlmProvider)) {
     throw new Error(
-      `CONTEXTIFY_LLM_PROVIDER must be one of: ${LLM_PROVIDERS.join(', ')}.`,
+      `CONTEXTIFLY_LLM_PROVIDER must be one of: ${LLM_PROVIDERS.join(', ')}.`,
     );
   }
-  const model = process.env.CONTEXTIFY_LLM_MODEL?.trim();
-  const baseUrl = process.env.CONTEXTIFY_LLM_BASE_URL?.trim();
+  const model = process.env.CONTEXTIFLY_LLM_MODEL?.trim();
+  const baseUrl = process.env.CONTEXTIFLY_LLM_BASE_URL?.trim();
   if (provider === 'openai-compatible' && !baseUrl) {
     throw new Error(
-      'CONTEXTIFY_LLM_BASE_URL is required when CONTEXTIFY_LLM_PROVIDER is "openai-compatible".',
+      'CONTEXTIFLY_LLM_BASE_URL is required when CONTEXTIFLY_LLM_PROVIDER is "openai-compatible".',
     );
   }
   return {
@@ -40,7 +40,7 @@ function llmFromEnv(): LlmOverride | null {
 }
 
 async function main(): Promise<void> {
-  // CLI mode: `contextify-mcp index|map|analyze|impact|search|diff <dir>` —
+  // CLI mode: `contextifly-mcp index|map|analyze|impact|search|diff <dir>` —
   // lets any tool or AI assistant use the knowledge graph without MCP.
   const { runCli } = await import('./cli');
   if (runCli(process.argv.slice(2))) {
@@ -48,7 +48,7 @@ async function main(): Promise<void> {
   }
 
   const baseUrl =
-    process.env.CONTEXTIFY_BACKEND_URL?.trim() ||
+    process.env.CONTEXTIFLY_BACKEND_URL?.trim() ||
     process.env.BACKEND_URL?.trim() ||
     'http://localhost:3000';
 
@@ -61,6 +61,6 @@ async function main(): Promise<void> {
 main().catch((err) => {
   // stdout is reserved for the MCP transport — log to stderr only.
   // eslint-disable-next-line no-console
-  console.error('contextify-mcp failed:', err);
+  console.error('contextifly-mcp failed:', err);
   process.exit(1);
 });

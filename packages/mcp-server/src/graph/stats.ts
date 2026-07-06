@@ -11,10 +11,10 @@ import { graphDir } from './store';
  * is labeled as an estimate — only answer sizes, latency, and screenshot
  * compression are measured.
  *
- * Graph queries: per-project, at .pixelcontextify/stats.json. `out` is the
+ * Graph queries: per-project, at .pixelcontextifly/stats.json. `out` is the
  * measured size of the tool's answer; `base` is a documented ESTIMATE of the
  * exploration the answer replaced, derived from BASELINE_FILES × TOKENS_PER_FILE.
- * Screenshots: global (~/.contextify/screenshots.json) with REAL numbers from
+ * Screenshots: global (~/.contextifly/screenshots.json) with REAL numbers from
  * the backend (estimated image tokens vs actual markdown tokens).
  */
 
@@ -66,7 +66,7 @@ function statsFile(projectRoot: string): string {
 }
 
 function screenshotStatsFile(): string {
-  return path.join(os.homedir(), '.contextify', 'screenshots.json');
+  return path.join(os.homedir(), '.contextifly', 'screenshots.json');
 }
 
 function readJson<T>(file: string): T[] {
@@ -193,7 +193,7 @@ export function renderSavingsReport(projectRoot: string): string {
     );
   }
 
-  const lines: string[] = ['# Contextify — exploration avoided', ''];
+  const lines: string[] = ['# Contextifly — exploration avoided', ''];
 
   // ---- graph side -----------------------------------------------------------
   if (s.byTool.length > 0) {

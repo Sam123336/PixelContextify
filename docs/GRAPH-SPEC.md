@@ -1,6 +1,6 @@
 # Software Knowledge Graph — IR Specification (v2)
 
-Contextify works like a compiler: **providers** (TypeScript/React via ts-morph,
+Contextifly works like a compiler: **providers** (TypeScript/React via ts-morph,
 NestJS via ts-morph decorators, Dart/Flutter via a structural scanner, more to
 come) transform a project into a common **intermediate representation** — the
 Software Knowledge Graph. A **normalizer** assigns framework-agnostic semantic
@@ -13,9 +13,9 @@ This document is the stable contract for that IR.
 
 | File | Purpose |
 | ---- | ------- |
-| `<project>/.pixelcontextify/graph.json` | Current graph (this spec) |
-| `<project>/.pixelcontextify/graph.html` | Self-contained interactive visualization |
-| `<project>/.pixelcontextify/history/*.json` | Prior graph snapshots (same schema), newest-last-archived, max 20 |
+| `<project>/.pixelcontextifly/graph.json` | Current graph (this spec) |
+| `<project>/.pixelcontextifly/graph.html` | Self-contained interactive visualization |
+| `<project>/.pixelcontextifly/history/*.json` | Prior graph snapshots (same schema), newest-last-archived, max 20 |
 
 The directory is derived data: it self-gitignores and can always be rebuilt from source.
 
@@ -142,7 +142,7 @@ Edges are deduplicated on `(from, kind, to)`. Dangling references never occur in
 ## Staleness
 
 `files[path].hash` is the SHA-1 of the file content at index time. A consumer can
-detect a stale graph by re-hashing; Contextify's own tools warn when hashes differ.
+detect a stale graph by re-hashing; Contextifly's own tools warn when hashes differ.
 A missing file counts as stale.
 
 ## History & temporal queries
@@ -151,7 +151,7 @@ When a re-index produces structurally different content (compared ignoring
 `indexedAt`), the previous `graph.json` is archived to `history/<indexedAt>.json`
 first. Diffing two snapshots (same schema) yields added/removed nodes by type,
 edge deltas, and per-node degree changes — this is what the `graph_diff` tool and
-`contextify-mcp diff` render.
+`contextifly-mcp diff` render.
 
 ## Versioning
 
@@ -166,6 +166,6 @@ rebuild).
 1. **Claude Code plugin** — MCP tools: `index_project`, `get_project_map`,
    `get_impact`, `analyze_project`, `search_graph`, `graph_diff`.
 2. **Any MCP client** (Cursor, ChatGPT/Gemini MCP hosts, custom agents) — run
-   `contextify-mcp` over stdio; same tools.
-3. **Anything else** — the CLI (`contextify-mcp index|map|analyze|impact|search|diff <dir>`)
+   `contextifly-mcp` over stdio; same tools.
+3. **Anything else** — the CLI (`contextifly-mcp index|map|analyze|impact|search|diff <dir>`)
    prints the same markdown to stdout, or read `graph.json` directly against this spec.

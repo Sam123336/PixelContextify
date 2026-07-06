@@ -29,7 +29,7 @@ const PROVIDER_OPTIONS: ProviderOption[] = [
 const labelFor = (value: string): string =>
   PROVIDER_OPTIONS.find((o) => o.value === value)?.label ?? value;
 
-const SELECT_COMMAND = 'contextify.selectProvider';
+const SELECT_COMMAND = 'contextifly.selectProvider';
 
 /**
  * Adds a status-bar item showing the active LLM provider. Clicking it opens a
@@ -44,18 +44,18 @@ export function registerProviderStatusBar(): vscode.Disposable[] {
 
   const render = (): void => {
     const provider = vscode.workspace
-      .getConfiguration('contextify')
+      .getConfiguration('contextifly')
       .get<string>('llm.provider', 'default');
-    item.text = `$(sparkle) Contextify: ${labelFor(provider)}`;
+    item.text = `$(sparkle) Contextifly: ${labelFor(provider)}`;
     item.tooltip =
       provider === 'default'
-        ? "Contextify is using the backend's default LLM. Click to switch."
-        : `Contextify is using your own ${labelFor(provider)} key. Click to switch.`;
+        ? "Contextifly is using the backend's default LLM. Click to switch."
+        : `Contextifly is using your own ${labelFor(provider)} key. Click to switch.`;
     item.show();
   };
 
   const command = vscode.commands.registerCommand(SELECT_COMMAND, async () => {
-    const cfg = vscode.workspace.getConfiguration('contextify');
+    const cfg = vscode.workspace.getConfiguration('contextifly');
     const current = cfg.get<string>('llm.provider', 'default');
 
     const pick = await vscode.window.showQuickPick(
@@ -65,7 +65,7 @@ export function registerProviderStatusBar(): vscode.Disposable[] {
         detail: o.detail,
         value: o.value,
       })),
-      { placeHolder: 'Select the LLM provider Contextify should use' },
+      { placeHolder: 'Select the LLM provider Contextifly should use' },
     );
     if (!pick || pick.value === current) {
       return;
@@ -80,7 +80,7 @@ export function registerProviderStatusBar(): vscode.Disposable[] {
   });
 
   const onChange = vscode.workspace.onDidChangeConfiguration((e) => {
-    if (e.affectsConfiguration('contextify.llm.provider')) {
+    if (e.affectsConfiguration('contextifly.llm.provider')) {
       render();
     }
   });
@@ -94,7 +94,7 @@ async function warnIfIncomplete(provider: string): Promise<void> {
   if (provider === 'default') {
     return;
   }
-  const cfg = vscode.workspace.getConfiguration('contextify');
+  const cfg = vscode.workspace.getConfiguration('contextifly');
   const missing: string[] = [];
   if (!cfg.get<string>('llm.apiKey', '').trim()) {
     missing.push('API key');
@@ -113,7 +113,7 @@ async function warnIfIncomplete(provider: string): Promise<void> {
 
   const open = 'Open Settings';
   const choice = await vscode.window.showWarningMessage(
-    `Contextify: switched to ${labelFor(provider)}, but its ${missing.join(' and ')} ${
+    `Contextifly: switched to ${labelFor(provider)}, but its ${missing.join(' and ')} ${
       missing.length > 1 ? 'are' : 'is'
     } not set yet.`,
     open,
@@ -121,7 +121,7 @@ async function warnIfIncomplete(provider: string): Promise<void> {
   if (choice === open) {
     await vscode.commands.executeCommand(
       'workbench.action.openSettings',
-      'contextify.llm',
+      'contextifly.llm',
     );
   }
 }

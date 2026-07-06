@@ -1,6 +1,6 @@
 # Architecture
 
-**PixelContextify is a compiler for software architecture.** It compiles source
+**Contextifly is a compiler for software architecture.** It compiles source
 code, UI, APIs, and infrastructure into a stable intermediate representation
 that powers deterministic software intelligence.
 

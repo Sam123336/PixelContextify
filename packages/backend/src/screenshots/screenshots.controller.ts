@@ -16,7 +16,7 @@ import {
   type LlmOverride,
   type LlmProvider,
   type ScreenshotRecord,
-} from '@contextify/shared';
+} from '@contextifly/shared';
 import { ScreenshotsService } from './screenshots.service';
 
 @Controller('screenshots')

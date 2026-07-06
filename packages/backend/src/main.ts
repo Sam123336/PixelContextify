@@ -21,11 +21,11 @@ async function bootstrap(): Promise<void> {
   const port = config.get<number>('port', 3000);
 
   await app.listen(port);
-  Logger.log(`Contextify backend listening on http://localhost:${port}`, 'Bootstrap');
+  Logger.log(`Contextifly backend listening on http://localhost:${port}`, 'Bootstrap');
 }
 
 bootstrap().catch((err) => {
   // eslint-disable-next-line no-console
-  console.error('Failed to bootstrap Contextify backend', err);
+  console.error('Failed to bootstrap Contextifly backend', err);
   process.exit(1);
 });

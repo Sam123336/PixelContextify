@@ -11,7 +11,7 @@ import {
 import * as path from 'node:path';
 import type { ProjectGraph } from './types';
 
-const DIR_NAME = '.pixelcontextify';
+const DIR_NAME = '.pixelcontextifly';
 const GRAPH_FILE = 'graph.json';
 const HISTORY_DIR = 'history';
 const MAX_SNAPSHOTS = 20;

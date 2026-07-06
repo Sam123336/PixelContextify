@@ -6,7 +6,7 @@ import {
   PrimaryKey,
   Table,
 } from 'sequelize-typescript';
-import type { ScreenshotStatus } from '@contextify/shared';
+import type { ScreenshotStatus } from '@contextifly/shared';
 
 @Table({ tableName: 'screenshots', timestamps: true })
 export class Screenshot extends Model<Screenshot> {

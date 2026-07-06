@@ -1,4 +1,4 @@
-import type { LlmProvider } from '@contextify/shared';
+import type { LlmProvider } from '@contextifly/shared';
 
 /**
  * Thrown when no usable credentials are available for a requested provider.
