@@ -53,7 +53,7 @@ Without Contextifly                      With Contextifly
 
 ```bash
 claude plugin marketplace add Sam123336/Contextifly
-claude plugin install contextifly@Sam123336-Contextifly
+claude plugin install contextifly@contextifly
 ```
 
 **2.** Open a new Claude Code session inside your project and ask:
@@ -90,14 +90,14 @@ Then install the plugin (from any terminal):
 
 ```bash
 claude plugin marketplace add Sam123336/Contextifly
-claude plugin install contextifly@Sam123336-Contextifly
+claude plugin install contextifly@contextifly
 ```
 
 Or from *inside* a Claude Code session:
 
 ```
 /plugin marketplace add Sam123336/Contextifly
-/plugin install contextifly@Sam123336-Contextifly
+/plugin install contextifly@contextifly
 ```
 
 Start a **new** session and the 14 tools + 2 skills are available automatically. Updating later: `claude plugin update contextifly`.
