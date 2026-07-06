@@ -15,7 +15,7 @@
       "command": "node",
       "args": ["${CLAUDE_PLUGIN_ROOT}/bundle/index.cjs"],
       "env": {
-        "CONTEXTIFLY_BACKEND_URL": "${CONTEXTIFLY_BACKEND_URL:-https://contextifly-backend-mdrs.onrender.com}",
+        "CONTEXTIFLY_BACKEND_URL": "${CONTEXTIFLY_BACKEND_URL:-https://contextifly-backend-gukt.onrender.com}",
         "CONTEXTIFLY_LLM_PROVIDER": "${CONTEXTIFLY_LLM_PROVIDER:-}",
         "CONTEXTIFLY_LLM_API_KEY": "${CONTEXTIFLY_LLM_API_KEY:-}",
         "CONTEXTIFLY_LLM_MODEL": "${CONTEXTIFLY_LLM_MODEL:-}",
