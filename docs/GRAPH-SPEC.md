@@ -151,7 +151,7 @@ When a re-index produces structurally different content (compared ignoring
 `indexedAt`), the previous `graph.json` is archived to `history/<indexedAt>.json`
 first. Diffing two snapshots (same schema) yields added/removed nodes by type,
 edge deltas, and per-node degree changes — this is what the `graph_diff` tool and
-`contextifly-mcp diff` render.
+`contextifly diff` render.
 
 ## Versioning
 
@@ -166,6 +166,6 @@ rebuild).
 1. **Claude Code plugin** — MCP tools: `index_project`, `get_project_map`,
    `get_impact`, `analyze_project`, `search_graph`, `graph_diff`.
 2. **Any MCP client** (Cursor, ChatGPT/Gemini MCP hosts, custom agents) — run
-   `contextifly-mcp` over stdio; same tools.
-3. **Anything else** — the CLI (`contextifly-mcp index|map|analyze|impact|search|diff <dir>`)
+   `contextifly` over stdio; same tools.
+3. **Anything else** — the CLI (`contextifly index|map|analyze|impact|search|diff <dir>`)
    prints the same markdown to stdout, or read `graph.json` directly against this spec.

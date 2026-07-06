@@ -8,7 +8,7 @@
 
 *Your AI re-discovers your project in every conversation. Contextifly gives it a memory.*
 
-[![Version](https://img.shields.io/badge/version-0.6.0-blue)](https://github.com/Sam123336/Contextifly)
+[![Version](https://img.shields.io/badge/version-1.0.0-blue)](https://github.com/Sam123336/Contextifly)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![MCP](https://img.shields.io/badge/protocol-MCP-8A2BE2)](https://modelcontextprotocol.io)
 [![React](https://img.shields.io/badge/React%20%2F%20Next.js-full-61DAFB?logo=react&logoColor=white)](#-tools)
@@ -285,7 +285,7 @@ Works with any endpoint that speaks the OpenAI Chat Completions API and has a vi
 | `search_graph` | Find any component/route/API by name with its full relationship neighborhood |
 | `graph_diff` | What changed architecturally between two snapshots |
 | `graph_timeline` | The whole architecture's evolution, dated and git-commit-tagged |
-| `token_savings` | 📊 Exploration-avoided report: how many files the AI *didn't* have to read (estimated, per-question baseline), measured answer sizes + latency, estimated reduction %, and real measured screenshot-compression savings — every number labeled measured or estimated. Also available as `contextifly-mcp savings .` in the CLI |
+| `token_savings` | 📊 Exploration-avoided report: how many files the AI *didn't* have to read (estimated, per-question baseline), measured answer sizes + latency, estimated reduction %, and real measured screenshot-compression savings — every number labeled measured or estimated. Also available as `contextifly savings .` in the CLI |
 
 ### 🤖 Bundled skills (zero setup)
 

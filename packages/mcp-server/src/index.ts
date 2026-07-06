@@ -40,7 +40,7 @@ function llmFromEnv(): LlmOverride | null {
 }
 
 async function main(): Promise<void> {
-  // CLI mode: `contextifly-mcp index|map|analyze|impact|search|diff <dir>` —
+  // CLI mode: `contextifly index|map|analyze|impact|search|diff <dir>` —
   // lets any tool or AI assistant use the knowledge graph without MCP.
   const { runCli } = await import('./cli');
   if (runCli(process.argv.slice(2))) {
@@ -61,6 +61,6 @@ async function main(): Promise<void> {
 main().catch((err) => {
   // stdout is reserved for the MCP transport — log to stderr only.
   // eslint-disable-next-line no-console
-  console.error('contextifly-mcp failed:', err);
+  console.error('contextifly failed:', err);
   process.exit(1);
 });
