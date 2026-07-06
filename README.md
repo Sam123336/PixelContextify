@@ -131,7 +131,7 @@ git clone https://github.com/Sam123336/Contextifly.git ~/contextifly
       "command": "node",
       "args": ["/Users/you/contextifly/packages/mcp-server/bundle/index.cjs"],
       "env": {
-        "CONTEXTIFLY_BACKEND_URL": "https://contextifly-backend-mdrs.onrender.com"
+        "CONTEXTIFLY_BACKEND_URL": "https://contextifly-backend-gukt.onrender.com"
       }
     }
   }
