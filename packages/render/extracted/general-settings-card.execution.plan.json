@@ -1,0 +1,331 @@
+{
+  "K1": [
+    {
+      "op": "Evaluate",
+      "expr": "loading",
+      "result": true
+    },
+    {
+      "op": "Activate",
+      "branch": "LoadingBranch"
+    },
+    {
+      "op": "Skip",
+      "branch": "Error/Form (else chain)",
+      "reason": "earlier case matched"
+    }
+  ],
+  "K2": [
+    {
+      "op": "Evaluate",
+      "expr": "loading",
+      "result": false
+    },
+    {
+      "op": "Skip",
+      "branch": "LoadingBranch",
+      "reason": "loading = false"
+    },
+    {
+      "op": "Activate",
+      "branch": "Error/Form (else chain)"
+    },
+    {
+      "op": "Evaluate",
+      "expr": "!extraDetails",
+      "result": true
+    },
+    {
+      "op": "Activate",
+      "branch": "Text(\"Failed to load general\")"
+    },
+    {
+      "op": "Skip",
+      "branch": "FormBranch",
+      "reason": "earlier case matched"
+    }
+  ],
+  "K3": [
+    {
+      "op": "Evaluate",
+      "expr": "loading",
+      "result": false
+    },
+    {
+      "op": "Skip",
+      "branch": "LoadingBranch",
+      "reason": "loading = false"
+    },
+    {
+      "op": "Activate",
+      "branch": "Error/Form (else chain)"
+    },
+    {
+      "op": "Evaluate",
+      "expr": "!extraDetails",
+      "result": false
+    },
+    {
+      "op": "Skip",
+      "branch": "Text(\"Failed to load general\")",
+      "reason": "!extraDetails = false"
+    },
+    {
+      "op": "Activate",
+      "branch": "FormBranch"
+    },
+    {
+      "op": "Evaluate",
+      "expr": "!canEdit",
+      "result": false
+    },
+    {
+      "op": "Skip",
+      "branch": "Text(\"You don&apos;t have pe\")",
+      "reason": "!canEdit = false"
+    },
+    {
+      "op": "Activate",
+      "branch": "null"
+    },
+    {
+      "op": "Instantiate",
+      "node": "list.23",
+      "cardinality": 5
+    },
+    {
+      "op": "Bind",
+      "node": "label.17",
+      "prop": "htmlFor",
+      "expr": "key",
+      "result": "isOnlinePaymentEnabled"
+    },
+    {
+      "op": "Bind",
+      "node": "t.16",
+      "prop": "text",
+      "expr": "label",
+      "result": "Online payment"
+    },
+    {
+      "op": "Bind",
+      "node": "t.19",
+      "prop": "text",
+      "expr": "help",
+      "result": "Allow customers to pay online (UPI / card) in this city."
+    },
+    {
+      "op": "Bind",
+      "node": "switch.21",
+      "prop": "id",
+      "expr": "key",
+      "result": "isOnlinePaymentEnabled"
+    },
+    {
+      "op": "Bind",
+      "node": "switch.21",
+      "prop": "checked",
+      "expr": "Boolean(toggles[key])",
+      "result": true
+    },
+    {
+      "op": "Bind",
+      "node": "switch.21",
+      "prop": "disabled",
+      "expr": "saving || !canEdit",
+      "result": false
+    },
+    {
+      "op": "Bind",
+      "node": "switch.21",
+      "prop": "onCheckedChange",
+      "expr": "(v) => setToggles((prev) => ({ ...prev, [key]: v }))"
+    },
+    {
+      "op": "Bind",
+      "node": "input.28",
+      "prop": "value",
+      "expr": "qrCode",
+      "result": "https://cdn.belivmart.example/qr/city_123.png"
+    },
+    {
+      "op": "Bind",
+      "node": "input.28",
+      "prop": "disabled",
+      "expr": "saving || !canEdit",
+      "result": false
+    },
+    {
+      "op": "Bind",
+      "node": "input.28",
+      "prop": "onChange",
+      "expr": "(e) => setQrCode(e.target.value)"
+    },
+    {
+      "op": "Bind",
+      "node": "button.33",
+      "prop": "onClick",
+      "expr": "handleSave"
+    },
+    {
+      "op": "Bind",
+      "node": "button.33",
+      "prop": "disabled",
+      "expr": "saving || !canEdit",
+      "result": false
+    },
+    {
+      "op": "Evaluate",
+      "expr": "saving",
+      "result": false
+    },
+    {
+      "op": "Skip",
+      "branch": "Text(\"Saving…\")",
+      "reason": "saving = false"
+    },
+    {
+      "op": "Activate",
+      "branch": "Text(\"Save\")"
+    }
+  ],
+  "K4": [
+    {
+      "op": "Evaluate",
+      "expr": "loading",
+      "result": false
+    },
+    {
+      "op": "Skip",
+      "branch": "LoadingBranch",
+      "reason": "loading = false"
+    },
+    {
+      "op": "Activate",
+      "branch": "Error/Form (else chain)"
+    },
+    {
+      "op": "Evaluate",
+      "expr": "!extraDetails",
+      "result": false
+    },
+    {
+      "op": "Skip",
+      "branch": "Text(\"Failed to load general\")",
+      "reason": "!extraDetails = false"
+    },
+    {
+      "op": "Activate",
+      "branch": "FormBranch"
+    },
+    {
+      "op": "Evaluate",
+      "expr": "!canEdit",
+      "result": true
+    },
+    {
+      "op": "Activate",
+      "branch": "Text(\"You don&apos;t have pe\")"
+    },
+    {
+      "op": "Instantiate",
+      "node": "list.23",
+      "cardinality": 5
+    },
+    {
+      "op": "Bind",
+      "node": "label.17",
+      "prop": "htmlFor",
+      "expr": "key",
+      "result": "isOnlinePaymentEnabled"
+    },
+    {
+      "op": "Bind",
+      "node": "t.16",
+      "prop": "text",
+      "expr": "label",
+      "result": "Online payment"
+    },
+    {
+      "op": "Bind",
+      "node": "t.19",
+      "prop": "text",
+      "expr": "help",
+      "result": "Allow customers to pay online (UPI / card) in this city."
+    },
+    {
+      "op": "Bind",
+      "node": "switch.21",
+      "prop": "id",
+      "expr": "key",
+      "result": "isOnlinePaymentEnabled"
+    },
+    {
+      "op": "Bind",
+      "node": "switch.21",
+      "prop": "checked",
+      "expr": "Boolean(toggles[key])",
+      "result": true
+    },
+    {
+      "op": "Bind",
+      "node": "switch.21",
+      "prop": "disabled",
+      "expr": "saving || !canEdit",
+      "result": true
+    },
+    {
+      "op": "Bind",
+      "node": "switch.21",
+      "prop": "onCheckedChange",
+      "expr": "(v) => setToggles((prev) => ({ ...prev, [key]: v }))"
+    },
+    {
+      "op": "Bind",
+      "node": "input.28",
+      "prop": "value",
+      "expr": "qrCode",
+      "result": "https://cdn.belivmart.example/qr/city_123.png"
+    },
+    {
+      "op": "Bind",
+      "node": "input.28",
+      "prop": "disabled",
+      "expr": "saving || !canEdit",
+      "result": true
+    },
+    {
+      "op": "Bind",
+      "node": "input.28",
+      "prop": "onChange",
+      "expr": "(e) => setQrCode(e.target.value)"
+    },
+    {
+      "op": "Bind",
+      "node": "button.33",
+      "prop": "onClick",
+      "expr": "handleSave"
+    },
+    {
+      "op": "Bind",
+      "node": "button.33",
+      "prop": "disabled",
+      "expr": "saving || !canEdit",
+      "result": true
+    },
+    {
+      "op": "Evaluate",
+      "expr": "saving",
+      "result": false
+    },
+    {
+      "op": "Skip",
+      "branch": "Text(\"Saving…\")",
+      "reason": "saving = false"
+    },
+    {
+      "op": "Activate",
+      "branch": "Text(\"Save\")"
+    }
+  ]
+}

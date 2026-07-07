@@ -1,0 +1,250 @@
+{
+  "tag": "div",
+  "role": "box",
+  "cls": "rounded-lg border bg-card text-card-foreground shadow-sm",
+  "children": [
+    {
+      "tag": "div",
+      "role": "box",
+      "cls": "flex flex-col space-y-1.5 p-6",
+      "children": [
+        {
+          "tag": "h3",
+          "role": "text",
+          "cls": "text-2xl font-semibold leading-none tracking-tight",
+          "text": "General Settings"
+        },
+        {
+          "tag": "p",
+          "role": "text",
+          "cls": "text-sm text-muted-foreground",
+          "text": "Payment and notification settings for this city."
+        }
+      ]
+    },
+    {
+      "tag": "div",
+      "role": "box",
+      "cls": "p-6 pt-0 space-y-4",
+      "children": [
+        {
+          "tag": "p",
+          "role": "text",
+          "cls": "text-xs text-muted-foreground",
+          "text": "You don't have permission to change this (requires update_city)."
+        },
+        {
+          "tag": "div",
+          "role": "box",
+          "cls": "flex items-center justify-between gap-4 rounded-md border p-3",
+          "children": [
+            {
+              "tag": "div",
+              "role": "box",
+              "cls": "space-y-0.5",
+              "children": [
+                {
+                  "tag": "label",
+                  "role": "text",
+                  "cls": "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
+                  "text": "Online payment"
+                },
+                {
+                  "tag": "p",
+                  "role": "text",
+                  "cls": "text-xs text-muted-foreground",
+                  "text": "Allow customers to pay online (UPI / card) in this city."
+                }
+              ]
+            },
+            {
+              "tag": "button",
+              "role": "switch",
+              "cls": "peer inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input",
+              "dataState": "checked",
+              "ariaChecked": "true",
+              "disabled": true
+            }
+          ]
+        },
+        {
+          "tag": "div",
+          "role": "box",
+          "cls": "flex items-center justify-between gap-4 rounded-md border p-3",
+          "children": [
+            {
+              "tag": "div",
+              "role": "box",
+              "cls": "space-y-0.5",
+              "children": [
+                {
+                  "tag": "label",
+                  "role": "text",
+                  "cls": "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
+                  "text": "WhatsApp notifications"
+                },
+                {
+                  "tag": "p",
+                  "role": "text",
+                  "cls": "text-xs text-muted-foreground",
+                  "text": "Send order updates to customers over WhatsApp."
+                }
+              ]
+            },
+            {
+              "tag": "button",
+              "role": "switch",
+              "cls": "peer inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input",
+              "dataState": "unchecked",
+              "ariaChecked": "false",
+              "disabled": true
+            }
+          ]
+        },
+        {
+          "tag": "div",
+          "role": "box",
+          "cls": "flex items-center justify-between gap-4 rounded-md border p-3",
+          "children": [
+            {
+              "tag": "div",
+              "role": "box",
+              "cls": "space-y-0.5",
+              "children": [
+                {
+                  "tag": "label",
+                  "role": "text",
+                  "cls": "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
+                  "text": "Order cancellable"
+                },
+                {
+                  "tag": "p",
+                  "role": "text",
+                  "cls": "text-xs text-muted-foreground",
+                  "text": "Allow customers to cancel orders in this city."
+                }
+              ]
+            },
+            {
+              "tag": "button",
+              "role": "switch",
+              "cls": "peer inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input",
+              "dataState": "checked",
+              "ariaChecked": "true",
+              "disabled": true
+            }
+          ]
+        },
+        {
+          "tag": "div",
+          "role": "box",
+          "cls": "flex items-center justify-between gap-4 rounded-md border p-3",
+          "children": [
+            {
+              "tag": "div",
+              "role": "box",
+              "cls": "space-y-0.5",
+              "children": [
+                {
+                  "tag": "label",
+                  "role": "text",
+                  "cls": "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
+                  "text": "Block orders when no partner available"
+                },
+                {
+                  "tag": "p",
+                  "role": "text",
+                  "cls": "text-xs text-muted-foreground",
+                  "text": "Stop new orders when no delivery partner is available."
+                }
+              ]
+            },
+            {
+              "tag": "button",
+              "role": "switch",
+              "cls": "peer inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input",
+              "dataState": "unchecked",
+              "ariaChecked": "false",
+              "disabled": true
+            }
+          ]
+        },
+        {
+          "tag": "div",
+          "role": "box",
+          "cls": "flex items-center justify-between gap-4 rounded-md border p-3",
+          "children": [
+            {
+              "tag": "div",
+              "role": "box",
+              "cls": "space-y-0.5",
+              "children": [
+                {
+                  "tag": "label",
+                  "role": "text",
+                  "cls": "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
+                  "text": "Block online payment when no partner available"
+                },
+                {
+                  "tag": "p",
+                  "role": "text",
+                  "cls": "text-xs text-muted-foreground",
+                  "text": "Disable online payment when no delivery partner is available."
+                }
+              ]
+            },
+            {
+              "tag": "button",
+              "role": "switch",
+              "cls": "peer inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input",
+              "dataState": "checked",
+              "ariaChecked": "true",
+              "disabled": true
+            }
+          ]
+        },
+        {
+          "tag": "div",
+          "role": "box",
+          "cls": "rounded-md border p-3 space-y-2",
+          "children": [
+            {
+              "tag": "label",
+              "role": "text",
+              "cls": "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
+              "text": "Payment QR code (image URL)"
+            },
+            {
+              "tag": "p",
+              "role": "text",
+              "cls": "text-xs text-muted-foreground",
+              "text": "The UPI/payment QR shown to customers for this city."
+            },
+            {
+              "tag": "input",
+              "role": "input",
+              "cls": "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+              "disabled": true,
+              "value": "https://cdn.belivmart.example/qr/city_123.png",
+              "placeholder": "https://…"
+            }
+          ]
+        },
+        {
+          "tag": "div",
+          "role": "box",
+          "cls": "flex justify-end",
+          "children": [
+            {
+              "tag": "button",
+              "role": "button",
+              "cls": "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2",
+              "text": "Save",
+              "disabled": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

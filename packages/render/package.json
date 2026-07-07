@@ -1,0 +1,18 @@
+{
+  "name": "@contextifly/render",
+  "version": "0.0.1",
+  "private": true,
+  "description": "RenderContextifly — compiles declarative UI source into a deterministic, measurable execution model (React IR → Runtime IR → Execution Plan → Scene Frames), validated against the framework itself.",
+  "type": "commonjs",
+  "scripts": {
+    "coverage": "node extract.cjs --batch /Users/sambit/Belivmart/belivmart-admin",
+    "extract": "node extract.cjs '/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/cities/[id]/general-settings-card.tsx'",
+    "semantic": "node semantic.cjs",
+    "plan": "node planner.cjs",
+    "vm": "node vm.cjs",
+    "diff": "node diff.cjs",
+    "oracle": "cp oracle/oracle.test.tsx oracle/vitest.config.mts /Users/sambit/Belivmart/belivmart-admin/.rcx-oracle/ && /Users/sambit/Belivmart/belivmart-admin/node_modules/.bin/vitest run --config /Users/sambit/Belivmart/belivmart-admin/.rcx-oracle/vitest.config.mts",
+    "compile": "npm run extract && node semantic.cjs && node planner.cjs && node vm.cjs",
+    "all": "npm run compile && npm run oracle && node diff.cjs"
+  }
+}

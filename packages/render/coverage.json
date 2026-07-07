@@ -1,0 +1,1134 @@
+[
+  {
+    "name": "cancellations-charts",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/analytics/cancellations-charts.tsx",
+    "status": "full",
+    "nodes": 8,
+    "reason": null
+  },
+  {
+    "name": "cancellations-section",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/analytics/cancellations-section.tsx",
+    "status": "partial",
+    "nodes": 61,
+    "reason": "expr-node"
+  },
+  {
+    "name": "chart-legend",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/analytics/chart-legend.tsx",
+    "status": "partial",
+    "nodes": 6,
+    "reason": "expr-node"
+  },
+  {
+    "name": "layout",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/analytics/layout.tsx",
+    "status": "partial",
+    "nodes": 2,
+    "reason": "expr-node"
+  },
+  {
+    "name": "multi-select",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/analytics/multi-select.tsx",
+    "status": "partial",
+    "nodes": 22,
+    "reason": "expr-node"
+  },
+  {
+    "name": "orders-by-group-chart",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/analytics/orders-by-group-chart.tsx",
+    "status": "partial",
+    "nodes": 69,
+    "reason": "expr-node"
+  },
+  {
+    "name": "orders-chart",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/analytics/orders-chart.tsx",
+    "status": "full",
+    "nodes": 21,
+    "reason": null
+  },
+  {
+    "name": "orders-revenue-section",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/analytics/orders-revenue-section.tsx",
+    "status": "partial",
+    "nodes": 45,
+    "reason": "expr-node"
+  },
+  {
+    "name": "page",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/analytics/page.tsx",
+    "status": "partial",
+    "nodes": 13,
+    "reason": "expr-node"
+  },
+  {
+    "name": "revenue-by-group-chart",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/analytics/revenue-by-group-chart.tsx",
+    "status": "partial",
+    "nodes": 69,
+    "reason": "expr-node"
+  },
+  {
+    "name": "revenue-chart",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/analytics/revenue-chart.tsx",
+    "status": "full",
+    "nodes": 22,
+    "reason": null
+  },
+  {
+    "name": "city-detail-client",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/cities/[id]/city-detail-client.tsx",
+    "status": "full",
+    "nodes": 7,
+    "reason": null
+  },
+  {
+    "name": "city-tabs",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/cities/[id]/city-tabs.tsx",
+    "status": "partial",
+    "nodes": 13,
+    "reason": "expr-node"
+  },
+  {
+    "name": "customer-fee-slabs-tab",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/cities/[id]/customer-fee-slabs-tab.tsx",
+    "status": "partial",
+    "nodes": 205,
+    "reason": "expr-node"
+  },
+  {
+    "name": "page",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/cities/[id]/delivery-area/page.tsx",
+    "status": "full",
+    "nodes": 2,
+    "reason": null
+  },
+  {
+    "name": "delivery-area-card",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/cities/[id]/delivery-area-card.tsx",
+    "status": "partial",
+    "nodes": 21,
+    "reason": "expr-node"
+  },
+  {
+    "name": "delivery-config-client",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/cities/[id]/delivery-config/delivery-config-client.tsx",
+    "status": "full",
+    "nodes": 8,
+    "reason": null
+  },
+  {
+    "name": "page",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/cities/[id]/delivery-config/page.tsx",
+    "status": "full",
+    "nodes": 1,
+    "reason": null
+  },
+  {
+    "name": "partner-acceptance-timeout-card",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/cities/[id]/delivery-config/partner-acceptance-timeout-card.tsx",
+    "status": "full",
+    "nodes": 30,
+    "reason": null
+  },
+  {
+    "name": "documents-client",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/cities/[id]/documents/documents-client.tsx",
+    "status": "partial",
+    "nodes": 29,
+    "reason": "expr-node"
+  },
+  {
+    "name": "page",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/cities/[id]/documents/page.tsx",
+    "status": "full",
+    "nodes": 1,
+    "reason": null
+  },
+  {
+    "name": "fee-config-tab",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/cities/[id]/fee-config-tab.tsx",
+    "status": "partial",
+    "nodes": 238,
+    "reason": "expr-node"
+  },
+  {
+    "name": "general-settings-card",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/cities/[id]/general-settings-card.tsx",
+    "status": "partial",
+    "nodes": 33,
+    "reason": "expr-node"
+  },
+  {
+    "name": "merchant-acceptance-timeout-card",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/cities/[id]/merchant-config/merchant-acceptance-timeout-card.tsx",
+    "status": "full",
+    "nodes": 27,
+    "reason": null
+  },
+  {
+    "name": "merchant-config-client",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/cities/[id]/merchant-config/merchant-config-client.tsx",
+    "status": "partial",
+    "nodes": 10,
+    "reason": "expr-node,spread-props"
+  },
+  {
+    "name": "page",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/cities/[id]/merchant-config/page.tsx",
+    "status": "full",
+    "nodes": 1,
+    "reason": null
+  },
+  {
+    "name": "page",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/cities/[id]/page.tsx",
+    "status": "full",
+    "nodes": 1,
+    "reason": null
+  },
+  {
+    "name": "parcel-amount-slabs-tab",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/cities/[id]/parcel-amount-slabs-tab.tsx",
+    "status": "partial",
+    "nodes": 157,
+    "reason": "expr-node"
+  },
+  {
+    "name": "shifts-tab",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/cities/[id]/shifts-tab.tsx",
+    "status": "partial",
+    "nodes": 135,
+    "reason": "expr-node"
+  },
+  {
+    "name": "area-config-tab",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/cities/[id]/tabs/area-config-tab.tsx",
+    "status": "full",
+    "nodes": 3,
+    "reason": null
+  },
+  {
+    "name": "auto-assignment-tab",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/cities/[id]/tabs/auto-assignment-tab.tsx",
+    "status": "partial",
+    "nodes": 29,
+    "reason": "expr-node"
+  },
+  {
+    "name": "area-config-ui",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/cities/area-config-ui.tsx",
+    "status": "partial",
+    "nodes": 61,
+    "reason": "expr-node"
+  },
+  {
+    "name": "cities-client",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/cities/cities-client.tsx",
+    "status": "partial",
+    "nodes": 138,
+    "reason": "expr-node"
+  },
+  {
+    "name": "cities-global-config-tab",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/cities/cities-global-config-tab.tsx",
+    "status": "partial",
+    "nodes": 17,
+    "reason": "expr-node,spread-props"
+  },
+  {
+    "name": "cities-tabs",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/cities/cities-tabs.tsx",
+    "status": "partial",
+    "nodes": 14,
+    "reason": "expr-node"
+  },
+  {
+    "name": "city-closure-dialog",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/cities/city-closure-dialog.tsx",
+    "status": "partial",
+    "nodes": 89,
+    "reason": "expr-node"
+  },
+  {
+    "name": "page",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/cities/page.tsx",
+    "status": "full",
+    "nodes": 1,
+    "reason": null
+  },
+  {
+    "name": "translated-name-editor",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/cities/translated-name-editor.tsx",
+    "status": "partial",
+    "nodes": 63,
+    "reason": "expr-node"
+  },
+  {
+    "name": "edit-coupon-client",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/coupons/[groupId]/edit/edit-coupon-client.tsx",
+    "status": "full",
+    "nodes": 5,
+    "reason": null
+  },
+  {
+    "name": "page",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/coupons/[groupId]/edit/page.tsx",
+    "status": "full",
+    "nodes": 1,
+    "reason": null
+  },
+  {
+    "name": "coupon-form",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/coupons/coupon-form.tsx",
+    "status": "partial",
+    "nodes": 192,
+    "reason": "expr-node"
+  },
+  {
+    "name": "coupons-client",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/coupons/coupons-client.tsx",
+    "status": "partial",
+    "nodes": 120,
+    "reason": "expr-node"
+  },
+  {
+    "name": "page",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/coupons/new/page.tsx",
+    "status": "full",
+    "nodes": 1,
+    "reason": null
+  },
+  {
+    "name": "page",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/coupons/page.tsx",
+    "status": "full",
+    "nodes": 1,
+    "reason": null
+  },
+  {
+    "name": "redemptions-dialog",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/coupons/redemptions-dialog.tsx",
+    "status": "partial",
+    "nodes": 74,
+    "reason": "expr-node"
+  },
+  {
+    "name": "customer-details-client",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/customers/[id]/customer-details-client.tsx",
+    "status": "partial",
+    "nodes": 12,
+    "reason": "expr-node"
+  },
+  {
+    "name": "order-history-tab",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/customers/[id]/order-history-tab.tsx",
+    "status": "partial",
+    "nodes": 103,
+    "reason": "expr-node"
+  },
+  {
+    "name": "page",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/customers/[id]/orders/page.tsx",
+    "status": "failed",
+    "reason": "no-jsx-return"
+  },
+  {
+    "name": "page",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/customers/[id]/page.tsx",
+    "status": "full",
+    "nodes": 1,
+    "reason": null
+  },
+  {
+    "name": "profile-addresses-tab",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/customers/[id]/profile-addresses-tab.tsx",
+    "status": "partial",
+    "nodes": 152,
+    "reason": "expr-node"
+  },
+  {
+    "name": "wallet-transactions-tab",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/customers/[id]/wallet-transactions-tab.tsx",
+    "status": "partial",
+    "nodes": 94,
+    "reason": "expr-node"
+  },
+  {
+    "name": "customers-client",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/customers/customers-client.tsx",
+    "status": "partial",
+    "nodes": 200,
+    "reason": "expr-node"
+  },
+  {
+    "name": "layout",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/customers/layout.tsx",
+    "status": "partial",
+    "nodes": 2,
+    "reason": "expr-node"
+  },
+  {
+    "name": "page",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/customers/page.tsx",
+    "status": "full",
+    "nodes": 1,
+    "reason": null
+  },
+  {
+    "name": "layout",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/dashboard/layout.tsx",
+    "status": "partial",
+    "nodes": 2,
+    "reason": "expr-node"
+  },
+  {
+    "name": "online-dp-coverage",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/dashboard/online-dp-coverage.tsx",
+    "status": "partial",
+    "nodes": 118,
+    "reason": "expr-node"
+  },
+  {
+    "name": "page",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/dashboard/page.tsx",
+    "status": "partial",
+    "nodes": 20,
+    "reason": "expr-node"
+  },
+  {
+    "name": "dp-detail-client",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/delivery-partners/[id]/dp-detail-client.tsx",
+    "status": "partial",
+    "nodes": 361,
+    "reason": "expr-node"
+  },
+  {
+    "name": "dp-order-history",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/delivery-partners/[id]/dp-order-history.tsx",
+    "status": "partial",
+    "nodes": 109,
+    "reason": "expr-node"
+  },
+  {
+    "name": "dp-orders",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/delivery-partners/[id]/dp-orders.tsx",
+    "status": "failed",
+    "reason": "no-jsx-return"
+  },
+  {
+    "name": "dp-payback-history",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/delivery-partners/[id]/dp-payback-history.tsx",
+    "status": "partial",
+    "nodes": 73,
+    "reason": "expr-node"
+  },
+  {
+    "name": "dp-payment-history",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/delivery-partners/[id]/dp-payment-history.tsx",
+    "status": "failed",
+    "reason": "no-jsx-return"
+  },
+  {
+    "name": "dp-payout-history",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/delivery-partners/[id]/dp-payout-history.tsx",
+    "status": "partial",
+    "nodes": 72,
+    "reason": "expr-node"
+  },
+  {
+    "name": "page",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/delivery-partners/[id]/page.tsx",
+    "status": "full",
+    "nodes": 1,
+    "reason": null
+  },
+  {
+    "name": "dp-list",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/delivery-partners/dp-list.tsx",
+    "status": "partial",
+    "nodes": 145,
+    "reason": "expr-node"
+  },
+  {
+    "name": "dp-new-requests",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/delivery-partners/dp-new-requests.tsx",
+    "status": "partial",
+    "nodes": 141,
+    "reason": "expr-node"
+  },
+  {
+    "name": "dp-pending-cash",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/delivery-partners/dp-pending-cash.tsx",
+    "status": "partial",
+    "nodes": 101,
+    "reason": "expr-node"
+  },
+  {
+    "name": "layout",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/delivery-partners/layout.tsx",
+    "status": "partial",
+    "nodes": 2,
+    "reason": "expr-node"
+  },
+  {
+    "name": "page",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/delivery-partners/page.tsx",
+    "status": "partial",
+    "nodes": 14,
+    "reason": "expr-node"
+  },
+  {
+    "name": "registration-step-badge",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/delivery-partners/registration-step-badge.tsx",
+    "status": "partial",
+    "nodes": 2,
+    "reason": "expr-node"
+  },
+  {
+    "name": "security-deposit-badge",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/delivery-partners/security-deposit-badge.tsx",
+    "status": "partial",
+    "nodes": 2,
+    "reason": "expr-node"
+  },
+  {
+    "name": "cod-config-dialog",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/deposits-fee-slabs/cod-config-dialog.tsx",
+    "status": "partial",
+    "nodes": 67,
+    "reason": "expr-node"
+  },
+  {
+    "name": "partner-cod-config-table",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/deposits-fee-slabs/partner-cod-config-table.tsx",
+    "status": "partial",
+    "nodes": 78,
+    "reason": "expr-node"
+  },
+  {
+    "name": "error",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/error.tsx",
+    "status": "partial",
+    "nodes": 13,
+    "reason": "expr-node"
+  },
+  {
+    "name": "layout",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/layout.tsx",
+    "status": "partial",
+    "nodes": 9,
+    "reason": "expr-node"
+  },
+  {
+    "name": "loading",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/loading.tsx",
+    "status": "full",
+    "nodes": 3,
+    "reason": null
+  },
+  {
+    "name": "audience-client",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/marketing/audience-client.tsx",
+    "status": "partial",
+    "nodes": 150,
+    "reason": "expr-node"
+  },
+  {
+    "name": "marketing-client",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/marketing/marketing-client.tsx",
+    "status": "partial",
+    "nodes": 8,
+    "reason": "expr-node"
+  },
+  {
+    "name": "notification-tab",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/marketing/notification-tab.tsx",
+    "status": "partial",
+    "nodes": 105,
+    "reason": "expr-node"
+  },
+  {
+    "name": "page",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/marketing/page.tsx",
+    "status": "full",
+    "nodes": 1,
+    "reason": null
+  },
+  {
+    "name": "bulk-add-products-dialog",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/merchants/[id]/bulk-add-products-dialog.tsx",
+    "status": "partial",
+    "nodes": 137,
+    "reason": "expr-node"
+  },
+  {
+    "name": "bulk-json-import-dialog",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/merchants/[id]/bulk-json-import-dialog.tsx",
+    "status": "full",
+    "nodes": 51,
+    "reason": null
+  },
+  {
+    "name": "image-picker-dialog",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/merchants/[id]/image-picker-dialog.tsx",
+    "status": "partial",
+    "nodes": 36,
+    "reason": "expr-node"
+  },
+  {
+    "name": "merchant-detail-client",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/merchants/[id]/merchant-detail-client.tsx",
+    "status": "partial",
+    "nodes": 415,
+    "reason": "expr-node"
+  },
+  {
+    "name": "merchant-orders",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/merchants/[id]/merchant-orders.tsx",
+    "status": "partial",
+    "nodes": 104,
+    "reason": "expr-node"
+  },
+  {
+    "name": "merchant-payment-history",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/merchants/[id]/merchant-payment-history.tsx",
+    "status": "partial",
+    "nodes": 80,
+    "reason": "expr-node"
+  },
+  {
+    "name": "merchant-payout-history",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/merchants/[id]/merchant-payout-history.tsx",
+    "status": "full",
+    "nodes": 1,
+    "reason": null
+  },
+  {
+    "name": "page",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/merchants/[id]/page.tsx",
+    "status": "full",
+    "nodes": 1,
+    "reason": null
+  },
+  {
+    "name": "product-form-dialog",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/merchants/[id]/product-form-dialog.tsx",
+    "status": "partial",
+    "nodes": 138,
+    "reason": "expr-node"
+  },
+  {
+    "name": "layout",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/merchants/layout.tsx",
+    "status": "partial",
+    "nodes": 2,
+    "reason": "expr-node"
+  },
+  {
+    "name": "merchant-step-badge",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/merchants/merchant-step-badge.tsx",
+    "status": "partial",
+    "nodes": 2,
+    "reason": "expr-node"
+  },
+  {
+    "name": "merchants-client",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/merchants/merchants-client.tsx",
+    "status": "partial",
+    "nodes": 166,
+    "reason": "expr-node"
+  },
+  {
+    "name": "onboarding-fee-badge",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/merchants/onboarding-fee-badge.tsx",
+    "status": "partial",
+    "nodes": 2,
+    "reason": "expr-node"
+  },
+  {
+    "name": "page",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/merchants/page.tsx",
+    "status": "full",
+    "nodes": 1,
+    "reason": null
+  },
+  {
+    "name": "product-approvals-tab",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/merchants/product-approvals-tab.tsx",
+    "status": "partial",
+    "nodes": 120,
+    "reason": "expr-node"
+  },
+  {
+    "name": "product-list",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/merchants/product-list.tsx",
+    "status": "partial",
+    "nodes": 168,
+    "reason": "expr-node"
+  },
+  {
+    "name": "activity-log-dialog",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/orders/activity-log-dialog.tsx",
+    "status": "partial",
+    "nodes": 22,
+    "reason": "expr-node"
+  },
+  {
+    "name": "delivery-route-dialog",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/orders/delivery-route-dialog.tsx",
+    "status": "partial",
+    "nodes": 32,
+    "reason": "expr-node"
+  },
+  {
+    "name": "delivery-timeline-dialog",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/orders/delivery-timeline-dialog.tsx",
+    "status": "partial",
+    "nodes": 72,
+    "reason": "expr-node"
+  },
+  {
+    "name": "device-details-dialog",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/orders/device-details-dialog.tsx",
+    "status": "partial",
+    "nodes": 68,
+    "reason": "expr-node"
+  },
+  {
+    "name": "layout",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/orders/layout.tsx",
+    "status": "partial",
+    "nodes": 2,
+    "reason": "expr-node"
+  },
+  {
+    "name": "orders-client",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/orders/orders-client.tsx",
+    "status": "partial",
+    "nodes": 612,
+    "reason": "expr-node"
+  },
+  {
+    "name": "page",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/orders/page.tsx",
+    "status": "full",
+    "nodes": 1,
+    "reason": null
+  },
+  {
+    "name": "partners-map",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/orders/partners-map.tsx",
+    "status": "full",
+    "nodes": 3,
+    "reason": null
+  },
+  {
+    "name": "payment-ledger-client",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/payment-ledger/payment-ledger-client.tsx",
+    "status": "partial",
+    "nodes": 119,
+    "reason": "expr-node"
+  },
+  {
+    "name": "payout-history",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/payouts/components/payout-history.tsx",
+    "status": "partial",
+    "nodes": 112,
+    "reason": "expr-node"
+  },
+  {
+    "name": "payout-list",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/payouts/components/payout-list.tsx",
+    "status": "partial",
+    "nodes": 325,
+    "reason": "expr-node"
+  },
+  {
+    "name": "delivery-partner-payout-history",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/payouts/delivery-partner-payout-history.tsx",
+    "status": "full",
+    "nodes": 1,
+    "reason": null
+  },
+  {
+    "name": "delivery-partner-payout",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/payouts/delivery-partner-payout.tsx",
+    "status": "full",
+    "nodes": 1,
+    "reason": null
+  },
+  {
+    "name": "delivery-partner-payouts",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/payouts/delivery-partner-payouts.tsx",
+    "status": "partial",
+    "nodes": 276,
+    "reason": "expr-node"
+  },
+  {
+    "name": "layout",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/payouts/layout.tsx",
+    "status": "partial",
+    "nodes": 2,
+    "reason": "expr-node"
+  },
+  {
+    "name": "merchant-payout-history",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/payouts/merchant-payout-history.tsx",
+    "status": "full",
+    "nodes": 1,
+    "reason": null
+  },
+  {
+    "name": "merchant-payout",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/payouts/merchant-payout.tsx",
+    "status": "full",
+    "nodes": 1,
+    "reason": null
+  },
+  {
+    "name": "merchant-payouts",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/payouts/merchant-payouts.tsx",
+    "status": "partial",
+    "nodes": 276,
+    "reason": "expr-node"
+  },
+  {
+    "name": "layout",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/payouts/new-partner-payout/layout.tsx",
+    "status": "partial",
+    "nodes": 2,
+    "reason": "expr-node"
+  },
+  {
+    "name": "page",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/payouts/new-partner-payout/page.tsx",
+    "status": "full",
+    "nodes": 11,
+    "reason": null
+  },
+  {
+    "name": "layout",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/payouts/new-payout/layout.tsx",
+    "status": "partial",
+    "nodes": 2,
+    "reason": "expr-node"
+  },
+  {
+    "name": "page",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/payouts/new-payout/page.tsx",
+    "status": "full",
+    "nodes": 11,
+    "reason": null
+  },
+  {
+    "name": "page",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/payouts/page.tsx",
+    "status": "partial",
+    "nodes": 15,
+    "reason": "expr-node"
+  },
+  {
+    "name": "layout",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/pnl-reports/layout.tsx",
+    "status": "partial",
+    "nodes": 2,
+    "reason": "expr-node"
+  },
+  {
+    "name": "order-detail-client",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/pnl-reports/orders/[orderId]/order-detail-client.tsx",
+    "status": "partial",
+    "nodes": 154,
+    "reason": "expr-node"
+  },
+  {
+    "name": "page",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/pnl-reports/orders/[orderId]/page.tsx",
+    "status": "full",
+    "nodes": 1,
+    "reason": null
+  },
+  {
+    "name": "orders-tab",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/pnl-reports/orders-tab.tsx",
+    "status": "partial",
+    "nodes": 94,
+    "reason": "expr-node"
+  },
+  {
+    "name": "page",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/pnl-reports/page.tsx",
+    "status": "partial",
+    "nodes": 77,
+    "reason": "expr-node"
+  },
+  {
+    "name": "pnl-report-tab",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/pnl-reports/pnl-report-tab.tsx",
+    "status": "partial",
+    "nodes": 48,
+    "reason": "expr-node"
+  },
+  {
+    "name": "page",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/roles/page.tsx",
+    "status": "failed",
+    "reason": "no-jsx-return"
+  },
+  {
+    "name": "roles-client",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/roles/roles-client.tsx",
+    "status": "partial",
+    "nodes": 157,
+    "reason": "expr-node"
+  },
+  {
+    "name": "page",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/unauthorized/page.tsx",
+    "status": "full",
+    "nodes": 11,
+    "reason": null
+  },
+  {
+    "name": "page",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/users/page.tsx",
+    "status": "full",
+    "nodes": 1,
+    "reason": null
+  },
+  {
+    "name": "users-client",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/users/users-client.tsx",
+    "status": "partial",
+    "nodes": 169,
+    "reason": "expr-node"
+  },
+  {
+    "name": "users-tabs",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/users/users-tabs.tsx",
+    "status": "full",
+    "nodes": 15,
+    "reason": null
+  },
+  {
+    "name": "global-error",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/global-error.tsx",
+    "status": "full",
+    "nodes": 11,
+    "reason": null
+  },
+  {
+    "name": "layout",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/layout.tsx",
+    "status": "partial",
+    "nodes": 7,
+    "reason": "expr-node"
+  },
+  {
+    "name": "layout",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/login/layout.tsx",
+    "status": "partial",
+    "nodes": 2,
+    "reason": "expr-node"
+  },
+  {
+    "name": "page",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/login/page.tsx",
+    "status": "partial",
+    "nodes": 18,
+    "reason": "expr-node"
+  },
+  {
+    "name": "page",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/app/page.tsx",
+    "status": "failed",
+    "reason": "no-jsx-return"
+  },
+  {
+    "name": "cancellation-payout-preview",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/components/cancellation-payout-preview.tsx",
+    "status": "full",
+    "nodes": 7,
+    "reason": null
+  },
+  {
+    "name": "header",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/components/layout/header.tsx",
+    "status": "partial",
+    "nodes": 13,
+    "reason": "expr-node"
+  },
+  {
+    "name": "sidebar",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/components/layout/sidebar.tsx",
+    "status": "partial",
+    "nodes": 46,
+    "reason": "expr-node"
+  },
+  {
+    "name": "polygon-editor",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/components/polygon-editor.tsx",
+    "status": "partial",
+    "nodes": 169,
+    "reason": "expr-node"
+  },
+  {
+    "name": "page-title-provider",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/components/providers/page-title-provider.tsx",
+    "status": "partial",
+    "nodes": 2,
+    "reason": "expr-node"
+  },
+  {
+    "name": "permissions-provider",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/components/providers/permissions-provider.tsx",
+    "status": "partial",
+    "nodes": 2,
+    "reason": "expr-node"
+  },
+  {
+    "name": "sidebar-provider",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/components/providers/sidebar-provider.tsx",
+    "status": "partial",
+    "nodes": 2,
+    "reason": "expr-node"
+  },
+  {
+    "name": "providers",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/components/providers.tsx",
+    "status": "partial",
+    "nodes": 3,
+    "reason": "expr-node"
+  },
+  {
+    "name": "theme-provider",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/components/theme-provider.tsx",
+    "status": "partial",
+    "nodes": 2,
+    "reason": "expr-node"
+  },
+  {
+    "name": "theme-toggle",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/components/theme-toggle.tsx",
+    "status": "full",
+    "nodes": 3,
+    "reason": null
+  },
+  {
+    "name": "alert-dialog",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/components/ui/alert-dialog.tsx",
+    "status": "failed",
+    "reason": "no-jsx-return"
+  },
+  {
+    "name": "avatar",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/components/ui/avatar.tsx",
+    "status": "failed",
+    "reason": "no-jsx-return"
+  },
+  {
+    "name": "badge",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/components/ui/badge.tsx",
+    "status": "partial",
+    "nodes": 1,
+    "reason": "spread-props"
+  },
+  {
+    "name": "button",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/components/ui/button.tsx",
+    "status": "partial",
+    "nodes": 1,
+    "reason": "spread-props"
+  },
+  {
+    "name": "card",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/components/ui/card.tsx",
+    "status": "failed",
+    "reason": "no-jsx-return"
+  },
+  {
+    "name": "checkbox",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/components/ui/checkbox.tsx",
+    "status": "failed",
+    "reason": "no-jsx-return"
+  },
+  {
+    "name": "dialog",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/components/ui/dialog.tsx",
+    "status": "failed",
+    "reason": "no-jsx-return"
+  },
+  {
+    "name": "dropdown-menu",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/components/ui/dropdown-menu.tsx",
+    "status": "partial",
+    "nodes": 1,
+    "reason": "spread-props"
+  },
+  {
+    "name": "input",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/components/ui/input.tsx",
+    "status": "partial",
+    "nodes": 1,
+    "reason": "spread-props"
+  },
+  {
+    "name": "label",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/components/ui/label.tsx",
+    "status": "failed",
+    "reason": "no-jsx-return"
+  },
+  {
+    "name": "popover",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/components/ui/popover.tsx",
+    "status": "failed",
+    "reason": "no-jsx-return"
+  },
+  {
+    "name": "select",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/components/ui/select.tsx",
+    "status": "failed",
+    "reason": "no-jsx-return"
+  },
+  {
+    "name": "separator",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/components/ui/separator.tsx",
+    "status": "failed",
+    "reason": "no-jsx-return"
+  },
+  {
+    "name": "switch",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/components/ui/switch.tsx",
+    "status": "failed",
+    "reason": "no-jsx-return"
+  },
+  {
+    "name": "table",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/components/ui/table.tsx",
+    "status": "failed",
+    "reason": "no-jsx-return"
+  },
+  {
+    "name": "textarea",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/components/ui/textarea.tsx",
+    "status": "partial",
+    "nodes": 1,
+    "reason": "spread-props"
+  },
+  {
+    "name": "toast",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/components/ui/toast.tsx",
+    "status": "partial",
+    "nodes": 1,
+    "reason": "spread-props"
+  },
+  {
+    "name": "toaster",
+    "file": "/Users/sambit/Belivmart/belivmart-admin/components/ui/toaster.tsx",
+    "status": "partial",
+    "nodes": 13,
+    "reason": "spread-props,expr-node"
+  }
+]

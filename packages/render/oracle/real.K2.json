@@ -1,0 +1,39 @@
+{
+  "tag": "div",
+  "role": "box",
+  "cls": "rounded-lg border bg-card text-card-foreground shadow-sm",
+  "children": [
+    {
+      "tag": "div",
+      "role": "box",
+      "cls": "flex flex-col space-y-1.5 p-6",
+      "children": [
+        {
+          "tag": "h3",
+          "role": "text",
+          "cls": "text-2xl font-semibold leading-none tracking-tight",
+          "text": "General Settings"
+        },
+        {
+          "tag": "p",
+          "role": "text",
+          "cls": "text-sm text-muted-foreground",
+          "text": "Payment and notification settings for this city."
+        }
+      ]
+    },
+    {
+      "tag": "div",
+      "role": "box",
+      "cls": "p-6 pt-0 space-y-4",
+      "children": [
+        {
+          "tag": "p",
+          "role": "text",
+          "cls": "text-sm text-destructive",
+          "text": "Failed to load general settings."
+        }
+      ]
+    }
+  ]
+}

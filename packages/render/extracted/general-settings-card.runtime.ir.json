@@ -1,0 +1,70 @@
+{
+  "component": "general-settings-card",
+  "props": [
+    {
+      "name": "id",
+      "type": "string"
+    }
+  ],
+  "state": [
+    {
+      "name": "extraDetails",
+      "type": "ExtraDetails | null",
+      "init": "null"
+    },
+    {
+      "name": "toggles",
+      "type": "Record<string, boolean>",
+      "init": "{}"
+    },
+    {
+      "name": "qrCode",
+      "type": "string",
+      "init": "\"\""
+    },
+    {
+      "name": "loading",
+      "type": "boolean",
+      "init": "true"
+    },
+    {
+      "name": "saving",
+      "type": "boolean",
+      "init": "false"
+    }
+  ],
+  "hooks": [
+    {
+      "name": "canEdit",
+      "from": "useHasPermission",
+      "arg": "update_city"
+    }
+  ],
+  "effects": [
+    {
+      "trigger": [
+        "id"
+      ],
+      "action": "fetch",
+      "dataSource": true
+    }
+  ],
+  "variants": [
+    {
+      "id": "K1",
+      "predicate": "loading"
+    },
+    {
+      "id": "K2",
+      "predicate": "!(loading) && !extraDetails"
+    },
+    {
+      "id": "K3",
+      "predicate": "!(loading) && !(!extraDetails) && canEdit"
+    },
+    {
+      "id": "K4",
+      "predicate": "!(loading) && !(!extraDetails) && !canEdit"
+    }
+  ]
+}

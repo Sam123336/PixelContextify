@@ -1,0 +1,18 @@
+{
+  "toggles": [
+    "switch.21.checked"
+  ],
+  "saving": [
+    "switch.21.disabled",
+    "input.28.disabled",
+    "button.33.disabled"
+  ],
+  "canEdit": [
+    "switch.21.disabled",
+    "input.28.disabled",
+    "button.33.disabled"
+  ],
+  "qrCode": [
+    "input.28.value"
+  ]
+}

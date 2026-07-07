@@ -1,0 +1,423 @@
+{
+  "irVersion": "react-private-0.1-extracted",
+  "kind": "Component",
+  "name": "general-settings-card",
+  "source": "/Users/sambit/Belivmart/belivmart-admin/app/(dashboard)/cities/[id]/general-settings-card.tsx",
+  "root": {
+    "kind": "Prim",
+    "key": "card.36",
+    "ref": "Card",
+    "props": {},
+    "children": [
+      {
+        "kind": "Prim",
+        "key": "cardheader.4",
+        "ref": "CardHeader",
+        "props": {},
+        "children": [
+          {
+            "kind": "Prim",
+            "key": "cardtitle.1",
+            "ref": "CardTitle",
+            "props": {},
+            "children": [
+              {
+                "kind": "Text",
+                "key": "t.0",
+                "value": {
+                  "lit": "General Settings"
+                }
+              }
+            ]
+          },
+          {
+            "kind": "Prim",
+            "key": "carddescription.3",
+            "ref": "CardDescription",
+            "props": {},
+            "children": [
+              {
+                "kind": "Text",
+                "key": "t.2",
+                "value": {
+                  "lit": "Payment and notification settings for this city."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "Prim",
+        "key": "cardcontent.35",
+        "ref": "CardContent",
+        "props": {},
+        "layout": {
+          "direction": "col",
+          "gap": 16
+        },
+        "children": [
+          {
+            "kind": "Cond",
+            "key": "cond.5",
+            "cases": [
+              {
+                "when": {
+                  "expr": "loading",
+                  "deps": [
+                    "loading"
+                  ]
+                },
+                "node": {
+                  "kind": "Box",
+                  "key": "box.8",
+                  "layout": {
+                    "direction": "row",
+                    "align": "center",
+                    "gap": 8
+                  },
+                  "text": {
+                    "size": "sm",
+                    "color": "muted-foreground"
+                  },
+                  "children": [
+                    {
+                      "kind": "Icon",
+                      "key": "icon.6",
+                      "name": "Loader2",
+                      "anim": "spin"
+                    },
+                    {
+                      "kind": "Text",
+                      "key": "t.7",
+                      "value": {
+                        "lit": "Loading…"
+                      }
+                    }
+                  ]
+                }
+              }
+            ],
+            "else": {
+              "kind": "Cond",
+              "key": "cond.9",
+              "cases": [
+                {
+                  "when": {
+                    "expr": "!extraDetails",
+                    "deps": [
+                      "extraDetails"
+                    ]
+                  },
+                  "node": {
+                    "kind": "Text",
+                    "key": "t.11",
+                    "el": "p",
+                    "value": {
+                      "lit": "Failed to load general settings."
+                    },
+                    "text": {
+                      "size": "sm",
+                      "color": "destructive"
+                    }
+                  }
+                }
+              ],
+              "else": {
+                "kind": "Fragment",
+                "key": "frag.12",
+                "children": [
+                  {
+                    "kind": "Cond",
+                    "key": "cond.13",
+                    "cases": [
+                      {
+                        "when": {
+                          "expr": "!canEdit",
+                          "deps": [
+                            "canEdit"
+                          ]
+                        },
+                        "node": {
+                          "kind": "Text",
+                          "key": "t.15",
+                          "el": "p",
+                          "value": {
+                            "lit": "You don&apos;t have permission to change this (requires update_city)."
+                          },
+                          "text": {
+                            "size": "xs",
+                            "color": "muted-foreground"
+                          }
+                        }
+                      }
+                    ],
+                    "else": null
+                  },
+                  {
+                    "kind": "List",
+                    "key": "list.23",
+                    "items": {
+                      "kind": "static",
+                      "source": "const:TOGGLES",
+                      "cardinality": 5
+                    },
+                    "itemKey": "key",
+                    "template": {
+                      "kind": "Box",
+                      "key": "box.22",
+                      "layout": {
+                        "direction": "row",
+                        "align": "center",
+                        "justify": "space-between",
+                        "gap": 16
+                      },
+                      "style": {
+                        "radius": 6,
+                        "border": 1,
+                        "padding": 12
+                      },
+                      "children": [
+                        {
+                          "kind": "Box",
+                          "key": "box.20",
+                          "layout": {
+                            "direction": "col",
+                            "gap": 2
+                          },
+                          "children": [
+                            {
+                              "kind": "Prim",
+                              "key": "label.17",
+                              "ref": "Label",
+                              "props": {
+                                "htmlFor": {
+                                  "expr": "key",
+                                  "deps": [
+                                    "key"
+                                  ]
+                                }
+                              },
+                              "children": [
+                                {
+                                  "kind": "Text",
+                                  "key": "t.16",
+                                  "value": {
+                                    "expr": "label",
+                                    "deps": [
+                                      "label"
+                                    ]
+                                  }
+                                }
+                              ]
+                            },
+                            {
+                              "kind": "Text",
+                              "key": "t.19",
+                              "el": "p",
+                              "value": {
+                                "expr": "help",
+                                "deps": [
+                                  "help"
+                                ]
+                              },
+                              "text": {
+                                "size": "xs",
+                                "color": "muted-foreground"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "kind": "Prim",
+                          "key": "switch.21",
+                          "ref": "Switch",
+                          "props": {
+                            "id": {
+                              "expr": "key",
+                              "deps": [
+                                "key"
+                              ]
+                            },
+                            "checked": {
+                              "expr": "Boolean(toggles[key])",
+                              "deps": [
+                                "Boolean",
+                                "toggles",
+                                "key"
+                              ]
+                            },
+                            "disabled": {
+                              "expr": "saving || !canEdit",
+                              "deps": [
+                                "saving",
+                                "canEdit"
+                              ]
+                            },
+                            "onCheckedChange": {
+                              "expr": "(v) => setToggles((prev) => ({ ...prev, [key]: v }))",
+                              "deps": [
+                                "v",
+                                "setToggles",
+                                "prev",
+                                "key"
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "kind": "Box",
+                    "key": "box.29",
+                    "layout": {
+                      "direction": "col",
+                      "gap": 8
+                    },
+                    "style": {
+                      "radius": 6,
+                      "border": 1,
+                      "padding": 12
+                    },
+                    "children": [
+                      {
+                        "kind": "Prim",
+                        "key": "label.25",
+                        "ref": "Label",
+                        "props": {
+                          "htmlFor": {
+                            "lit": "qr-code"
+                          }
+                        },
+                        "children": [
+                          {
+                            "kind": "Text",
+                            "key": "t.24",
+                            "value": {
+                              "lit": "Payment QR code (image URL)"
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "kind": "Text",
+                        "key": "t.27",
+                        "el": "p",
+                        "value": {
+                          "lit": "The UPI/payment QR shown to customers for this city."
+                        },
+                        "text": {
+                          "size": "xs",
+                          "color": "muted-foreground"
+                        }
+                      },
+                      {
+                        "kind": "Prim",
+                        "key": "input.28",
+                        "ref": "Input",
+                        "props": {
+                          "id": {
+                            "lit": "qr-code"
+                          },
+                          "type": {
+                            "lit": "text"
+                          },
+                          "value": {
+                            "expr": "qrCode",
+                            "deps": [
+                              "qrCode"
+                            ]
+                          },
+                          "placeholder": {
+                            "lit": "https://…"
+                          },
+                          "disabled": {
+                            "expr": "saving || !canEdit",
+                            "deps": [
+                              "saving",
+                              "canEdit"
+                            ]
+                          },
+                          "onChange": {
+                            "expr": "(e) => setQrCode(e.target.value)",
+                            "deps": [
+                              "e",
+                              "setQrCode",
+                              "target",
+                              "value"
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "Box",
+                    "key": "box.34",
+                    "layout": {
+                      "direction": "row",
+                      "justify": "end"
+                    },
+                    "children": [
+                      {
+                        "kind": "Prim",
+                        "key": "button.33",
+                        "ref": "Button",
+                        "props": {
+                          "onClick": {
+                            "expr": "handleSave",
+                            "deps": [
+                              "handleSave"
+                            ]
+                          },
+                          "disabled": {
+                            "expr": "saving || !canEdit",
+                            "deps": [
+                              "saving",
+                              "canEdit"
+                            ]
+                          }
+                        },
+                        "children": [
+                          {
+                            "kind": "Cond",
+                            "key": "cond.30",
+                            "cases": [
+                              {
+                                "when": {
+                                  "expr": "saving",
+                                  "deps": [
+                                    "saving"
+                                  ]
+                                },
+                                "node": {
+                                  "kind": "Text",
+                                  "key": "t.31",
+                                  "value": {
+                                    "lit": "Saving…"
+                                  }
+                                }
+                              }
+                            ],
+                            "else": {
+                              "kind": "Text",
+                              "key": "t.32",
+                              "value": {
+                                "lit": "Save"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

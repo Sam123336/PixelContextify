@@ -1,0 +1,120 @@
+{
+  "irVersion": "react-private-0.0.1",
+  "kind": "Component",
+  "name": "GeneralSettingsCard",
+  "source": "app/(dashboard)/cities/[id]/general-settings-card.tsx",
+  "props": [{ "name": "id", "type": "string" }],
+  "state": [
+    { "name": "extraDetails", "type": "ExtraDetails | null", "init": null,
+      "source": { "kind": "fetch", "method": "GET", "url": "/api/cities/{id}", "settles": ["loading"] } },
+    { "name": "toggles", "type": "Record<string,boolean>", "init": {} },
+    { "name": "qrCode", "type": "string", "init": "" },
+    { "name": "loading", "type": "boolean", "init": true },
+    { "name": "saving", "type": "boolean", "init": false },
+    { "name": "canEdit", "type": "boolean", "init": "env.capability('update_city')",
+      "source": { "kind": "hook", "name": "useHasPermission", "arg": "update_city" } }
+  ],
+  "dataSources": [
+    { "id": "city", "method": "GET", "url": "/api/cities/{id}", "yields": "ExtraDetails",
+      "fixtureFrom": "type:ExtraDetails + const:TOGGLES.keys" }
+  ],
+  "root": {
+    "kind": "Prim", "ref": "Card", "key": "card", "children": [
+      { "kind": "Prim", "ref": "CardHeader", "key": "hdr", "children": [
+        { "kind": "Prim", "ref": "CardTitle", "key": "title",
+          "children": [{ "kind": "Text", "key": "title.t", "value": { "lit": "General Settings" } }] },
+        { "kind": "Prim", "ref": "CardDescription", "key": "desc",
+          "children": [{ "kind": "Text", "key": "desc.t", "value": { "lit": "Payment and notification settings for this city." } }] }
+      ]},
+      { "kind": "Prim", "ref": "CardContent", "key": "content",
+        "layout": { "direction": "col", "gap": 16 },
+        "children": [
+          { "kind": "Cond", "key": "content.variant",
+            "cases": [
+              { "when": { "expr": "loading", "deps": ["loading"] }, "node": { "$ref": "#/variants/Loading" } },
+              { "when": { "expr": "!extraDetails", "deps": ["extraDetails"] }, "node": { "$ref": "#/variants/Error" } }
+            ],
+            "else": { "$ref": "#/variants/Form" }
+          }
+        ]
+      }
+    ]
+  },
+  "variants": {
+    "Loading": {
+      "kind": "Box", "key": "v.loading",
+      "layout": { "direction": "row", "align": "center", "gap": 8 },
+      "text": { "size": "sm", "color": "muted-foreground" },
+      "children": [
+        { "kind": "Icon", "key": "v.loading.icon", "name": "loader-2", "anim": "spin", "size": { "w": 16, "h": 16 } },
+        { "kind": "Text", "key": "v.loading.t", "value": { "lit": "Loading…" } }
+      ]
+    },
+    "Error": {
+      "kind": "Text", "el": "p", "key": "v.error",
+      "text": { "size": "sm", "color": "destructive" },
+      "value": { "lit": "Failed to load general settings." }
+    },
+    "Form": {
+      "kind": "Fragment", "key": "v.form", "children": [
+        { "kind": "Cond", "key": "v.form.permNote",
+          "cases": [{ "when": { "expr": "!canEdit", "deps": ["canEdit"] },
+            "node": { "kind": "Text", "el": "p", "key": "v.form.permNote.t",
+              "text": { "size": "xs", "color": "muted-foreground" },
+              "value": { "lit": "You don't have permission to change this (requires update_city)." } } }],
+          "else": null },
+        { "kind": "List", "key": "v.form.toggles",
+          "items": { "kind": "static", "source": "const:TOGGLES", "cardinality": 5 },
+          "itemKey": "key",
+          "template": {
+            "kind": "Box", "key": "toggleRow",
+            "layout": { "direction": "row", "align": "center", "justify": "space-between", "gap": 16 },
+            "style": { "radius": 6, "border": 1, "padding": 12 },
+            "children": [
+              { "kind": "Box", "key": "toggleRow.text", "layout": { "direction": "col", "gap": 2 }, "children": [
+                { "kind": "Prim", "ref": "Label", "key": "toggleRow.label",
+                  "props": { "htmlFor": { "expr": "item.key", "deps": ["item"] } },
+                  "children": [{ "kind": "Text", "key": "toggleRow.label.t", "value": { "expr": "item.label", "deps": ["item"] } }] },
+                { "kind": "Text", "el": "p", "key": "toggleRow.help",
+                  "text": { "size": "xs", "color": "muted-foreground" },
+                  "value": { "expr": "item.help", "deps": ["item"] } }
+              ]},
+              { "kind": "Prim", "ref": "Switch", "key": "toggleRow.switch", "props": {
+                "id": { "expr": "item.key", "deps": ["item"] },
+                "checked": { "expr": "Boolean(toggles[item.key])", "deps": ["toggles", "item"] },
+                "disabled": { "expr": "saving || !canEdit", "deps": ["saving", "canEdit"] }
+              }}
+            ]
+          }
+        },
+        { "kind": "Box", "key": "v.form.qr",
+          "layout": { "direction": "col", "gap": 8 }, "style": { "radius": 6, "border": 1, "padding": 12 },
+          "children": [
+            { "kind": "Prim", "ref": "Label", "key": "v.form.qr.label", "props": { "htmlFor": { "lit": "qr-code" } },
+              "children": [{ "kind": "Text", "key": "v.form.qr.label.t", "value": { "lit": "Payment QR code (image URL)" } }] },
+            { "kind": "Text", "el": "p", "key": "v.form.qr.help", "text": { "size": "xs", "color": "muted-foreground" },
+              "value": { "lit": "The UPI/payment QR shown to customers for this city." } },
+            { "kind": "Prim", "ref": "Input", "key": "v.form.qr.input", "props": {
+              "id": { "lit": "qr-code" }, "type": { "lit": "text" },
+              "value": { "expr": "qrCode", "deps": ["qrCode"] },
+              "placeholder": { "lit": "https://…" },
+              "disabled": { "expr": "saving || !canEdit", "deps": ["saving", "canEdit"] }
+            }}
+          ]
+        },
+        { "kind": "Box", "key": "v.form.actions", "layout": { "direction": "row", "justify": "end" }, "children": [
+          { "kind": "Prim", "ref": "Button", "key": "v.form.save",
+            "props": { "disabled": { "expr": "saving || !canEdit", "deps": ["saving", "canEdit"] } },
+            "children": [{ "kind": "Text", "key": "v.form.save.t", "value": { "expr": "saving ? 'Saving…' : 'Save'", "deps": ["saving"] } }] }
+        ]}
+      ]
+    }
+  },
+  "structuralKeyframes": [
+    { "id": "K1", "label": "Loading",        "env": { "loading": true } },
+    { "id": "K2", "label": "Error",          "env": { "loading": false, "extraDetails": null } },
+    { "id": "K3", "label": "Form read-only", "env": { "loading": false, "extraDetails": "fixture", "canEdit": false } },
+    { "id": "K4", "label": "Form editable",  "env": { "loading": false, "extraDetails": "fixture", "canEdit": true } }
+  ],
+  "note": "Geometry (px boxes) is intentionally NOT resolved in the IR — layout facets carry direction/gap/align/padding; the VM resolves flex geometry against a chosen viewport. Prim refs (Card/Switch/...) resolve to their own IR from components/ui/ in a later pass."
+}
