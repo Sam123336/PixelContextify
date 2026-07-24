@@ -1,0 +1,23 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Dark Background Container -->
+  <rect width="32" height="32" rx="6" fill="#0B0F17"/>
+  
+  <!-- The Trace Path ('C' Shape) -->
+  <path d="M 12 23 L 18 23 L 24 17 L 18 9 L 12 9" 
+        stroke="#00F0FF" 
+        stroke-width="2.5" 
+        stroke-linecap="square" 
+        stroke-linejoin="miter"/>
+        
+  <!-- Node 1: Frontend Ring (Origin) -->
+  <circle cx="10" cy="23" r="2.5" stroke="#00F0FF" stroke-width="2" fill="#0B0F17" />
+  
+  <!-- Node 2: API Route -->
+  <circle cx="18" cy="9" r="2" fill="#00F0FF" />
+  
+  <!-- Node 3: Service -->
+  <circle cx="24" cy="17" r="2" fill="#00F0FF" />
+  
+  <!-- Node 4: Terminal Entity (Square) -->
+  <rect x="8" y="7" width="4" height="4" fill="#6366F1" />
+</svg>

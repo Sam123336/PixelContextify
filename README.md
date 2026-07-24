@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/images/logo.png" alt="Contextifly — See it. Understand it. Build better." width="320">
+<img src="docs/images//Users/sambit/gemini-svg.svg" alt="Contextifly — See it. Understand it. Build better." width="320">
 
 # Contextifly
 
